@@ -26,8 +26,8 @@ public class ExecutionPanel extends JPanel {
     }
 
     private void initLayout() {
-        JLabel accessLabel = Defaults.createLabel("Acessos: ");
-        JLabel instructionLabel = Defaults.createLabel("Instruções: ");
+        final JLabel accessLabel = Defaults.createLabel("Acessos: ");
+        final JLabel instructionLabel = Defaults.createLabel("Instruções: ");
 
         GridBagLayout grid = new GridBagLayout();
         grid.columnWidths = new int[] { 0, 0 };
@@ -37,34 +37,32 @@ public class ExecutionPanel extends JPanel {
 
         setLayout(grid);
 
-        GridBagConstraints c_0 = new GridBagConstraints();
+        final GridBagConstraints c_0 = new GridBagConstraints();
         c_0.gridx = 0;
         c_0.gridy = 0;
         c_0.anchor = GridBagConstraints.WEST;
         add(accessLabel, c_0);
 
-        GridBagConstraints c_1 = new GridBagConstraints();
+        final GridBagConstraints c_1 = new GridBagConstraints();
         c_1.gridx = 0;
         c_1.gridy = 1;
         c_1.anchor = GridBagConstraints.WEST;
         add(instructionLabel, c_1);
 
-        GridBagConstraints c_2 = new GridBagConstraints();
+        final GridBagConstraints c_2 = new GridBagConstraints();
         c_2.gridx = 1;
         c_2.gridy = 0;
         c_2.anchor = GridBagConstraints.EAST;
         add(accessDisplay, c_2);
 
-        GridBagConstraints c_3 = new GridBagConstraints();
+        final GridBagConstraints c_3 = new GridBagConstraints();
         c_3.gridx = 1;
         c_3.gridy = 1;
         c_3.anchor = GridBagConstraints.EAST;
         add(instructionDisplay, c_3);
 
-        Border outer = Defaults.createTitledBorder("Execução:");
-        Border inner = Defaults.createEmptyBorder();
+        final Border outer = Defaults.createTitledBorder("Execução:");
+        final Border inner = Defaults.createEmptyBorder();
         setBorder(new CompoundBorder(outer, inner));
     }
-
-
 }

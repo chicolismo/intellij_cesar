@@ -1,5 +1,6 @@
 package cesar.gui;
 
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ComponentAdapter;
@@ -16,6 +17,7 @@ import javax.swing.JToggleButton;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import cesar.gui.displays.RegisterDisplay;
@@ -33,6 +35,7 @@ import cesar.utils.Defaults;
 
 public class MainWindow extends JFrame {
     public static final long serialVersionUID = -4182598865843186332L;
+
     private final MenuBar menuBar;
     private final Cpu cpu;
     private final ProgramPanel programPanel;
@@ -44,27 +47,23 @@ public class MainWindow extends JFrame {
     private final RegisterDisplay[] registerDisplays;
     private final JToggleButton decimalButton;
     private final JToggleButton hexadecimalButton;
+    private final StatusBar statusBar;
 
     public MainWindow() {
         super("Cesar");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
         setFocusable(true);
         setAutoRequestFocus(true);
         BoxLayout mainLayout = new BoxLayout(getContentPane(), BoxLayout.Y_AXIS);
         getContentPane().setLayout(mainLayout);
 
-        JPanel mainPanel = new JPanel();
-        Border border = BorderFactory.createCompoundBorder(Defaults.createEmptyBorder(1),
-                BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-        mainPanel.setBorder(border);
-        var vbox = new BoxLayout(mainPanel, BoxLayout.Y_AXIS);
-        mainPanel.setLayout(vbox);
 
         cpu = new Cpu();
         programPanel = new ProgramPanel(this, cpu.getMemory());
-        programTableModel = (ProgramTableModel) programPanel.getTable().getModel();
-
         dataPanel = new DataPanel(this, cpu.getMemory());
+
+        programTableModel = (ProgramTableModel) programPanel.getTable().getModel();
         dataTableModel = (DataTableModel) dataPanel.getTable().getModel();
 
         textDisplay = new TextDisplay(cpu.getMemory());
@@ -74,62 +73,59 @@ public class MainWindow extends JFrame {
 
         registerDisplays = new RegisterDisplay[8];
 
-        programPanel.setSize(programPanel.getPreferredSize());
-        dataPanel.setSize(dataPanel.getPreferredSize());
-
-        var registerPanel = new RegisterPanel();
+        final var registerPanel = new RegisterPanel();
         for (int i = 0; i < 8; ++i) {
             registerDisplays[i] = registerPanel.getDisplay(i);
         }
         registerPanel.setAlignmentX(CENTER_ALIGNMENT);
-        mainPanel.add(registerPanel);
 
-        var executionPanel = new ExecutionPanel();
-        var conditionPanel = new ConditionPanel();
-        var buttonPanel = new ButtonPanel();
 
+        final ExecutionPanel executionPanel = new ExecutionPanel();
+        final ConditionPanel conditionPanel = new ConditionPanel();
+        final ButtonPanel buttonPanel = new ButtonPanel();
 
         decimalButton = buttonPanel.getDecButton();
         hexadecimalButton = buttonPanel.getHexButton();
         decimalButton.doClick();
 
-        var middleRightPanel = new JPanel();
-        var middleRightBox = new BoxLayout(middleRightPanel, BoxLayout.Y_AXIS);
+        final JPanel middleRightPanel = new JPanel();
+        final BoxLayout middleRightBox = new BoxLayout(middleRightPanel, BoxLayout.Y_AXIS);
         middleRightPanel.setLayout(middleRightBox);
         middleRightPanel.add(conditionPanel);
         middleRightPanel.add(buttonPanel);
 
-        var middlePanel = new JPanel();
-        var hbox = new BoxLayout(middlePanel, BoxLayout.X_AXIS);
+        final JPanel middlePanel = new JPanel();
+        final BoxLayout hbox = new BoxLayout(middlePanel, BoxLayout.X_AXIS);
         middlePanel.setLayout(hbox);
         middlePanel.add(executionPanel);
         middlePanel.add(middleRightPanel);
 
-        mainPanel.add(middlePanel);
+        final InstructionPanel instructionPanel = new InstructionPanel();
 
-        var instructionPanel = new InstructionPanel();
+        final JPanel mainPanel = createMainPanel();
+        mainPanel.add(registerPanel);
+        mainPanel.add(middlePanel);
         mainPanel.add(instructionPanel);
 
-        var statusBar = new StatusBar();
+        statusBar = new StatusBar();
         statusBar.setText("Bem-vindos");
 
         add(mainPanel);
         add(statusBar);
 
-        initEvents();
         pack();
         setResizable(false);
 
-        textPanel = new JDialog();
-        textPanel.add(textDisplay);
-        textPanel.pack();
-        textPanel.setResizable(false);
+        textPanel = createTextPanel(textDisplay);
 
+        programPanel.setSize(programPanel.getPreferredSize());
+        dataPanel.setSize(dataPanel.getPreferredSize());
+
+        initEvents();
         updatePositions();
         programPanel.setVisible(true);
         dataPanel.setVisible(true);
         textPanel.setVisible(true);
-
         textDisplay.repaint();
     }
 
@@ -157,6 +153,10 @@ public class MainWindow extends JFrame {
 
         menuBar.viewData.addActionListener(actionEvent -> {
             dataPanel.setVisible(true);
+        });
+
+        menuBar.viewDisplay.addActionListener(actionEvent -> {
+            textPanel.setVisible(true);
         });
 
         addComponentListener(new ComponentAdapter() {
@@ -197,5 +197,25 @@ public class MainWindow extends JFrame {
         dataPanel.setSize(dataSize.width, height);
         textPanel.setLocation(location.x - programWindowSize.width - gap, location.y + height + gap);
         this.requestFocus();
+    }
+
+    private JPanel createMainPanel() {
+        final JPanel mainPanel = new JPanel();
+        final BoxLayout mainPanelLayout = new BoxLayout(mainPanel, BoxLayout.Y_AXIS);
+        mainPanel.setLayout(mainPanelLayout);
+        final Border outer = Defaults.createEmptyBorder();
+        final Border inner = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
+        mainPanel.setBorder(new CompoundBorder(outer, inner));
+        return mainPanel;
+    }
+
+    private JDialog createTextPanel(TextDisplay textDisplay) {
+        final JDialog textPanel = new JDialog(this, "Display");
+        textPanel.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+        textPanel.setFocusable(false);
+        textPanel.getContentPane().add(textDisplay);
+        textPanel.pack();
+        textPanel.setResizable(false);
+        return textPanel;
     }
 }

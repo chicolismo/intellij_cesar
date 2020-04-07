@@ -1,5 +1,6 @@
 package cesar.gui.panels;
 
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
@@ -11,7 +12,6 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
@@ -48,6 +48,7 @@ public class ButtonPanel extends JPanel {
         btnRun = new JToggleButton(new ImageIcon(runIcon));
         btnNext = new JButton(new ImageIcon(nextIcon));
         initLayout();
+        setAlignmentY(Component.BOTTOM_ALIGNMENT);
     }
 
     public JToggleButton getDecButton() {
@@ -67,20 +68,21 @@ public class ButtonPanel extends JPanel {
     }
 
     private void initLayout() {
-        BoxLayout box = new BoxLayout(this, BoxLayout.X_AXIS);
+        final BoxLayout box = new BoxLayout(this, BoxLayout.X_AXIS);
         setLayout(box);
-        btnDec.setAlignmentY(JComponent.BOTTOM_ALIGNMENT);
-        btnHex.setAlignmentY(JComponent.BOTTOM_ALIGNMENT);
-        btnRun.setAlignmentY(JComponent.BOTTOM_ALIGNMENT);
-        btnNext.setAlignmentY(JComponent.BOTTOM_ALIGNMENT);
+
+        btnNext.setAlignmentY(Component.CENTER_ALIGNMENT);
+        btnRun.setAlignmentY(Component.CENTER_ALIGNMENT);
+        btnDec.setAlignmentY(Component.CENTER_ALIGNMENT);
+        btnHex.setAlignmentY(Component.CENTER_ALIGNMENT);
 
         btnDec.setFocusable(false);
         btnHex.setFocusable(false);
         btnRun.setFocusable(false);
         btnNext.setFocusable(false);
 
-        Font font = new Font(Font.MONOSPACED, Font.PLAIN, 10);
-        Insets margins = new Insets(0, 0, 0, 0);
+        final Font font = new Font(Font.MONOSPACED, Font.PLAIN, 10);
+        final Insets margins = new Insets(0, 0, 0, 0);
 
         btnDec.putClientProperty("JButton.buttonType", "segmentedTextured");
         btnDec.putClientProperty("JButton.segmentPosition", "first");
@@ -94,7 +96,7 @@ public class ButtonPanel extends JPanel {
         btnRun.setMargin(margins);
         btnNext.setMargin(margins);
 
-        ButtonGroup g = new ButtonGroup();
+        final ButtonGroup g = new ButtonGroup();
         g.add(btnDec);
         g.add(btnHex);
 

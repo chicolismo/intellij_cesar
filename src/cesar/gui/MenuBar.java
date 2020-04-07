@@ -15,6 +15,7 @@ public class MenuBar extends JMenuBar {
     public final JMenuItem fileExit;
     public final JMenuItem viewProgram;
     public final JMenuItem viewData;
+    public final JMenuItem viewDisplay;
 
     public MenuBar() {
         int ctrlKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
@@ -35,8 +36,10 @@ public class MenuBar extends JMenuBar {
         JMenu viewMenu = new JMenu("Visualizar");
         viewProgram = new JMenuItem("Exibir programa");
         viewData = new JMenuItem("Exibir dados");
+        viewDisplay = new JMenuItem("Exibir visor");
         viewMenu.add(viewProgram);
         viewMenu.add(viewData);
+        viewMenu.add(viewDisplay);
 
         JMenu execMenu = new JMenu("Executar");
 

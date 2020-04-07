@@ -1,22 +1,36 @@
 package cesar;
 
-import javax.swing.*;
-import cesar.gui.MainWindow;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 
-import java.awt.*;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+import cesar.gui.MainWindow;
 
 public class Main {
     public static void centerComponent(Component c) {
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        Dimension componentSize = c.getSize();
-        int x = (int) ((screenSize.getWidth() - componentSize.getWidth()) / 2);
-        int y = (int) ((screenSize.getHeight() - componentSize.getHeight()) / 2);
+        final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        final Dimension componentSize = c.getSize();
+        final int x = (int) ((screenSize.getWidth() - componentSize.getWidth()) / 2);
+        final int y = (int) ((screenSize.getHeight() - componentSize.getHeight()) / 2);
         c.setLocation(x, y);
     }
 
     public static void main(String[] args) {
+        try {
+//             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+        }
+        catch (IllegalAccessException | InstantiationException | ClassNotFoundException
+                | UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
+
         SwingUtilities.invokeLater(() -> {
-            MainWindow window = new MainWindow();
+            final MainWindow window = new MainWindow();
             window.setVisible(true);
             centerComponent(window);
         });

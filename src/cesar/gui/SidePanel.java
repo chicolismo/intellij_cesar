@@ -14,8 +14,7 @@ public abstract class SidePanel extends JDialog {
     protected MainWindow parent;
 
     public SidePanel(MainWindow parent, String title) {
-//        super(parent);
-        setTitle(title);
+        super(parent, title);
         setFocusable(false);
         setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
