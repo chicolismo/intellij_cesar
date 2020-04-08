@@ -3,6 +3,8 @@ package cesar.gui;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.Box;
 import javax.swing.JLabel;
@@ -14,18 +16,24 @@ import cesar.gui.tables.DataTable;
 import cesar.gui.tables.DataTableModel;
 
 public class DataPanel extends SidePanel {
-    private static final long serialVersionUID = -7816298913045696756L;
+    public static final long serialVersionUID = -7816298913045696756L;
+    private static final String LABEL_FORMAT = "[%s]";
 
     private final DataTable table;
     private final DataTableModel model;
     private final JLabel addressLabel;
     private final JTextField valueField;
+    private int currentAddress;
+    private byte currentValue;
 
     public DataPanel(MainWindow parent, byte[] data) {
         super(parent, "Dados");
 
         model = new DataTableModel(data, new String[] { "Endereço", "Dado" });
         table = new DataTable(model);
+
+        currentAddress = 0;
+        currentValue = 0;
 
         JScrollPane scrollPane = new JScrollPane(table);
 
@@ -38,7 +46,8 @@ public class DataPanel extends SidePanel {
         add(scrollPane);
 
         addressLabel = new JLabel("[0]");
-        valueField = new JTextField(5);
+        valueField = new JTextField(6);
+        valueField.setMinimumSize(valueField.getPreferredSize());
 
         final JPanel lowerPanel = new JPanel();
         final GridBagLayout layout = new GridBagLayout();
@@ -64,10 +73,38 @@ public class DataPanel extends SidePanel {
         add(lowerPanel);
 
         pack();
+        initEvents();
     }
 
     @Override
     public DataTable getTable() {
         return table;
+    }
+
+    private void initEvents() {
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                // TODO Auto-generated method stub
+                if (table.getSelectedRow() >= 0) {
+                    int row = table.getSelectedRow();
+                    String address = (String) model.getValueAt(row, 0);
+                    String value = (String) model.getValueAt(row, 1);
+                    addressLabel.setText(String.format(LABEL_FORMAT, address));
+                    valueField.setText(value);
+
+                    int radix = Base.toInt(model.getBase());
+                    currentAddress = Integer.parseInt(address, radix);
+                    currentValue = (byte) Integer.parseInt(value, radix);
+                }
+            }
+        });
+    }
+
+    public void setBase(Base base) {
+        int radix = Base.toInt(base);
+        model.setBase(base);
+        addressLabel.setText(String.format(LABEL_FORMAT, Integer.toString(currentAddress, radix)));
+        valueField.setText(Integer.toString(currentValue, radix));
     }
 }

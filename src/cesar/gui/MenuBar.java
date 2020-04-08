@@ -18,7 +18,8 @@ public class MenuBar extends JMenuBar {
     public final JMenuItem viewDisplay;
 
     public MenuBar() {
-        int ctrlKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+        // int ctrlKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+        int ctrlKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
         fileOpen = new JMenuItem("Carregar", KeyEvent.VK_C);
         fileOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ctrlKey));

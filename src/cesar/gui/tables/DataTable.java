@@ -10,9 +10,11 @@ public class DataTable extends Table {
         super(model);
 
         TableColumnModel columnModel = getColumnModel();
+
         TableColumn column = columnModel.getColumn(0);
-        column.setMinWidth(70);
+        column.setMinWidth(60);
+
         column = columnModel.getColumn(1);
-        column.setMinWidth(70);
+        column.setMinWidth(60);
     }
 }

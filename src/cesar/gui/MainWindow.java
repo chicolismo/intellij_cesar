@@ -3,6 +3,8 @@ package cesar.gui;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
@@ -31,7 +33,6 @@ import cesar.gui.panels.StatusBar;
 import cesar.gui.tables.DataTableModel;
 import cesar.gui.tables.ProgramTableModel;
 import cesar.hardware.Cpu;
-import cesar.utils.Defaults;
 
 public class MainWindow extends JFrame {
     public static final long serialVersionUID = -4182598865843186332L;
@@ -73,7 +74,7 @@ public class MainWindow extends JFrame {
 
         registerDisplays = new RegisterDisplay[8];
 
-        final var registerPanel = new RegisterPanel();
+        final RegisterPanel registerPanel = new RegisterPanel();
         for (int i = 0; i < 8; ++i) {
             registerDisplays[i] = registerPanel.getDisplay(i);
         }
@@ -130,33 +131,48 @@ public class MainWindow extends JFrame {
     }
 
     private void initEvents() {
-        final var parent = this;
-        final var fileChooser = new JFileChooser();
+        final MainWindow parent = this;
+        final JFileChooser fileChooser = new JFileChooser();
         fileChooser.setMultiSelectionEnabled(false);
         fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos de memória", "mem"));
 
-        menuBar.fileOpen.addActionListener(actionEvent -> {
-            if (fileChooser.showDialog(parent, null) == JFileChooser.APPROVE_OPTION) {
-                File file = fileChooser.getSelectedFile();
-                System.out.println(file.getName());
+        menuBar.fileOpen.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (fileChooser.showDialog(parent, null) == JFileChooser.APPROVE_OPTION) {
+                    File file = fileChooser.getSelectedFile();
+                    System.out.println(file.getName());
+                }
             }
         });
 
-        menuBar.fileExit.addActionListener(actionEvent -> {
-            // TODO: Testar se o arquivo aberto foi alterado.
-            System.exit(0);
+        menuBar.fileExit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                // TODO: Testar se o arquivo aberto foi alterado.
+                System.exit(0);
+            }
         });
 
-        menuBar.viewProgram.addActionListener(actionEvent -> {
-            programPanel.setVisible(true);
+        menuBar.viewProgram.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                programPanel.setVisible(true);
+            }
         });
 
-        menuBar.viewData.addActionListener(actionEvent -> {
-            dataPanel.setVisible(true);
+        menuBar.viewData.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                dataPanel.setVisible(true);
+            }
         });
 
-        menuBar.viewDisplay.addActionListener(actionEvent -> {
-            textPanel.setVisible(true);
+        menuBar.viewDisplay.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                textPanel.setVisible(true);
+            }
         });
 
         addComponentListener(new ComponentAdapter() {
@@ -166,19 +182,25 @@ public class MainWindow extends JFrame {
             }
         });
 
-        decimalButton.addActionListener((e) -> {
-            programTableModel.setBase(Base.DECIMAL);
-            dataTableModel.setBase(Base.DECIMAL);
-            for (var register : registerDisplays) {
-                register.setBase(Base.DECIMAL);
+        decimalButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                programPanel.setBase(Base.DECIMAL);
+                dataPanel.setBase(Base.DECIMAL);
+                for (RegisterDisplay register : registerDisplays) {
+                    register.setBase(Base.DECIMAL);
+                }
             }
         });
 
-        hexadecimalButton.addActionListener((e) -> {
-            programTableModel.setBase(Base.HEXADECIMAL);
-            dataTableModel.setBase(Base.HEXADECIMAL);
-            for (var register : registerDisplays) {
-                register.setBase(Base.HEXADECIMAL);
+        hexadecimalButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                programPanel.setBase(Base.HEXADECIMAL);
+                dataPanel.setBase(Base.HEXADECIMAL);
+                for (RegisterDisplay register : registerDisplays) {
+                    register.setBase(Base.HEXADECIMAL);
+                }
             }
         });
     }
@@ -203,7 +225,7 @@ public class MainWindow extends JFrame {
         final JPanel mainPanel = new JPanel();
         final BoxLayout mainPanelLayout = new BoxLayout(mainPanel, BoxLayout.Y_AXIS);
         mainPanel.setLayout(mainPanelLayout);
-        final Border outer = Defaults.createEmptyBorder();
+        final Border outer = BorderFactory.createEmptyBorder(1, 1, 1, 1);
         final Border inner = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
         mainPanel.setBorder(new CompoundBorder(outer, inner));
         return mainPanel;

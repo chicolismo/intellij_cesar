@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.Box;
 import javax.swing.JLabel;
@@ -15,19 +17,26 @@ import cesar.gui.tables.ProgramTable;
 import cesar.gui.tables.ProgramTableModel;
 
 public class ProgramPanel extends SidePanel {
-    private static final long serialVersionUID = 8452878222228144644L;
+    public static final long serialVersionUID = 8452878222228144644L;
+
+    private static final String LABEL_FORMAT = "[%s]";
 
     private final ProgramTable table;
-    private final ProgramTableModel tableModel;
+    private final ProgramTableModel model;
     private final JTextField bpField;
     private final JLabel addressLabel;
     private final JTextField valueField;
+    private int currentAddress;
+    private byte currentValue;
 
     public ProgramPanel(MainWindow parent, byte[] data) {
         super(parent, "Programa");
 
-        tableModel = new ProgramTableModel(data, new String[] { "PC", "Endereço", "Dado", "Mnemônico" });
-        table = new ProgramTable(tableModel);
+        model = new ProgramTableModel(data, new String[] { "PC", "Endereço", "Dado", "Mnemônico" });
+        table = new ProgramTable(model);
+
+        currentAddress = 0;
+        currentValue = 0;
 
         JScrollPane scrollPane = new JScrollPane(table);
 
@@ -42,8 +51,10 @@ public class ProgramPanel extends SidePanel {
         final JLabel bpLabel = new JLabel("BP:");
         bpLabel.setForeground(Color.RED);
         bpField = new JTextField(4);
+        bpField.setMinimumSize(bpField.getPreferredSize());
         addressLabel = new JLabel("[0]");
-        valueField = new JTextField(5);
+        valueField = new JTextField(6);
+        valueField.setMinimumSize(valueField.getPreferredSize());
 
         final JPanel lowerPanel = new JPanel();
         final GridBagLayout layout = new GridBagLayout();
@@ -75,6 +86,8 @@ public class ProgramPanel extends SidePanel {
         add(lowerPanel);
 
         pack();
+
+        initEvents();
     }
 
     @Override
@@ -92,5 +105,33 @@ public class ProgramPanel extends SidePanel {
 
     public JTextField getBreakPointField() {
         return bpField;
+    }
+
+    private void initEvents() {
+
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                // TODO Auto-generated method stub
+                if (table.getSelectedRow() >= 0) {
+                    int row = table.getSelectedRow();
+                    String address = (String) model.getValueAt(row, 1);
+                    String value = (String) model.getValueAt(row, 2);
+                    addressLabel.setText(String.format(LABEL_FORMAT, address));
+                    valueField.setText(value);
+
+                    int radix = Base.toInt(model.getBase());
+                    currentAddress = Integer.parseInt(address, radix);
+                    currentValue = (byte) Integer.parseInt(value, radix);
+                }
+            }
+        });
+    }
+
+    public void setBase(Base base) {
+        int radix = Base.toInt(base);
+        model.setBase(base);
+        addressLabel.setText(String.format(LABEL_FORMAT, Integer.toString(currentAddress, radix)));
+        valueField.setText(Integer.toString(currentValue, radix));
     }
 }

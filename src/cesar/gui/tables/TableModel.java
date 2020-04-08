@@ -30,6 +30,10 @@ public abstract class TableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    public Base getBase() {
+        return currentBase;
+    }
+
     @Override
     public String getColumnName(int col) {
         return columnNames[col];

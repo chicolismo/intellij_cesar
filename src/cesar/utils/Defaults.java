@@ -11,7 +11,8 @@ public class Defaults {
     public static final Font DEFAULT_FONT;
 
     static {
-        DEFAULT_FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+//        DEFAULT_FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+        DEFAULT_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 12);
     }
 
     private Defaults() {
@@ -31,7 +32,7 @@ public class Defaults {
 
     public static Border createTitledBorder(String title, int align) {
         TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), title, align,
-            TitledBorder.CENTER);
+                TitledBorder.CENTER);
         border.setTitleFont(DEFAULT_FONT);
         return border;
     }
