@@ -1,14 +1,9 @@
 package cesar;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Toolkit;
-
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-
 import cesar.gui.MainWindow;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class Main {
     public static void centerComponent(Component c) {
@@ -21,10 +16,9 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-        }
-        catch (IllegalAccessException | InstantiationException | ClassNotFoundException
+//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+        } catch (IllegalAccessException | InstantiationException | ClassNotFoundException
                 | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }

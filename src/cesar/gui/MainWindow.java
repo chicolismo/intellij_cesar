@@ -1,8 +1,20 @@
 package cesar.gui;
 
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.Point;
+import cesar.gui.displays.RegisterDisplay;
+import cesar.gui.displays.TextDisplay;
+import cesar.gui.panels.*;
+import cesar.gui.tables.DataTable;
+import cesar.gui.tables.DataTableModel;
+import cesar.gui.tables.ProgramTable;
+import cesar.gui.tables.ProgramTableModel;
+import cesar.hardware.Cpu;
+
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -10,34 +22,6 @@ import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
-import javax.swing.WindowConstants;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import cesar.gui.displays.RegisterDisplay;
-import cesar.gui.displays.TextDisplay;
-import cesar.gui.panels.ButtonPanel;
-import cesar.gui.panels.ConditionPanel;
-import cesar.gui.panels.ExecutionPanel;
-import cesar.gui.panels.InstructionPanel;
-import cesar.gui.panels.RegisterPanel;
-import cesar.gui.panels.StatusBar;
-import cesar.gui.tables.DataTable;
-import cesar.gui.tables.DataTableModel;
-import cesar.gui.tables.ProgramTable;
-import cesar.gui.tables.ProgramTableModel;
-import cesar.hardware.Cpu;
 
 public class MainWindow extends JFrame {
     public static final long serialVersionUID = -4182598865843186332L;
@@ -106,8 +90,8 @@ public class MainWindow extends JFrame {
         middleRightPanel.add(buttonPanel);
 
         final JPanel middlePanel = new JPanel();
-        final BoxLayout hbox = new BoxLayout(middlePanel, BoxLayout.X_AXIS);
-        middlePanel.setLayout(hbox);
+        final BoxLayout horizontalBox = new BoxLayout(middlePanel, BoxLayout.X_AXIS);
+        middlePanel.setLayout(horizontalBox);
         middlePanel.add(executionPanel);
         middlePanel.add(middleRightPanel);
 
@@ -263,8 +247,7 @@ public class MainWindow extends JFrame {
             programPanel.repaint();
             dataPanel.repaint();
             textPanel.repaint();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Um erro ocorreu ao abrir o arquivo",
                     JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();

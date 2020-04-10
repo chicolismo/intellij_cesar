@@ -1,20 +1,15 @@
 package cesar.gui.panels;
 
-import java.awt.GridLayout;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
-
 import cesar.gui.Base;
 import cesar.gui.displays.RegisterDisplay;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.border.BevelBorder;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public class RegisterPanel extends JPanel {
     private static final long serialVersionUID = 2962079321929645473L;
@@ -24,8 +19,7 @@ public class RegisterPanel extends JPanel {
         BufferedImage icon = null;
         try {
             icon = ImageIO.read(RegisterPanel.class.getResourceAsStream("/cesar/gui/assets/computer.png"));
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.err.println("Erro ao ler o ícone do computador");
             System.exit(1);
         }
@@ -38,9 +32,9 @@ public class RegisterPanel extends JPanel {
     public RegisterPanel() {
         super(true);
 
-        registerDisplays = new RegisterDisplay[] { new RegisterDisplay(0, "R0:"), new RegisterDisplay(1, "R1:"),
-            new RegisterDisplay(2, "R2:"), new RegisterDisplay(3, "R3:"), new RegisterDisplay(4, "R4:"),
-            new RegisterDisplay(5, "R5:"), new RegisterDisplay(6, "R6: (SP)"), new RegisterDisplay(7, "R7: (PC)"), };
+        registerDisplays = new RegisterDisplay[]{new RegisterDisplay(0, "R0:"), new RegisterDisplay(1, "R1:"),
+                new RegisterDisplay(2, "R2:"), new RegisterDisplay(3, "R3:"), new RegisterDisplay(4, "R4:"),
+                new RegisterDisplay(5, "R5:"), new RegisterDisplay(6, "R6: (SP)"), new RegisterDisplay(7, "R7: (PC)"),};
 
         interruptionPanel = new LedPanel("IS");
 

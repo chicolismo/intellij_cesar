@@ -1,18 +1,14 @@
 package cesar.gui.displays;
 
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
+import cesar.gui.Base;
 
 import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.BevelBorder;
-
-import cesar.gui.Base;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public class DigitalDisplay extends JPanel {
     private static final long serialVersionUID = 7750416402778310401L;
@@ -27,9 +23,6 @@ public class DigitalDisplay extends JPanel {
 
     private static final BufferedImage[] displayImages;
     private static final BufferedImage displayNull;
-    private int unsignedValue;
-    private Base currentBase;
-    private int numberOfDigits;
 
     static {
         BufferedImage[] digits = new BufferedImage[16];
@@ -40,8 +33,7 @@ public class DigitalDisplay extends JPanel {
                 digits[i] = ImageIO.read(DigitalDisplay.class.getResourceAsStream(String.format(pathFormat, i)));
             }
             emptyDigit = ImageIO.read(DigitalDisplay.class.getResourceAsStream("/cesar/gui/assets/cesar_null.png"));
-        }
-        catch (IllegalArgumentException | IOException e) {
+        } catch (IllegalArgumentException | IOException e) {
             System.err.println("Erro a ler os dígitos");
             e.printStackTrace();
             System.exit(1);
@@ -49,6 +41,10 @@ public class DigitalDisplay extends JPanel {
         displayImages = digits;
         displayNull = emptyDigit;
     }
+
+    private int unsignedValue;
+    private Base currentBase;
+    private int numberOfDigits;
 
     public DigitalDisplay() {
         super(true);

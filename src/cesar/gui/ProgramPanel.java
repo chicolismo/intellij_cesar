@@ -1,21 +1,13 @@
 package cesar.gui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import javax.swing.Box;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-
 import cesar.gui.tables.ProgramTable;
 import cesar.gui.tables.ProgramTableModel;
 import cesar.hardware.Cpu;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class ProgramPanel extends SidePanel {
     public static final long serialVersionUID = 8452878222228144644L;
@@ -33,7 +25,7 @@ public class ProgramPanel extends SidePanel {
     public ProgramPanel(MainWindow parent, Cpu cpu) {
         super(parent, "Programa");
 
-        model = new ProgramTableModel(cpu, new String[] { "PC", "Endereço", "Dado", "Mnemônico" });
+        model = new ProgramTableModel(cpu, new String[]{"PC", "Endereço", "Dado", "Mnemônico"});
         table = new ProgramTable(model);
 
         currentAddress = 0;
@@ -59,8 +51,8 @@ public class ProgramPanel extends SidePanel {
 
         final JPanel lowerPanel = new JPanel();
         final GridBagLayout layout = new GridBagLayout();
-        layout.columnWeights = new double[] { 0.0, 0.0, 1.0, 0.0, 0.0 };
-        layout.rowWeights = new double[] { 1.0 };
+        layout.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0};
+        layout.rowWeights = new double[]{1.0};
         lowerPanel.setLayout(layout);
 
         final GridBagConstraints c = new GridBagConstraints();
@@ -114,11 +106,9 @@ public class ProgramPanel extends SidePanel {
         // O valor da memória no endereço correspondente deve ser alterado, e a próxima
         // linha da
         // tabela deve ser selecionada como se houvesse sido clicada pelo mouse.
-
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                // TODO Auto-generated method stub
                 if (table.getSelectedRow() >= 0) {
                     final int row = table.getSelectedRow();
                     String address = (String) model.getValueAt(row, 1);

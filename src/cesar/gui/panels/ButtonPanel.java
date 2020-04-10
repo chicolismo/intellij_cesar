@@ -1,19 +1,10 @@
 package cesar.gui.panels;
 
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.Insets;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
 
 public class ButtonPanel extends JPanel {
     private static final long serialVersionUID = -1509965084306287422L;
@@ -27,8 +18,7 @@ public class ButtonPanel extends JPanel {
         try {
             icon = ImageIO.read(ButtonPanel.class.getResourceAsStream("/cesar/gui/assets/config.png"));
             next = ImageIO.read(ButtonPanel.class.getResourceAsStream("/cesar/gui/assets/tools.png"));
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             System.err.println("Erro a ler os ícones dos botões");
             e.printStackTrace();
             System.exit(1);

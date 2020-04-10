@@ -1,10 +1,8 @@
 package cesar.gui.tables;
 
-import java.awt.Font;
-
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.table.JTableHeader;
+import java.awt.*;
 
 public abstract class Table extends JTable {
     private static final long serialVersionUID = -8733831578127444505L;

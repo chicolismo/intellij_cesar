@@ -1,12 +1,8 @@
 package cesar.gui;
 
-import java.awt.Toolkit;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyEvent;
-
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.KeyStroke;
 
 public class MenuBar extends JMenuBar {
     private static final long serialVersionUID = -7618206299229330211L;

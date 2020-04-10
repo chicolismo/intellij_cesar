@@ -1,15 +1,11 @@
 package cesar.gui;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
-
 import cesar.gui.tables.Table;
 
+import javax.swing.*;
+
 public abstract class SidePanel extends JDialog {
-    private static final long serialVersionUID = 3602114587032491724L;
+    public static final long serialVersionUID = 3602114587032491724L;
 
     protected MainWindow parent;
 

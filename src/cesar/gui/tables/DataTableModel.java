@@ -8,7 +8,7 @@ public class DataTableModel extends TableModel {
 
     public DataTableModel(Cpu cpu, String[] columnNames) {
         super(cpu, columnNames);
-        classNames = new Class<?>[] { Integer.class, Byte.class };
+        classNames = new Class<?>[]{Integer.class, Byte.class};
     }
 
     @Override

@@ -1,20 +1,13 @@
 package cesar.gui;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import javax.swing.Box;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-
 import cesar.gui.tables.DataTable;
 import cesar.gui.tables.DataTableModel;
 import cesar.hardware.Cpu;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class DataPanel extends SidePanel {
     public static final long serialVersionUID = -7816298913045696756L;
@@ -30,7 +23,7 @@ public class DataPanel extends SidePanel {
     public DataPanel(MainWindow parent, Cpu cpu) {
         super(parent, "Dados");
 
-        model = new DataTableModel(cpu, new String[] { "Endereço", "Dado" });
+        model = new DataTableModel(cpu, new String[]{"Endereço", "Dado"});
         table = new DataTable(model);
 
         currentAddress = 0;
@@ -52,8 +45,8 @@ public class DataPanel extends SidePanel {
 
         final JPanel lowerPanel = new JPanel();
         final GridBagLayout layout = new GridBagLayout();
-        layout.columnWeights = new double[] { 1.0, 0.0, 0.0 };
-        layout.rowWeights = new double[] { 1.0 };
+        layout.columnWeights = new double[]{1.0, 0.0, 0.0};
+        layout.rowWeights = new double[]{1.0};
         lowerPanel.setLayout(layout);
 
         final GridBagConstraints c = new GridBagConstraints();

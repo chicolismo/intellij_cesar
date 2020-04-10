@@ -1,12 +1,8 @@
 package cesar.gui.panels;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-
 import cesar.utils.Defaults;
+
+import javax.swing.*;
 
 public class StatusBar extends JPanel {
     private static final long serialVersionUID = 1408669317780545642L;

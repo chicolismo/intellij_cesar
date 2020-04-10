@@ -10,7 +10,7 @@ public class ProgramTableModel extends TableModel {
 
     public ProgramTableModel(Cpu cpu, String[] columnNames) {
         super(cpu, columnNames);
-        classNames = new Class<?>[] { String.class, Integer.class, Byte.class, String.class };
+        classNames = new Class<?>[]{String.class, Integer.class, Byte.class, String.class};
         pcRow = 0;
     }
 

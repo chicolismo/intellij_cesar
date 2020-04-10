@@ -1,13 +1,13 @@
 package cesar.gui.tables;
 
-import javax.swing.table.AbstractTableModel;
-
 import cesar.gui.Base;
 import cesar.hardware.Cpu;
 
+import javax.swing.table.AbstractTableModel;
+
 public abstract class TableModel extends AbstractTableModel {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -124231497089309828L;
     protected Base currentBase;
@@ -28,13 +28,13 @@ public abstract class TableModel extends AbstractTableModel {
         return classNames[column];
     }
 
+    public Base getBase() {
+        return currentBase;
+    }
+
     public void setBase(Base base) {
         currentBase = base;
         fireTableDataChanged();
-    }
-
-    public Base getBase() {
-        return currentBase;
     }
 
     @Override
