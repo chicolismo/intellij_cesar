@@ -11,13 +11,21 @@ public class Cpu {
 
     public Cpu() {
         memory = new byte[MEMORY_SIZE];
-        for (int i = 0; i < MEMORY_SIZE; ++i) {
-//            memory[i] = (byte) i;
-            memory[i] = (byte) 60;
+    }
+
+    public void setMemory(byte[] bytes) {
+        final int maxSize = Math.min(bytes.length, memory.length);
+        final int offset = (bytes.length > memory.length) ? (bytes.length - memory.length) : 0;
+        for (int i = 0; i < maxSize; ++i) {
+            memory[i] = bytes[i + offset];
         }
     }
 
     public byte[] getMemory() {
         return memory;
+    }
+
+    public byte getByte(int address) {
+        return memory[address];
     }
 }

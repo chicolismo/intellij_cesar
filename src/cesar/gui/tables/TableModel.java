@@ -3,6 +3,7 @@ package cesar.gui.tables;
 import javax.swing.table.AbstractTableModel;
 
 import cesar.gui.Base;
+import cesar.hardware.Cpu;
 
 public abstract class TableModel extends AbstractTableModel {
     /**
@@ -11,12 +12,14 @@ public abstract class TableModel extends AbstractTableModel {
     private static final long serialVersionUID = -124231497089309828L;
     protected Base currentBase;
     protected String[] columnNames;
-    protected byte[] data;
+    // protected byte[] data;
+    protected Cpu cpu;
     protected Class<?>[] classNames;
 
-    public TableModel(byte[] data, String[] columnNames) {
+    public TableModel(Cpu cpu, String[] columnNames) {
         this.currentBase = Base.DECIMAL;
-        this.data = data;
+        // this.data = data;
+        this.cpu = cpu;
         this.columnNames = columnNames;
     }
 
@@ -41,7 +44,8 @@ public abstract class TableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return data.length;
+        return Cpu.MEMORY_SIZE;
+        // return cpu.getMemory().length;
     }
 
     @Override

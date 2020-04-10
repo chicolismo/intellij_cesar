@@ -8,12 +8,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.WindowConstants;
@@ -30,7 +33,9 @@ import cesar.gui.panels.ExecutionPanel;
 import cesar.gui.panels.InstructionPanel;
 import cesar.gui.panels.RegisterPanel;
 import cesar.gui.panels.StatusBar;
+import cesar.gui.tables.DataTable;
 import cesar.gui.tables.DataTableModel;
+import cesar.gui.tables.ProgramTable;
 import cesar.gui.tables.ProgramTableModel;
 import cesar.hardware.Cpu;
 
@@ -41,7 +46,9 @@ public class MainWindow extends JFrame {
     private final Cpu cpu;
     private final ProgramPanel programPanel;
     private final DataPanel dataPanel;
+    private final ProgramTable programTable;
     private final ProgramTableModel programTableModel;
+    private final DataTable dataTable;
     private final DataTableModel dataTableModel;
     private final JDialog textPanel;
     private final TextDisplay textDisplay;
@@ -61,11 +68,14 @@ public class MainWindow extends JFrame {
 
 
         cpu = new Cpu();
-        programPanel = new ProgramPanel(this, cpu.getMemory());
-        dataPanel = new DataPanel(this, cpu.getMemory());
+        programPanel = new ProgramPanel(this, cpu);
+        dataPanel = new DataPanel(this, cpu);
 
-        programTableModel = (ProgramTableModel) programPanel.getTable().getModel();
-        dataTableModel = (DataTableModel) dataPanel.getTable().getModel();
+        programTable = programPanel.getTable();
+        programTableModel = (ProgramTableModel) programTable.getModel();
+
+        dataTable = dataPanel.getTable();
+        dataTableModel = (DataTableModel) dataTable.getModel();
 
         textDisplay = new TextDisplay(cpu.getMemory());
 
@@ -131,7 +141,15 @@ public class MainWindow extends JFrame {
     }
 
     private void initEvents() {
-        final MainWindow parent = this;
+        final MainWindow window = this;
+
+        window.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentMoved(ComponentEvent e) {
+                window.updatePositions();
+            }
+        });
+
         final JFileChooser fileChooser = new JFileChooser();
         fileChooser.setMultiSelectionEnabled(false);
         fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos de memória", "mem"));
@@ -139,9 +157,9 @@ public class MainWindow extends JFrame {
         menuBar.fileOpen.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (fileChooser.showDialog(parent, null) == JFileChooser.APPROVE_OPTION) {
+                if (fileChooser.showDialog(window, null) == JFileChooser.APPROVE_OPTION) {
                     File file = fileChooser.getSelectedFile();
-                    System.out.println(file.getName());
+                    window.onOpenFile(file);
                 }
             }
         });
@@ -172,13 +190,6 @@ public class MainWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 textPanel.setVisible(true);
-            }
-        });
-
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentMoved(ComponentEvent e) {
-                updatePositions();
             }
         });
 
@@ -239,5 +250,24 @@ public class MainWindow extends JFrame {
         textPanel.pack();
         textPanel.setResizable(false);
         return textPanel;
+    }
+
+    private void onOpenFile(File file) {
+        try {
+            FileInputStream inputStream = new FileInputStream(file);
+            int size = (int) file.length();
+            byte[] buffer = new byte[size];
+            inputStream.read(buffer, 0, size);
+            inputStream.close();
+            cpu.setMemory(buffer);
+            programPanel.repaint();
+            dataPanel.repaint();
+            textPanel.repaint();
+        }
+        catch (IOException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Um erro ocorreu ao abrir o arquivo",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 }

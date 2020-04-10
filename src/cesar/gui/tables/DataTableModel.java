@@ -1,12 +1,13 @@
 package cesar.gui.tables;
 
 import cesar.gui.Base;
+import cesar.hardware.Cpu;
 
 public class DataTableModel extends TableModel {
     private static final long serialVersionUID = -6517003845553744906L;
 
-    public DataTableModel(byte[] data, String[] columnNames) {
-        super(data, columnNames);
+    public DataTableModel(Cpu cpu, String[] columnNames) {
+        super(cpu, columnNames);
         classNames = new Class<?>[] { Integer.class, Byte.class };
     }
 
@@ -17,7 +18,7 @@ public class DataTableModel extends TableModel {
                 return String.format(currentBase == Base.DECIMAL ? "%d" : "%x", row);
             case 1:
             default:
-                return String.format(currentBase == Base.DECIMAL ? "%d" : "%x", 0xFF & data[row]);
+                return String.format(currentBase == Base.DECIMAL ? "%d" : "%x", 0xFF & cpu.getByte(row));
         }
     }
 }

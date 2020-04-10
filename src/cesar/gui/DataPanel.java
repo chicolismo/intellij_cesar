@@ -14,6 +14,7 @@ import javax.swing.JTextField;
 
 import cesar.gui.tables.DataTable;
 import cesar.gui.tables.DataTableModel;
+import cesar.hardware.Cpu;
 
 public class DataPanel extends SidePanel {
     public static final long serialVersionUID = -7816298913045696756L;
@@ -26,10 +27,10 @@ public class DataPanel extends SidePanel {
     private int currentAddress;
     private byte currentValue;
 
-    public DataPanel(MainWindow parent, byte[] data) {
+    public DataPanel(MainWindow parent, Cpu cpu) {
         super(parent, "Dados");
 
-        model = new DataTableModel(data, new String[] { "Endereço", "Dado" });
+        model = new DataTableModel(cpu, new String[] { "Endereço", "Dado" });
         table = new DataTable(model);
 
         currentAddress = 0;
@@ -85,15 +86,15 @@ public class DataPanel extends SidePanel {
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                // TODO Auto-generated method stub
                 if (table.getSelectedRow() >= 0) {
-                    int row = table.getSelectedRow();
+                    final int row = table.getSelectedRow();
                     String address = (String) model.getValueAt(row, 0);
                     String value = (String) model.getValueAt(row, 1);
                     addressLabel.setText(String.format(LABEL_FORMAT, address));
                     valueField.setText(value);
+                    valueField.requestFocus();
 
-                    int radix = Base.toInt(model.getBase());
+                    final int radix = Base.toInt(model.getBase());
                     currentAddress = Integer.parseInt(address, radix);
                     currentValue = (byte) Integer.parseInt(value, radix);
                 }
@@ -102,7 +103,7 @@ public class DataPanel extends SidePanel {
     }
 
     public void setBase(Base base) {
-        int radix = Base.toInt(base);
+        final int radix = Base.toInt(base);
         model.setBase(base);
         addressLabel.setText(String.format(LABEL_FORMAT, Integer.toString(currentAddress, radix)));
         valueField.setText(Integer.toString(currentValue, radix));
