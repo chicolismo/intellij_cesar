@@ -1,20 +1,8 @@
 package cesar.gui;
 
-import cesar.gui.displays.RegisterDisplay;
-import cesar.gui.displays.TextDisplay;
-import cesar.gui.panels.*;
-import cesar.gui.tables.DataTable;
-import cesar.gui.tables.DataTableModel;
-import cesar.gui.tables.ProgramTable;
-import cesar.gui.tables.ProgramTableModel;
-import cesar.hardware.Cpu;
-
-import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -22,6 +10,35 @@ import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JToggleButton;
+import javax.swing.WindowConstants;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import cesar.gui.displays.RegisterDisplay;
+import cesar.gui.displays.TextDisplay;
+import cesar.gui.panels.ButtonPanel;
+import cesar.gui.panels.ConditionPanel;
+import cesar.gui.panels.ExecutionPanel;
+import cesar.gui.panels.InstructionPanel;
+import cesar.gui.panels.RegisterPanel;
+import cesar.gui.panels.StatusBar;
+import cesar.gui.tables.DataTable;
+import cesar.gui.tables.DataTableModel;
+import cesar.gui.tables.ProgramTable;
+import cesar.gui.tables.ProgramTableModel;
+import cesar.hardware.Cpu;
 
 public class MainWindow extends JFrame {
     public static final long serialVersionUID = -4182598865843186332L;
@@ -37,9 +54,14 @@ public class MainWindow extends JFrame {
     private final JDialog textPanel;
     private final TextDisplay textDisplay;
     private final RegisterDisplay[] registerDisplays;
+    private final ExecutionPanel executionPanel;
+    private final ConditionPanel conditionPanel;
+    private final JButton nextButton;
+    private final JToggleButton runButton;
     private final JToggleButton decimalButton;
     private final JToggleButton hexadecimalButton;
     private final StatusBar statusBar;
+    private boolean running;
 
     public MainWindow() {
         super("Cesar");
@@ -49,6 +71,7 @@ public class MainWindow extends JFrame {
         setAutoRequestFocus(true);
         BoxLayout mainLayout = new BoxLayout(getContentPane(), BoxLayout.Y_AXIS);
         getContentPane().setLayout(mainLayout);
+        running = false;
 
 
         cpu = new Cpu();
@@ -75,10 +98,12 @@ public class MainWindow extends JFrame {
         registerPanel.setAlignmentX(CENTER_ALIGNMENT);
 
 
-        final ExecutionPanel executionPanel = new ExecutionPanel();
-        final ConditionPanel conditionPanel = new ConditionPanel();
+        executionPanel = new ExecutionPanel();
+        conditionPanel = new ConditionPanel();
         final ButtonPanel buttonPanel = new ButtonPanel();
 
+        nextButton = buttonPanel.getNextButton();
+        runButton = buttonPanel.getRunButton();
         decimalButton = buttonPanel.getDecButton();
         hexadecimalButton = buttonPanel.getHexButton();
         decimalButton.doClick();
@@ -104,6 +129,7 @@ public class MainWindow extends JFrame {
 
         statusBar = new StatusBar();
         statusBar.setText("Bem-vindos");
+        statusBar.setMinimumSize(statusBar.getPreferredSize());
 
         add(mainPanel);
         add(statusBar);
@@ -124,13 +150,32 @@ public class MainWindow extends JFrame {
         textDisplay.repaint();
     }
 
-    private void initEvents() {
-        final MainWindow window = this;
+    synchronized private boolean isRunning() {
+        return running;
+    }
 
-        window.addComponentListener(new ComponentAdapter() {
+    synchronized private void stopRunning() {
+        running = false;
+    }
+
+    synchronized private void startRunning() {
+        running = true;
+        Thread runningThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (isRunning()) {
+                    MainWindow.this.executeNextInstruction();
+                }
+            }
+        });
+        runningThread.start();
+    }
+
+    private void initEvents() {
+        addComponentListener(new ComponentAdapter() {
             @Override
             public void componentMoved(ComponentEvent e) {
-                window.updatePositions();
+                updatePositions();
             }
         });
 
@@ -141,9 +186,9 @@ public class MainWindow extends JFrame {
         menuBar.fileOpen.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (fileChooser.showDialog(window, null) == JFileChooser.APPROVE_OPTION) {
+                if (fileChooser.showDialog(MainWindow.this, null) == JFileChooser.APPROVE_OPTION) {
                     File file = fileChooser.getSelectedFile();
-                    window.onOpenFile(file);
+                    MainWindow.this.onOpenFile(file);
                 }
             }
         });
@@ -174,6 +219,25 @@ public class MainWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 textPanel.setVisible(true);
+            }
+        });
+
+        nextButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                MainWindow.this.executeNextInstruction();
+            }
+        });
+
+        runButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isRunning()) {
+                    stopRunning();
+                }
+                else {
+                    startRunning();
+                }
             }
         });
 
@@ -247,10 +311,46 @@ public class MainWindow extends JFrame {
             programPanel.repaint();
             dataPanel.repaint();
             textPanel.repaint();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Um erro ocorreu ao abrir o arquivo",
                     JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
+        }
+    }
+
+    public void executeNextInstruction() {
+        Cpu.ExecutionResult result = cpu.executeNextInstruction();
+        switch (result) {
+            case HALT:
+                stopRunning();
+            case NOOP:
+            case OK:
+                for (int i = 0; i < 8; ++i) {
+                    registerDisplays[i].setValue(cpu.getRegister(i));
+                }
+                if (cpu.hasMemoryChanged()) {
+                    final int address = cpu.getLastChangedAddress();
+                    programTableModel.fireTableRowsUpdated(address, address + 1);
+                    dataTableModel.fireTableRowsUpdated(address, address + 1);
+                    textDisplay.repaint();
+                }
+                programTableModel.setPcRow(cpu.getRegister(7));
+                int pcRow = programTableModel.getPcRow();
+                // TODO: Fazer o scroll da linha do PC
+                programTable.setRowSelectionInterval(pcRow, pcRow);
+                conditionPanel.setNegative(cpu.isNegative());
+                conditionPanel.setZero(cpu.isZero());
+                conditionPanel.setOverflow(cpu.isOverflow());
+                conditionPanel.setCarry(cpu.isCarry());
+                executionPanel.setMemoryAccessCount(cpu.getMemoryAccessCount());
+                executionPanel.incrementInstructions();
+                statusBar.setText(result.toString());
+                break;
+
+            case INVALID_INSTRUCTION:
+                statusBar.setText("Invalid Instruction");
+                break;
         }
     }
 }

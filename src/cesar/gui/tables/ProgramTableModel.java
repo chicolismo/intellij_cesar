@@ -2,6 +2,7 @@ package cesar.gui.tables;
 
 import cesar.gui.Base;
 import cesar.hardware.Cpu;
+import cesar.utils.Shorts;
 
 public class ProgramTableModel extends TableModel {
     public static final long serialVersionUID = -5373447997057887767L;
@@ -10,7 +11,7 @@ public class ProgramTableModel extends TableModel {
 
     public ProgramTableModel(Cpu cpu, String[] columnNames) {
         super(cpu, columnNames);
-        classNames = new Class<?>[]{String.class, Integer.class, Byte.class, String.class};
+        classNames = new Class<?>[] { String.class, Integer.class, Byte.class, String.class };
         pcRow = 0;
     }
 
@@ -27,5 +28,16 @@ public class ProgramTableModel extends TableModel {
             default:
                 return " Não implementado";
         }
+    }
+
+    public int getPcRow() {
+        return pcRow;
+    }
+
+    public void setPcRow(short register) {
+        final int oldPcRow = pcRow;
+        pcRow = Shorts.toUnsignedInt(register);
+        fireTableRowsUpdated(oldPcRow, oldPcRow);
+        fireTableRowsUpdated(pcRow, pcRow);
     }
 }
