@@ -1,6 +1,6 @@
 package cesar.gui.tables;
 
-import cesar.gui.Base;
+import cesar.utils.Base;
 import cesar.hardware.Cpu;
 
 public class DataTableModel extends TableModel {

@@ -1,8 +1,21 @@
-package cesar.gui;
+package cesar.gui.windows;
 
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.Point;
+import cesar.gui.displays.RegisterDisplay;
+import cesar.gui.displays.TextDisplay;
+import cesar.gui.panels.*;
+import cesar.gui.tables.DataTable;
+import cesar.gui.tables.DataTableModel;
+import cesar.gui.tables.ProgramTable;
+import cesar.gui.tables.ProgramTableModel;
+import cesar.hardware.Cpu;
+import cesar.utils.Base;
+
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -11,45 +24,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
-import javax.swing.WindowConstants;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import cesar.gui.displays.RegisterDisplay;
-import cesar.gui.displays.TextDisplay;
-import cesar.gui.panels.ButtonPanel;
-import cesar.gui.panels.ConditionPanel;
-import cesar.gui.panels.ExecutionPanel;
-import cesar.gui.panels.InstructionPanel;
-import cesar.gui.panels.RegisterPanel;
-import cesar.gui.panels.StatusBar;
-import cesar.gui.tables.DataTable;
-import cesar.gui.tables.DataTableModel;
-import cesar.gui.tables.ProgramTable;
-import cesar.gui.tables.ProgramTableModel;
-import cesar.hardware.Cpu;
-
 public class MainWindow extends JFrame {
     public static final long serialVersionUID = -4182598865843186332L;
 
     private final Cpu cpu;
 
-    private final ProgramPanel programPanel;
+    private final ProgramWindow programWindow;
     private final ProgramTable programTable;
     private final ProgramTableModel programTableModel;
 
-    private final DataPanel dataPanel;
+    private final DataWindow dataWindow;
     private final DataTable dataTable;
     private final DataTableModel dataTableModel;
 
@@ -84,12 +68,12 @@ public class MainWindow extends JFrame {
 
         running = false;
 
-        programPanel = new ProgramPanel(this, cpu);
-        programTable = programPanel.getTable();
+        programWindow = new ProgramWindow(this, cpu);
+        programTable = programWindow.getTable();
         programTableModel = (ProgramTableModel) programTable.getModel();
 
-        dataPanel = new DataPanel(this, cpu);
-        dataTable = dataPanel.getTable();
+        dataWindow = new DataWindow(this, cpu);
+        dataTable = dataWindow.getTable();
         dataTableModel = (DataTableModel) dataTable.getModel();
 
         textDisplay = new TextDisplay(cpu);
@@ -144,13 +128,13 @@ public class MainWindow extends JFrame {
 
         textPanel = createTextPanel(textDisplay);
 
-        programPanel.setSize(programPanel.getPreferredSize());
-        dataPanel.setSize(dataPanel.getPreferredSize());
+        programWindow.setSize(programWindow.getPreferredSize());
+        dataWindow.setSize(dataWindow.getPreferredSize());
 
         initEvents();
         updatePositions();
-        programPanel.setVisible(true);
-        dataPanel.setVisible(true);
+        programWindow.setVisible(true);
+        dataWindow.setVisible(true);
         textPanel.setVisible(true);
         textDisplay.repaint();
         dataTable.scrollToRow(1024, true);
@@ -211,14 +195,14 @@ public class MainWindow extends JFrame {
         menuBar.viewProgram.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                programPanel.setVisible(true);
+                programWindow.setVisible(true);
             }
         });
 
         menuBar.viewData.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                dataPanel.setVisible(true);
+                dataWindow.setVisible(true);
             }
         });
 
@@ -241,8 +225,7 @@ public class MainWindow extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if (runButton.isSelected() && !isRunning()) {
                     startRunning();
-                }
-                else {
+                } else {
                     stopRunning();
                 }
             }
@@ -251,8 +234,8 @@ public class MainWindow extends JFrame {
         decimalButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                programPanel.setBase(Base.DECIMAL);
-                dataPanel.setBase(Base.DECIMAL);
+                programWindow.setBase(Base.DECIMAL);
+                dataWindow.setBase(Base.DECIMAL);
                 for (RegisterDisplay register : registerDisplays) {
                     register.setBase(Base.DECIMAL);
                 }
@@ -262,8 +245,8 @@ public class MainWindow extends JFrame {
         hexadecimalButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                programPanel.setBase(Base.HEXADECIMAL);
-                dataPanel.setBase(Base.HEXADECIMAL);
+                programWindow.setBase(Base.HEXADECIMAL);
+                dataWindow.setBase(Base.HEXADECIMAL);
                 for (RegisterDisplay register : registerDisplays) {
                     register.setBase(Base.HEXADECIMAL);
                 }
@@ -276,13 +259,13 @@ public class MainWindow extends JFrame {
         final int width = getWidth();
         final int height = getHeight();
         final Point location = getLocation();
-        final Dimension programWindowSize = programPanel.getSize();
-        final Dimension programSize = programPanel.getPreferredSize();
-        final Dimension dataSize = dataPanel.getPreferredSize();
-        programPanel.setLocation(location.x - programWindowSize.width - gap, location.y);
-        dataPanel.setLocation(location.x + width + gap, location.y);
-        programPanel.setSize(programSize.width, height);
-        dataPanel.setSize(dataSize.width, height);
+        final Dimension programWindowSize = programWindow.getSize();
+        final Dimension programSize = programWindow.getPreferredSize();
+        final Dimension dataSize = dataWindow.getPreferredSize();
+        programWindow.setLocation(location.x - programWindowSize.width - gap, location.y);
+        dataWindow.setLocation(location.x + width + gap, location.y);
+        programWindow.setSize(programSize.width, height);
+        dataWindow.setSize(dataSize.width, height);
         textPanel.setLocation(location.x - programWindowSize.width - gap, location.y + height + gap);
         this.requestFocus();
     }
@@ -309,17 +292,19 @@ public class MainWindow extends JFrame {
 
     private void onOpenFile(File file) {
         try {
-            FileInputStream inputStream = new FileInputStream(file);
-            int size = (int) file.length();
-            byte[] buffer = new byte[size];
-            inputStream.read(buffer, 0, size);
-            inputStream.close();
+            final FileInputStream inputStream = new FileInputStream(file);
+            final int size = (int) file.length();
+            final byte[] buffer = new byte[size];
+            final int bytesRead = inputStream.read(buffer, 0, size);
+            if (bytesRead != size) {
+                inputStream.close();
+                throw new IOException("Não foi possível ler todos os bytes do arquivo");
+            }
             cpu.setMemory(buffer);
-            programPanel.repaint();
-            dataPanel.repaint();
+            programWindow.repaint();
+            dataWindow.repaint();
             textPanel.repaint();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Um erro ocorreu ao abrir o arquivo",
                     JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
@@ -376,7 +361,7 @@ public class MainWindow extends JFrame {
         repaint();
         textPanel.repaint();
         programTable.scrollToRow(programTableModel.getPcRow(), true);
-        programPanel.repaint();
-        dataPanel.repaint();
+        programWindow.repaint();
+        dataWindow.repaint();
     }
 }

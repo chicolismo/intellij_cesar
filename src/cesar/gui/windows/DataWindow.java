@@ -1,15 +1,16 @@
-package cesar.gui;
+package cesar.gui.windows;
 
 import cesar.gui.tables.DataTable;
 import cesar.gui.tables.DataTableModel;
 import cesar.hardware.Cpu;
+import cesar.utils.Base;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class DataPanel extends SidePanel {
+public class DataWindow extends SideWindow {
     public static final long serialVersionUID = -7816298913045696756L;
     private static final String LABEL_FORMAT = "[%s]";
 
@@ -20,7 +21,7 @@ public class DataPanel extends SidePanel {
     private int currentAddress;
     private byte currentValue;
 
-    public DataPanel(MainWindow parent, Cpu cpu) {
+    public DataWindow(MainWindow parent, Cpu cpu) {
         super(parent, "Dados");
 
         model = new DataTableModel(cpu, new String[]{"Endereço", "Dado"});

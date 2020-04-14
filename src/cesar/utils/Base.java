@@ -1,4 +1,4 @@
-package cesar.gui;
+package cesar.utils;
 
 public enum Base {
     DECIMAL, HEXADECIMAL;

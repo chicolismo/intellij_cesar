@@ -1,4 +1,4 @@
-package cesar.gui;
+package cesar.gui.windows;
 
 import javax.swing.*;
 import java.awt.*;

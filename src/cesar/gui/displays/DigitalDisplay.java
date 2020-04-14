@@ -1,7 +1,7 @@
 package cesar.gui.displays;
 
 
-import cesar.gui.Base;
+import cesar.utils.Base;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

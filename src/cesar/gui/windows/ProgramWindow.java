@@ -1,15 +1,16 @@
-package cesar.gui;
+package cesar.gui.windows;
 
 import cesar.gui.tables.ProgramTable;
 import cesar.gui.tables.ProgramTableModel;
 import cesar.hardware.Cpu;
+import cesar.utils.Base;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class ProgramPanel extends SidePanel {
+public class ProgramWindow extends SideWindow {
     public static final long serialVersionUID = 8452878222228144644L;
 
     private static final String LABEL_FORMAT = "[%s]";
@@ -22,7 +23,7 @@ public class ProgramPanel extends SidePanel {
     private int currentAddress;
     private byte currentValue;
 
-    public ProgramPanel(MainWindow parent, Cpu cpu) {
+    public ProgramWindow(MainWindow parent, Cpu cpu) {
         super(parent, "Programa");
 
         model = new ProgramTableModel(cpu, new String[]{"PC", "Endereço", "Dado", "Mnemônico"});

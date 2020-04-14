@@ -1,8 +1,7 @@
 package cesar.gui.tables;
 
-import cesar.gui.Base;
+import cesar.utils.Base;
 import cesar.hardware.Cpu;
-import cesar.utils.Shorts;
 
 public class ProgramTableModel extends TableModel {
     public static final long serialVersionUID = -5373447997057887767L;

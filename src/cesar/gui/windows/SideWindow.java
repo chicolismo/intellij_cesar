@@ -1,15 +1,15 @@
-package cesar.gui;
+package cesar.gui.windows;
 
 import cesar.gui.tables.Table;
 
 import javax.swing.*;
 
-public abstract class SidePanel extends JDialog {
+public abstract class SideWindow extends JDialog {
     public static final long serialVersionUID = 3602114587032491724L;
 
     protected MainWindow parent;
 
-    public SidePanel(MainWindow parent, String title) {
+    public SideWindow(MainWindow parent, String title) {
         super(parent, title);
         setFocusable(false);
         setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);

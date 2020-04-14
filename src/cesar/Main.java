@@ -1,6 +1,6 @@
 package cesar;
 
-import cesar.gui.MainWindow;
+import cesar.gui.windows.MainWindow;
 
 import javax.swing.*;
 import java.awt.*;

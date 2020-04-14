@@ -1,6 +1,6 @@
 package cesar.gui.displays;
 
-import cesar.gui.Base;
+import cesar.utils.Base;
 import cesar.utils.Defaults;
 import cesar.utils.Shorts;
 
