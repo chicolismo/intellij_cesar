@@ -70,7 +70,6 @@ public class RegisterPanel extends JPanel {
         add(registerDisplays[4]);
         add(registerDisplays[5]);
         add(registerDisplays[6]);
-//        add(Box.createHorizontalGlue());
         add(centerPanel);
         add(registerDisplays[7]);
     }

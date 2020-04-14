@@ -36,6 +36,10 @@ public class Cpu {
         return registers[registerNumber];
     }
 
+    public int getProgramCounter() {
+        return Shorts.toUnsignedInt(registers[PC]);
+    }
+
     public byte[] getMemory() {
         return memory;
     }
@@ -156,7 +160,6 @@ public class Cpu {
             case CONDITIONAL_BRANCH: {
                 final ConditionalInstruction conditionalInstruction = ConditionalInstruction.fromInt(firstByte & 0x0F);
                 final byte nextByte = fetchNextByte();
-                System.out.println(conditionalInstruction.toString());
                 executeConditionalInstruction(conditionalInstruction, nextByte);
                 return ExecutionResult.OK;
             }
@@ -166,12 +169,11 @@ public class Cpu {
                 final int mmm = (nextByte & 0b0011_1000) >> 3;
                 final int rrr = (nextByte & 0b0000_0111);
                 final AddressMode mode = AddressMode.fromInt(mmm);
-                if (mode != AddressMode.REGISTER) {
-                    registers[PC] = (short) getAddress(mode, rrr);
-                    return ExecutionResult.OK;
-                } else {
+                if (mode == AddressMode.REGISTER) {
                     return ExecutionResult.NOOP;
                 }
+                registers[PC] = (short) getAddress(mode, rrr);
+                return ExecutionResult.OK;
             }
 
             case SOB: {
@@ -208,9 +210,9 @@ public class Cpu {
             }
 
             case ONE_OPERAND_INSTRUCTION: {
-                final OneOperandInstruction oneOperandInstruction = OneOperandInstruction.fromInt(firstByte & 0x0F);
+                final int code = firstByte & 0x0F;
+                final OneOperandInstruction oneOperandInstruction = OneOperandInstruction.fromInt(code);
                 final byte nextByte = fetchNextByte();
-                System.out.println(oneOperandInstruction.toString());
                 executeOneOperandInstruction(oneOperandInstruction, nextByte);
                 return ExecutionResult.OK;
             }
@@ -220,11 +222,12 @@ public class Cpu {
             case SUB:
             case CMP:
             case AND:
-            case OR:
+            case OR: {
                 final byte nextByte = fetchNextByte();
                 final short word = Shorts.fromBytes(firstByte, nextByte);
                 executeTwoOperandInstruction(instruction, word);
                 return ExecutionResult.OK;
+            }
 
             case HLT:
                 return ExecutionResult.HALT;
@@ -456,7 +459,6 @@ public class Cpu {
     }
 
     private void executeTwoOperandInstruction(final Instruction instruction, final short word) {
-
         final int uWord = Shorts.toUnsignedInt(word);
         final int mmm1 = (uWord & 0b0000_1110_0000_0000) >> 9;
         final int rrr1 = (uWord & 0b0000_0001_1100_0000) >> 6;
@@ -529,10 +531,10 @@ public class Cpu {
 
     private Operand getOperand(final int mmm, final int rrr) {
         final AddressMode mode = AddressMode.fromInt(mmm);
-        int address = getAddress(mode, rrr);
         if (mode == AddressMode.REGISTER) {
-            return new Operand(registers[rrr], address, mode);
+            return new Operand(registers[rrr], rrr, mode);
         } else {
+            final int address = getAddress(mode, rrr);
             return new Operand(readWord(address), address, mode);
         }
     }
@@ -591,7 +593,7 @@ public class Cpu {
         return address;
     }
 
-    private enum Instruction {
+    enum Instruction {
         NOP, CCC, SCC, CONDITIONAL_BRANCH, JMP, SOB, JSR, RTS, ONE_OPERAND_INSTRUCTION, MOV, ADD, SUB, CMP, AND, OR,
         HLT;
 
@@ -602,153 +604,38 @@ public class Cpu {
         }
     }
 
-    private enum ConditionalInstruction {
+    enum ConditionalInstruction {
         BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS;
 
-        private static ConditionalInstruction[] array = ConditionalInstruction.values();
+        private static final ConditionalInstruction[] array = ConditionalInstruction.values();
 
         public static ConditionalInstruction fromInt(final int index) {
             return array[index];
         }
     }
 
-    private enum OneOperandInstruction {
+    enum OneOperandInstruction {
         CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC;
 
-        private static OneOperandInstruction[] array = OneOperandInstruction.values();
+        private static final OneOperandInstruction[] array = OneOperandInstruction.values();
 
         public static OneOperandInstruction fromInt(int index) {
             return array[index];
         }
     }
 
-    public enum ExecutionResult {
-        HALT, INVALID_INSTRUCTION, NOOP, OK
-    }
-
-    private enum AddressMode {
+    enum AddressMode {
         REGISTER, REGISTER_POST_INCREMENTED, REGISTER_PRE_DECREMENTED, INDEXED, REGISTER_INDIRECT,
         POST_INCREMENTED_INDIRECT, PRE_DECREMENTED_INDIRECT, INDEX_INDIRECT;
 
-        private static AddressMode[] array = AddressMode.values();
+        private static final AddressMode[] array = AddressMode.values();
 
         public static AddressMode fromInt(final int index) {
             return array[index];
         }
     }
 
-
-    private static class ConditionRegister {
-        enum CarryOperation {
-            PLUS, MINUS
-        }
-
-        ;
-
-        private boolean negative;
-        private boolean zero;
-        private boolean carry;
-        private boolean overflow;
-        private int value;
-
-        public ConditionRegister() {
-            setNegative(false);
-            setZero(true);
-            setCarry(false);
-            overflow = false;
-
-            value = 0b0100;
-        }
-
-        public void ccc(int newValue) {
-            // TODO: Testar
-            value &= ~(newValue);
-            update();
-        }
-
-        public void scc(int newValue) {
-            // TODO: Testar
-            value |= newValue;
-            update();
-        }
-
-        private void update() {
-            setNegative((value & 8) == 8);
-            setZero((value & 4) == 4);
-            setCarry((value & 2) == 2);
-            overflow = (value & 1) == 1;
-        }
-
-        public boolean isNegative() {
-            return negative;
-        }
-
-        public void setNegative(boolean negative) {
-            this.negative = negative;
-            value |= 0b1000;
-        }
-
-        public boolean isZero() {
-            return zero;
-        }
-
-        public void setZero(boolean zero) {
-            this.zero = zero;
-            value |= 0b0100;
-        }
-
-        public boolean isCarry() {
-            return carry;
-        }
-
-        public void setCarry(boolean carry) {
-            this.carry = carry;
-            value |= 0b0010;
-        }
-
-        public boolean isOverflow() {
-            return overflow;
-        }
-
-        public void setOverflow(boolean overflow) {
-            this.overflow = overflow;
-            value |= 0b0001;
-        }
-
-        public void testNegative(final short value) {
-            setNegative(value < 0);
-        }
-
-        public void testZero(final short value) {
-            setZero(value == 0);
-        }
-
-        public void testOverflow(final short op1, final short op2, final short result) {
-            setOverflow(((op1 > 0) && (op2 > 0) && (result < 0)) || ((op1 < 0) && (op2 < 0) && (result > 0)));
-        }
-
-        public void testCarry(final short a, final short b, CarryOperation operation) {
-            final int ua = Shorts.toUnsignedInt(a);
-            final int ub = Shorts.toUnsignedInt(b);
-            int result;
-            if (operation == CarryOperation.PLUS) {
-                result = ua + ub;
-            } else {
-                result = ua - ub;
-            }
-            setCarry((result & 0x1_0000) == 0x1_0000);
-        }
-    }
-
-    class Operand {
-        public short value;
-        public int address;
-        public AddressMode addressMode;
-
-        public Operand(final short value, final int address, final AddressMode addressMode) {
-            this.value = value;
-            this.address = address;
-            this.addressMode = addressMode;
-        }
+    public enum ExecutionResult {
+        HALT, INVALID_INSTRUCTION, NOOP, OK
     }
 }

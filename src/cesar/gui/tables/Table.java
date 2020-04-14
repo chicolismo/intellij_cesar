@@ -16,4 +16,22 @@ public abstract class Table extends JTable {
         final JTableHeader header = getTableHeader();
         header.setReorderingAllowed(false);
     }
+
+    public void scrollToRow(int row, boolean topRow) {
+        final int rowHeight = getRowHeight();
+        final Rectangle rect;
+        if (topRow) {
+            final int parentHeight = getParent().getHeight();
+            rect = new Rectangle(0, (row - 1) * rowHeight + parentHeight, getWidth(), rowHeight);
+        }
+        else {
+            rect = getCellRect(row, 0, true);
+        }
+
+        scrollRectToVisible(rect);
+    }
+
+    public void scrollToRow(int row) {
+        scrollToRow(row, false);
+    }
 }

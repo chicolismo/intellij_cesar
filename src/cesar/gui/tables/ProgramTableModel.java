@@ -34,9 +34,9 @@ public class ProgramTableModel extends TableModel {
         return pcRow;
     }
 
-    public void setPcRow(short register) {
+    public void setPcRow(int programCounter) {
         final int oldPcRow = pcRow;
-        pcRow = Shorts.toUnsignedInt(register);
+        pcRow = programCounter;
         fireTableRowsUpdated(oldPcRow, oldPcRow);
         fireTableRowsUpdated(pcRow, pcRow);
     }

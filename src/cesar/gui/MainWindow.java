@@ -43,24 +43,32 @@ import cesar.hardware.Cpu;
 public class MainWindow extends JFrame {
     public static final long serialVersionUID = -4182598865843186332L;
 
-    private final MenuBar menuBar;
     private final Cpu cpu;
+
     private final ProgramPanel programPanel;
-    private final DataPanel dataPanel;
     private final ProgramTable programTable;
     private final ProgramTableModel programTableModel;
+
+    private final DataPanel dataPanel;
     private final DataTable dataTable;
     private final DataTableModel dataTableModel;
+
     private final JDialog textPanel;
     private final TextDisplay textDisplay;
+
     private final RegisterDisplay[] registerDisplays;
     private final ExecutionPanel executionPanel;
     private final ConditionPanel conditionPanel;
+
     private final JButton nextButton;
     private final JToggleButton runButton;
     private final JToggleButton decimalButton;
     private final JToggleButton hexadecimalButton;
+
+    private final MenuBar menuBar;
+
     private final StatusBar statusBar;
+
     private boolean running;
 
     public MainWindow() {
@@ -71,16 +79,16 @@ public class MainWindow extends JFrame {
         setAutoRequestFocus(true);
         BoxLayout mainLayout = new BoxLayout(getContentPane(), BoxLayout.Y_AXIS);
         getContentPane().setLayout(mainLayout);
-        running = false;
-
 
         cpu = new Cpu();
-        programPanel = new ProgramPanel(this, cpu);
-        dataPanel = new DataPanel(this, cpu);
 
+        running = false;
+
+        programPanel = new ProgramPanel(this, cpu);
         programTable = programPanel.getTable();
         programTableModel = (ProgramTableModel) programTable.getModel();
 
+        dataPanel = new DataPanel(this, cpu);
         dataTable = dataPanel.getTable();
         dataTableModel = (DataTableModel) dataTable.getModel();
 
@@ -89,14 +97,11 @@ public class MainWindow extends JFrame {
         menuBar = new MenuBar();
         setJMenuBar(menuBar);
 
-        registerDisplays = new RegisterDisplay[8];
 
         final RegisterPanel registerPanel = new RegisterPanel();
-        for (int i = 0; i < 8; ++i) {
-            registerDisplays[i] = registerPanel.getDisplay(i);
-        }
         registerPanel.setAlignmentX(CENTER_ALIGNMENT);
 
+        registerDisplays = registerPanel.getDisplays();
 
         executionPanel = new ExecutionPanel();
         conditionPanel = new ConditionPanel();
@@ -148,6 +153,7 @@ public class MainWindow extends JFrame {
         dataPanel.setVisible(true);
         textPanel.setVisible(true);
         textDisplay.repaint();
+        dataTable.scrollToRow(1024, true);
     }
 
     synchronized private boolean isRunning() {
@@ -166,6 +172,7 @@ public class MainWindow extends JFrame {
                 while (isRunning()) {
                     MainWindow.this.executeNextInstruction();
                 }
+                updateInterface();
             }
         });
         runningThread.start();
@@ -321,6 +328,7 @@ public class MainWindow extends JFrame {
 
     public void executeNextInstruction() {
         Cpu.ExecutionResult result = cpu.executeNextInstruction();
+        statusBar.setText(result.toString());
 
         switch (result) {
             case HALT:
@@ -329,6 +337,7 @@ public class MainWindow extends JFrame {
             case NOOP:
             case OK:
                 updateDisplays();
+                executionPanel.incrementInstructions();
 
                 if (cpu.hasMemoryChanged()) {
                     final int address = cpu.getLastChangedAddress();
@@ -337,21 +346,23 @@ public class MainWindow extends JFrame {
                     textDisplay.repaint();
                 }
 
-                programTableModel.setPcRow(cpu.getRegister(7));
-                int pcRow = programTableModel.getPcRow();
-                // TODO: Fazer o scroll da linha do PC
-                programTable.setRowSelectionInterval(pcRow, pcRow);
-                statusBar.setText(result.toString());
+                final int programCounter = cpu.getProgramCounter();
+                programTableModel.setPcRow(programCounter);
+                programTable.setRowSelectionInterval(programCounter, programCounter);
+                if (!isRunning()) {
+                    programTable.scrollToRow(programCounter);
+                }
+
                 break;
 
             case INVALID_INSTRUCTION:
-                statusBar.setText("Invalid Instruction");
+                stopRunning();
                 break;
         }
     }
 
     private void updateDisplays() {
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < registerDisplays.length; ++i) {
             registerDisplays[i].setValue(cpu.getRegister(i));
         }
         conditionPanel.setNegative(cpu.isNegative());
@@ -359,6 +370,13 @@ public class MainWindow extends JFrame {
         conditionPanel.setOverflow(cpu.isOverflow());
         conditionPanel.setCarry(cpu.isCarry());
         executionPanel.setMemoryAccessCount(cpu.getMemoryAccessCount());
-        executionPanel.incrementInstructions();
+    }
+
+    private void updateInterface() {
+        repaint();
+        textPanel.repaint();
+        programTable.scrollToRow(programTableModel.getPcRow(), true);
+        programPanel.repaint();
+        dataPanel.repaint();
     }
 }
