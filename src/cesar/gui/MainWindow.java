@@ -84,7 +84,7 @@ public class MainWindow extends JFrame {
         dataTable = dataPanel.getTable();
         dataTableModel = (DataTableModel) dataTable.getModel();
 
-        textDisplay = new TextDisplay(cpu.getMemory());
+        textDisplay = new TextDisplay(cpu);
 
         menuBar = new MenuBar();
         setJMenuBar(menuBar);
@@ -232,11 +232,11 @@ public class MainWindow extends JFrame {
         runButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (isRunning()) {
-                    stopRunning();
+                if (runButton.isSelected() && !isRunning()) {
+                    startRunning();
                 }
                 else {
-                    startRunning();
+                    stopRunning();
                 }
             }
         });
@@ -321,30 +321,26 @@ public class MainWindow extends JFrame {
 
     public void executeNextInstruction() {
         Cpu.ExecutionResult result = cpu.executeNextInstruction();
+
         switch (result) {
             case HALT:
                 stopRunning();
+                runButton.setSelected(false);
             case NOOP:
             case OK:
-                for (int i = 0; i < 8; ++i) {
-                    registerDisplays[i].setValue(cpu.getRegister(i));
-                }
+                updateDisplays();
+
                 if (cpu.hasMemoryChanged()) {
                     final int address = cpu.getLastChangedAddress();
                     programTableModel.fireTableRowsUpdated(address, address + 1);
                     dataTableModel.fireTableRowsUpdated(address, address + 1);
                     textDisplay.repaint();
                 }
+
                 programTableModel.setPcRow(cpu.getRegister(7));
                 int pcRow = programTableModel.getPcRow();
                 // TODO: Fazer o scroll da linha do PC
                 programTable.setRowSelectionInterval(pcRow, pcRow);
-                conditionPanel.setNegative(cpu.isNegative());
-                conditionPanel.setZero(cpu.isZero());
-                conditionPanel.setOverflow(cpu.isOverflow());
-                conditionPanel.setCarry(cpu.isCarry());
-                executionPanel.setMemoryAccessCount(cpu.getMemoryAccessCount());
-                executionPanel.incrementInstructions();
                 statusBar.setText(result.toString());
                 break;
 
@@ -352,5 +348,17 @@ public class MainWindow extends JFrame {
                 statusBar.setText("Invalid Instruction");
                 break;
         }
+    }
+
+    private void updateDisplays() {
+        for (int i = 0; i < 8; ++i) {
+            registerDisplays[i].setValue(cpu.getRegister(i));
+        }
+        conditionPanel.setNegative(cpu.isNegative());
+        conditionPanel.setZero(cpu.isZero());
+        conditionPanel.setOverflow(cpu.isOverflow());
+        conditionPanel.setCarry(cpu.isCarry());
+        executionPanel.setMemoryAccessCount(cpu.getMemoryAccessCount());
+        executionPanel.incrementInstructions();
     }
 }

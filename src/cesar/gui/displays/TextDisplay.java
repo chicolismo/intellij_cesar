@@ -24,6 +24,8 @@ public class TextDisplay extends JPanel {
 
     private static final BufferedImage[] charImages;
 
+    private final Cpu cpu;
+
     static {
         charImages = new BufferedImage[NUMBER_OF_CHARACTERS];
         String format = "/cesar/gui/assets/character_%02d.png";
@@ -38,10 +40,8 @@ public class TextDisplay extends JPanel {
         }
     }
 
-    private byte[] memory;
-
-    public TextDisplay(byte[] cpuMemory) {
-        this.memory = cpuMemory;
+    public TextDisplay(Cpu cpu) {
+        this.cpu = cpu;
         Dimension size = new Dimension(WIDTH, HEIGHT);
         setSize(size);
         setMinimumSize(size);
@@ -57,7 +57,8 @@ public class TextDisplay extends JPanel {
         g.fillRect(0, 0, WIDTH, HEIGHT);
         int x = START_X;
         for (int i = 0; i < SIZE; ++i) {
-            int index = memory[START_ADDRESS + i] - 32;
+            //int index = (memory[START_ADDRESS + i] - 32);
+            int index = cpu.getByte(START_ADDRESS + i) - 32;
             if (index >= 0 && index < NUMBER_OF_CHARACTERS) {
                 g.drawImage(charImages[index], x, START_Y, CHAR_WIDTH, CHAR_HEIGHT, null);
             } else {
