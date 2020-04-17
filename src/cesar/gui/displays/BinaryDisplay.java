@@ -1,10 +1,12 @@
 package cesar.gui.displays;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
 
 public class BinaryDisplay extends JPanel {
     private static final long serialVersionUID = -5490249529061282417L;
@@ -25,7 +27,8 @@ public class BinaryDisplay extends JPanel {
                     .read(BinaryDisplay.class.getResourceAsStream("/cesar/gui/assets/mini_led_0.png"));
             displayImages[1] = ImageIO
                     .read(BinaryDisplay.class.getResourceAsStream("/cesar/gui/assets/mini_led_1.png"));
-        } catch (IOException e) {
+        }
+        catch (final IOException e) {
             System.err.println("Erro ao carregar os mini leds");
             e.printStackTrace();
             System.exit(1);
@@ -36,7 +39,7 @@ public class BinaryDisplay extends JPanel {
 
     public BinaryDisplay() {
         super(true);
-        Dimension dim = new Dimension(WIDTH, HEIGHT);
+        final Dimension dim = new Dimension(WIDTH, HEIGHT);
         setSize(dim);
         setPreferredSize(dim);
         setMaximumSize(dim);
@@ -44,7 +47,7 @@ public class BinaryDisplay extends JPanel {
         unsignedValue = 0;
     }
 
-    public void setValue(int newValue) {
+    public void setValue(final int newValue) {
         if (unsignedValue != newValue) {
             unsignedValue = newValue;
             repaint();
@@ -52,7 +55,7 @@ public class BinaryDisplay extends JPanel {
     }
 
     @Override
-    public void paintComponent(Graphics g) {
+    public void paintComponent(final Graphics g) {
         super.paintComponent(g);
         int n = unsignedValue;
         int x = START_X;
@@ -60,7 +63,7 @@ public class BinaryDisplay extends JPanel {
 
         while (n != 0) {
             ++currentDigit;
-            int index = n & 1;
+            final int index = n & 1;
             g.drawImage(displayImages[index], x, START_Y, IMAGE_WIDTH, IMAGE_HEIGHT, null);
             x -= IMAGE_OFFSET;
             n >>= 1;

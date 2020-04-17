@@ -1,14 +1,18 @@
 package cesar.gui.displays;
 
 
-import cesar.utils.Base;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import javax.swing.border.BevelBorder;
+
+import cesar.utils.Base;
 
 public class DigitalDisplay extends JPanel {
     private static final long serialVersionUID = 7750416402778310401L;
@@ -25,15 +29,16 @@ public class DigitalDisplay extends JPanel {
     private static final BufferedImage displayNull;
 
     static {
-        BufferedImage[] digits = new BufferedImage[16];
+        final BufferedImage[] digits = new BufferedImage[16];
         BufferedImage emptyDigit = null;
         try {
-            String pathFormat = "/cesar/gui/assets/cesar_%1x.png";
+            final String pathFormat = "/cesar/gui/assets/cesar_%1x.png";
             for (int i = 0; i < 16; ++i) {
                 digits[i] = ImageIO.read(DigitalDisplay.class.getResourceAsStream(String.format(pathFormat, i)));
             }
             emptyDigit = ImageIO.read(DigitalDisplay.class.getResourceAsStream("/cesar/gui/assets/cesar_null.png"));
-        } catch (IllegalArgumentException | IOException e) {
+        }
+        catch (IllegalArgumentException | IOException e) {
             System.err.println("Erro a ler os dígitos");
             e.printStackTrace();
             System.exit(1);
@@ -50,7 +55,7 @@ public class DigitalDisplay extends JPanel {
         super(true);
         currentBase = Base.DECIMAL;
         numberOfDigits = 5;
-        Dimension dim = new Dimension(WIDTH, HEIGHT);
+        final Dimension dim = new Dimension(WIDTH, HEIGHT);
         setSize(dim);
         setPreferredSize(dim);
         setMinimumSize(dim);
@@ -58,20 +63,20 @@ public class DigitalDisplay extends JPanel {
         setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
     }
 
-    public void setValue(int unsignedValue) {
+    public void setValue(final int unsignedValue) {
         if (this.unsignedValue != unsignedValue) {
             this.unsignedValue = unsignedValue;
             repaint();
         }
     }
 
-    public void setBase(Base newBase) {
+    public void setBase(final Base newBase) {
         currentBase = newBase;
         numberOfDigits = currentBase == Base.DECIMAL ? 5 : 4;
     }
 
     @Override
-    public void paintComponent(Graphics g) {
+    public void paintComponent(final Graphics g) {
         super.paintComponent(g);
 
         g.setColor(Color.BLACK);
@@ -80,9 +85,9 @@ public class DigitalDisplay extends JPanel {
         int x = START_X;
         int currentDigit = 0;
         int n = unsignedValue;
-        int base = Base.toInt(currentBase);
+        final int base = Base.toInt(currentBase);
         do {
-            int digit = n % base;
+            final int digit = n % base;
             g.drawImage(displayImages[digit], x, START_Y, DIGIT_WIDTH, DIGIT_HEIGHT, null);
             x -= DIGIT_OFFSET;
             ++currentDigit;

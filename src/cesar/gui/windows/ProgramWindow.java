@@ -1,135 +1,97 @@
 package cesar.gui.windows;
 
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+
+import javax.swing.Box;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
 import cesar.gui.tables.ProgramTable;
 import cesar.gui.tables.ProgramTableModel;
 import cesar.hardware.Cpu;
-import cesar.utils.Base;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-public class ProgramWindow extends SideWindow {
+public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
     public static final long serialVersionUID = 8452878222228144644L;
 
-    private static final String LABEL_FORMAT = "[%s]";
-
-    private final ProgramTable table;
-    private final ProgramTableModel model;
     private final JTextField bpField;
-    private final JLabel addressLabel;
-    private final JTextField valueField;
-    private int currentAddress;
-    private byte currentValue;
 
-    public ProgramWindow(MainWindow parent, Cpu cpu) {
-        super(parent, "Programa");
-
-        model = new ProgramTableModel(cpu, new String[]{"PC", "Endereço", "Dado", "Mnemônico"});
-        table = new ProgramTable(model);
-
-        currentAddress = 0;
-        currentValue = 0;
-
-        JScrollPane scrollPane = new JScrollPane(table);
-
-        final Dimension tableSize = table.getPreferredSize();
-        final int scrollBarWidth = 15;
-        final Dimension scrollPaneSize = new Dimension(tableSize.width + scrollBarWidth, tableSize.height);
-        scrollPane.setPreferredSize(scrollPaneSize);
-        scrollPane.getVerticalScrollBar().setSize(new Dimension(scrollBarWidth, 0));
-
-        add(scrollPane);
+    public ProgramWindow(final MainWindow parent, final Cpu cpu) {
+        super(parent, "Programa", cpu);
 
         final JLabel bpLabel = new JLabel("BP:");
         bpLabel.setForeground(Color.RED);
         bpField = new JTextField(4);
         bpField.setMinimumSize(bpField.getPreferredSize());
-        addressLabel = new JLabel("[0]");
-        valueField = new JTextField(6);
-        valueField.setMinimumSize(valueField.getPreferredSize());
+
+        addScrollPane();
 
         final JPanel lowerPanel = new JPanel();
         final GridBagLayout layout = new GridBagLayout();
-        layout.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0};
-        layout.rowWeights = new double[]{1.0};
+        layout.columnWeights = new double[] { 0.0, 0.0, 1.0, 0.0, 0.0 };
+        layout.rowWeights = new double[] { 1.0 };
         lowerPanel.setLayout(layout);
 
-        final GridBagConstraints c = new GridBagConstraints();
-        c.ipadx = 4;
-        c.gridx = 0;
-        c.gridy = 0;
-        c.anchor = GridBagConstraints.WEST;
-        lowerPanel.add(bpLabel, c);
+        final GridBagConstraints c_0 = new GridBagConstraints();
+        c_0.ipadx = 4;
+        c_0.gridx = 0;
+        c_0.gridy = 0;
+        c_0.anchor = GridBagConstraints.WEST;
+        lowerPanel.add(bpLabel, c_0);
 
-        c.gridx = 1;
-        lowerPanel.add(bpField, c);
+        final GridBagConstraints c_1 = new GridBagConstraints();
+        c_1.ipadx = 4;
+        c_1.gridx = 1;
+        c_1.gridy = 0;
+        c_1.anchor = GridBagConstraints.WEST;
+        lowerPanel.add(bpField, c_1);
 
-        c.gridx = 2;
-        lowerPanel.add(Box.createHorizontalGlue(), c);
+        final GridBagConstraints c_2 = new GridBagConstraints();
+        c_2.ipadx = 4;
+        c_2.gridx = 1;
+        c_2.gridy = 0;
+        c_2.anchor = GridBagConstraints.WEST;
+        lowerPanel.add(Box.createHorizontalGlue(), c_2);
 
-        c.gridx = 3;
-        c.anchor = GridBagConstraints.EAST;
-        lowerPanel.add(addressLabel, c);
+        final GridBagConstraints c_3 = new GridBagConstraints();
+        c_3.ipadx = 4;
+        c_3.gridx = 3;
+        c_3.gridy = 0;
+        c_3.anchor = GridBagConstraints.EAST;
+        lowerPanel.add(addressLabel, c_3);
 
-        c.gridx = 4;
-        lowerPanel.add(valueField, c);
+        final GridBagConstraints c_4 = new GridBagConstraints();
+        c_4.ipadx = 4;
+        c_4.gridx = 4;
+        c_4.gridy = 0;
+        c_4.anchor = GridBagConstraints.EAST;
+        lowerPanel.add(valueField, c_4);
 
         add(Box.createVerticalStrut(4));
         add(lowerPanel);
 
         pack();
-
         initEvents();
-    }
-
-    @Override
-    public ProgramTable getTable() {
-        return table;
-    }
-
-    public JLabel getAddressLabel() {
-        return addressLabel;
-    }
-
-    public JTextField getValueField() {
-        return valueField;
     }
 
     public JTextField getBreakPointField() {
         return bpField;
     }
 
-    private void initEvents() {
-        // TODO: Tratar o caso de quando o valor do campo de texto é alterado e o
-        // usuário aperta [ENTER].
-        // O valor da memória no endereço correspondente deve ser alterado, e a próxima
-        // linha da
-        // tabela deve ser selecionada como se houvesse sido clicada pelo mouse.
-        table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (table.getSelectedRow() >= 0) {
-                    final int row = table.getSelectedRow();
-                    String address = (String) model.getValueAt(row, 1);
-                    String value = (String) model.getValueAt(row, 2);
-                    addressLabel.setText(String.format(LABEL_FORMAT, address));
-                    valueField.setText(value);
-                    valueField.requestFocus();
+//    @Override
+//    protected void initEvents() {
+//        // TODO: Tratar o caso de quando o valor do campo de texto é alterado e o
+//        // usuário aperta [ENTER].
+//        // O valor da memória no endereço correspondente deve ser alterado, e a próxima
+//        // linha da
+//        // tabela deve ser selecionada como se houvesse sido clicada pelo mouse.
+//    }
 
-                    final int radix = Base.toInt(model.getBase());
-                    currentAddress = Integer.parseInt(address, radix);
-                    currentValue = (byte) Integer.parseInt(value, radix);
-                }
-            }
-        });
-    }
-
-    public void setBase(Base base) {
-        final int radix = Base.toInt(base);
-        model.setBase(base);
-        addressLabel.setText(String.format(LABEL_FORMAT, Integer.toString(currentAddress, radix)));
-        valueField.setText(Integer.toString(currentValue, radix));
+    @Override
+    protected void initTable(final Cpu cpu) {
+        model = new ProgramTableModel(cpu);
+        table = new ProgramTable(model);
     }
 }

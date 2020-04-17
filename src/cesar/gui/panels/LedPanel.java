@@ -1,21 +1,24 @@
 package cesar.gui.panels;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
+
 import cesar.gui.displays.LedDisplay;
 import cesar.utils.Defaults;
-
-import javax.swing.*;
-import javax.swing.border.TitledBorder;
 
 public class LedPanel extends JPanel {
     private static final long serialVersionUID = 1339366132381996962L;
 
     private final LedDisplay display;
 
-    public LedPanel(String label) {
+    public LedPanel(final String label) {
         display = new LedDisplay();
         display.setAlignmentX(JComponent.CENTER_ALIGNMENT);
         display.setAlignmentY(JComponent.CENTER_ALIGNMENT);
-        BoxLayout box = new BoxLayout(this, BoxLayout.X_AXIS);
+        final BoxLayout box = new BoxLayout(this, BoxLayout.X_AXIS);
         setLayout(box);
         add(Box.createHorizontalGlue());
         add(display);
@@ -24,7 +27,7 @@ public class LedPanel extends JPanel {
         setBorder(Defaults.createTitledBorder(label, TitledBorder.CENTER));
     }
 
-    void setValue(boolean value) {
+    void setValue(final boolean value) {
         display.setTurnedOn(value);
     }
 

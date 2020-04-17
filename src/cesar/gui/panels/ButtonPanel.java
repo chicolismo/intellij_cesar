@@ -1,10 +1,19 @@
 package cesar.gui.panels;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 
 public class ButtonPanel extends JPanel {
     private static final long serialVersionUID = -1509965084306287422L;
@@ -18,7 +27,8 @@ public class ButtonPanel extends JPanel {
         try {
             icon = ImageIO.read(ButtonPanel.class.getResourceAsStream("/cesar/gui/assets/config.png"));
             next = ImageIO.read(ButtonPanel.class.getResourceAsStream("/cesar/gui/assets/tools.png"));
-        } catch (IOException e) {
+        }
+        catch (final IOException e) {
             System.err.println("Erro a ler os ícones dos botões");
             e.printStackTrace();
             System.exit(1);
@@ -27,10 +37,10 @@ public class ButtonPanel extends JPanel {
         nextIcon = next;
     }
 
-    private final JToggleButton btnDec;
-    private final JToggleButton btnHex;
-    private final JToggleButton btnRun;
-    private final JButton btnNext;
+    public final JToggleButton btnDec;
+    public final JToggleButton btnHex;
+    public final JToggleButton btnRun;
+    public final JButton btnNext;
 
     public ButtonPanel() {
         btnDec = new JToggleButton("Dec");
@@ -39,22 +49,6 @@ public class ButtonPanel extends JPanel {
         btnNext = new JButton(new ImageIcon(nextIcon));
         initLayout();
         setAlignmentY(Component.BOTTOM_ALIGNMENT);
-    }
-
-    public JToggleButton getDecButton() {
-        return btnDec;
-    }
-
-    public JToggleButton getHexButton() {
-        return btnHex;
-    }
-
-    public JToggleButton getRunButton() {
-        return btnRun;
-    }
-
-    public JButton getNextButton() {
-        return btnNext;
     }
 
     private void initLayout() {

@@ -1,10 +1,12 @@
 package cesar.gui.displays;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
 
 public class LedDisplay extends JPanel {
     private static final long serialVersionUID = 7159709799229150768L;
@@ -18,7 +20,8 @@ public class LedDisplay extends JPanel {
         try {
             images[0] = ImageIO.read(LedDisplay.class.getResourceAsStream("/cesar/gui/assets/light_off.png"));
             images[1] = ImageIO.read(LedDisplay.class.getResourceAsStream("/cesar/gui/assets/light_on.png"));
-        } catch (IOException e) {
+        }
+        catch (final IOException e) {
             System.err.println("Erro ao ler as imagens do LED.");
             e.printStackTrace();
         }
@@ -28,7 +31,7 @@ public class LedDisplay extends JPanel {
 
     public LedDisplay() {
         super(true);
-        Dimension dim = new Dimension(WIDTH, HEIGHT);
+        final Dimension dim = new Dimension(WIDTH, HEIGHT);
         setSize(dim);
         setPreferredSize(dim);
         setMinimumSize(dim);
@@ -36,7 +39,7 @@ public class LedDisplay extends JPanel {
         isTurnedOn = false;
     }
 
-    public void setTurnedOn(boolean value) {
+    public void setTurnedOn(final boolean value) {
         if (isTurnedOn != value) {
             isTurnedOn = value;
             repaint();
@@ -44,7 +47,7 @@ public class LedDisplay extends JPanel {
     }
 
     @Override
-    public void paintComponent(Graphics g) {
+    public void paintComponent(final Graphics g) {
         super.paintComponent(g);
         g.drawImage(isTurnedOn ? images[1] : images[0], 0, 0, WIDTH, HEIGHT, null);
     }

@@ -1,11 +1,15 @@
 package cesar.gui.displays;
 
+import java.awt.Dimension;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+
 import cesar.utils.Base;
 import cesar.utils.Defaults;
 import cesar.utils.Shorts;
-
-import javax.swing.*;
-import java.awt.*;
 
 public class RegisterDisplay extends JPanel {
     private static final long serialVersionUID = 7050289063551512021L;
@@ -17,10 +21,10 @@ public class RegisterDisplay extends JPanel {
 
     public RegisterDisplay(final int registerNumber, final String label) {
         super(true);
-        this.currentBase = Base.DECIMAL;
+        currentBase = Base.DECIMAL;
         this.registerNumber = registerNumber;
-        this.digitalDisplay = new DigitalDisplay();
-        this.binaryDisplay = new BinaryDisplay();
+        digitalDisplay = new DigitalDisplay();
+        binaryDisplay = new BinaryDisplay();
 
         digitalDisplay.setAlignmentX(JComponent.CENTER_ALIGNMENT);
         binaryDisplay.setAlignmentX(JComponent.CENTER_ALIGNMENT);
@@ -37,7 +41,7 @@ public class RegisterDisplay extends JPanel {
         setMinimumSize(getPreferredSize());
     }
 
-    public void setBase(Base newBase) {
+    public void setBase(final Base newBase) {
         if (currentBase != newBase) {
             currentBase = newBase;
             digitalDisplay.setBase(newBase);
@@ -45,8 +49,8 @@ public class RegisterDisplay extends JPanel {
         }
     }
 
-    public void setValue(short value) {
-        int unsignedValue = Shorts.toUnsignedInt(value);
+    public void setValue(final short value) {
+        final int unsignedValue = Shorts.toUnsignedInt(value);
         digitalDisplay.setValue(unsignedValue);
         binaryDisplay.setValue(unsignedValue);
     }

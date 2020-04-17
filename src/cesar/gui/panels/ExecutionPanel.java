@@ -64,7 +64,7 @@ public class ExecutionPanel extends JPanel {
         setBorder(new CompoundBorder(outer, inner));
     }
 
-    public void setMemoryAccessCount(int accesses) {
+    public void setMemoryAccessCount(final int accesses) {
         memoryAccessCountDisplay.setValue(accesses);
     }
 

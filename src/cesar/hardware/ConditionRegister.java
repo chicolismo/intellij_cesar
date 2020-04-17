@@ -6,74 +6,74 @@ class ConditionRegister {
     enum CarryOperation {
         PLUS, MINUS
     }
+
     private boolean negative;
     private boolean zero;
     private boolean carry;
     private boolean overflow;
-    private int value;
+    private int bits;
 
     public ConditionRegister() {
         setNegative(false);
         setZero(true);
         setCarry(false);
-        overflow = false;
-
-        value = 0b0100;
+        setOverflow(false);
+        bits = 0b0100;
     }
 
-    public void ccc(int newValue) {
+    public void ccc(final int newValue) {
         // TODO: Testar
-        value &= ~(newValue);
+        bits &= ~newValue;
         update();
     }
 
-    public void scc(int newValue) {
+    public void scc(final int newValue) {
         // TODO: Testar
-        value |= newValue;
+        bits |= newValue;
         update();
     }
 
     private void update() {
-        setNegative((value & 8) == 8);
-        setZero((value & 4) == 4);
-        setCarry((value & 2) == 2);
-        overflow = (value & 1) == 1;
+        setNegative((bits & 8) == 8);
+        setZero((bits & 4) == 4);
+        setCarry((bits & 2) == 2);
+        setOverflow((bits & 1) == 1);
     }
 
     public boolean isNegative() {
         return negative;
     }
 
-    public void setNegative(boolean negative) {
-        this.negative = negative;
-        value |= 0b1000;
+    public void setNegative(final boolean value) {
+        negative = value;
+        bits |= 0b1000;
     }
 
     public boolean isZero() {
         return zero;
     }
 
-    public void setZero(boolean zero) {
-        this.zero = zero;
-        value |= 0b0100;
+    public void setZero(final boolean value) {
+        zero = value;
+        bits |= 0b0100;
     }
 
     public boolean isCarry() {
         return carry;
     }
 
-    public void setCarry(boolean carry) {
-        this.carry = carry;
-        value |= 0b0010;
+    public void setCarry(final boolean value) {
+        carry = value;
+        bits |= 0b0010;
     }
 
     public boolean isOverflow() {
         return overflow;
     }
 
-    public void setOverflow(boolean overflow) {
-        this.overflow = overflow;
-        value |= 0b0001;
+    public void setOverflow(final boolean value) {
+        overflow = value;
+        bits |= 0b0001;
     }
 
     public void testNegative(final short value) {
@@ -85,16 +85,17 @@ class ConditionRegister {
     }
 
     public void testOverflow(final short op1, final short op2, final short result) {
-        setOverflow(((op1 > 0) && (op2 > 0) && (result < 0)) || ((op1 < 0) && (op2 < 0) && (result > 0)));
+        setOverflow(op1 > 0 && op2 > 0 && result < 0 || op1 < 0 && op2 < 0 && result > 0);
     }
 
-    public void testCarry(final short a, final short b, CarryOperation operation) {
+    public void testCarry(final short a, final short b, final CarryOperation operation) {
         final int ua = Shorts.toUnsignedInt(a);
         final int ub = Shorts.toUnsignedInt(b);
         int result;
         if (operation == CarryOperation.PLUS) {
             result = ua + ub;
-        } else {
+        }
+        else {
             result = ua - ub;
         }
         setCarry((result & 0x1_0000) == 0x1_0000);

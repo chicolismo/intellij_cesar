@@ -1,12 +1,17 @@
 package cesar;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 import cesar.gui.windows.MainWindow;
 
-import javax.swing.*;
-import java.awt.*;
-
 public class Main {
-    public static void centerComponent(Component c) {
+    public static void centerComponent(final Component c) {
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         final Dimension componentSize = c.getSize();
         final int x = (int) ((screenSize.getWidth() - componentSize.getWidth()) / 2);
@@ -14,11 +19,17 @@ public class Main {
         c.setLocation(x, y);
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         try {
-//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-        } catch (IllegalAccessException | InstantiationException | ClassNotFoundException
+            if (System.getProperty("os.name").equals("Mac OS X")) {
+                UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+            }
+            else {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            }
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        }
+        catch (IllegalAccessException | InstantiationException | ClassNotFoundException
                 | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }

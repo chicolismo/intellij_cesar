@@ -1,12 +1,15 @@
 package cesar.gui.displays;
 
-import cesar.hardware.Cpu;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
+
+import cesar.hardware.Cpu;
 
 public class TextDisplay extends JPanel {
     private static final long serialVersionUID = 1744904008121167731L;
@@ -28,21 +31,22 @@ public class TextDisplay extends JPanel {
 
     static {
         charImages = new BufferedImage[NUMBER_OF_CHARACTERS];
-        String format = "/cesar/gui/assets/character_%02d.png";
+        final String format = "/cesar/gui/assets/character_%02d.png";
         try {
             for (int i = 0; i < NUMBER_OF_CHARACTERS; ++i) {
                 charImages[i] = ImageIO.read(TextDisplay.class.getResourceAsStream(String.format(format, i)));
             }
-        } catch (IOException e) {
+        }
+        catch (final IOException e) {
             System.err.println("Erro ao tentar ler as imagens dos TextDisplay.");
             e.printStackTrace();
             System.exit(1);
         }
     }
 
-    public TextDisplay(Cpu cpu) {
+    public TextDisplay(final Cpu cpu) {
         this.cpu = cpu;
-        Dimension size = new Dimension(WIDTH, HEIGHT);
+        final Dimension size = new Dimension(WIDTH, HEIGHT);
         setSize(size);
         setMinimumSize(size);
         setMaximumSize(size);
@@ -51,17 +55,18 @@ public class TextDisplay extends JPanel {
     }
 
     @Override
-    public void paintComponent(Graphics g) {
+    public void paintComponent(final Graphics g) {
         super.paintComponent(g);
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, WIDTH, HEIGHT);
         int x = START_X;
         for (int i = 0; i < SIZE; ++i) {
-            //int index = (memory[START_ADDRESS + i] - 32);
-            int index = cpu.getByte(START_ADDRESS + i) - 32;
+            // int index = (memory[START_ADDRESS + i] - 32);
+            final int index = cpu.getByte(START_ADDRESS + i) - 32;
             if (index >= 0 && index < NUMBER_OF_CHARACTERS) {
                 g.drawImage(charImages[index], x, START_Y, CHAR_WIDTH, CHAR_HEIGHT, null);
-            } else {
+            }
+            else {
                 g.drawImage(charImages[0], x, START_Y, CHAR_WIDTH, CHAR_HEIGHT, null);
             }
             x += CHAR_OFFSET;

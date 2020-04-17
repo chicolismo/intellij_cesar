@@ -1,13 +1,17 @@
 package cesar.gui.tables;
 
-import javax.swing.*;
+import java.awt.Font;
+import java.awt.Rectangle;
+
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.JTableHeader;
-import java.awt.*;
+import javax.swing.table.TableModel;
 
 public abstract class Table extends JTable {
     private static final long serialVersionUID = -8733831578127444505L;
 
-    public Table(TableModel model) {
+    public Table(final TableModel model) {
         super(model);
         setFocusable(false);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -17,7 +21,7 @@ public abstract class Table extends JTable {
         header.setReorderingAllowed(false);
     }
 
-    public void scrollToRow(int row, boolean topRow) {
+    public void scrollToRow(final int row, final boolean topRow) {
         final int rowHeight = getRowHeight();
         final Rectangle rect;
         if (topRow) {
@@ -31,7 +35,7 @@ public abstract class Table extends JTable {
         scrollRectToVisible(rect);
     }
 
-    public void scrollToRow(int row) {
+    public void scrollToRow(final int row) {
         scrollToRow(row, false);
     }
 }
