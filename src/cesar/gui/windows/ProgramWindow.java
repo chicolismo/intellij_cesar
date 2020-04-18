@@ -20,13 +20,23 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
 
     public ProgramWindow(final MainWindow parent, final Cpu cpu) {
         super(parent, "Programa", cpu);
+        initTable(cpu);
+        bpField = new JTextField(4);
+        bpField.setMinimumSize(bpField.getPreferredSize());
+        initLayout();
+        initEvents();
+    }
+
+    public JTextField getBreakPointField() {
+        return bpField;
+    }
+
+    @Override
+    protected void initLayout() {
+        super.initLayout();
 
         final JLabel bpLabel = new JLabel("BP:");
         bpLabel.setForeground(Color.RED);
-        bpField = new JTextField(4);
-        bpField.setMinimumSize(bpField.getPreferredSize());
-
-        addScrollPane();
 
         final JPanel lowerPanel = new JPanel();
         final GridBagLayout layout = new GridBagLayout();
@@ -71,23 +81,8 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
 
         add(Box.createVerticalStrut(4));
         add(lowerPanel);
-
         pack();
-        initEvents();
     }
-
-    public JTextField getBreakPointField() {
-        return bpField;
-    }
-
-//    @Override
-//    protected void initEvents() {
-//        // TODO: Tratar o caso de quando o valor do campo de texto é alterado e o
-//        // usuário aperta [ENTER].
-//        // O valor da memória no endereço correspondente deve ser alterado, e a próxima
-//        // linha da
-//        // tabela deve ser selecionada como se houvesse sido clicada pelo mouse.
-//    }
 
     @Override
     protected void initTable(final Cpu cpu) {

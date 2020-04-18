@@ -230,6 +230,17 @@ public class MainWindow extends JFrame {
             });
         }
 
+        programTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(final MouseEvent event) {
+                final int selectedRow;
+                if (event.getClickCount() == 2 && (selectedRow = programTable.getSelectedRow()) != -1) {
+                    cpu.setRegister(7, (short) (0xFFFF & selectedRow));
+                    updateInterface();
+                }
+            }
+        });
+
         final JFileChooser fileChooser = new JFileChooser();
         fileChooser.setMultiSelectionEnabled(false);
         fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos do Cesar (*.mem)", "mem"));
@@ -383,7 +394,7 @@ public class MainWindow extends JFrame {
         updateProgramCounterRow();
         repaint();
         textWindow.repaint();
-        programTable.scrollToRow(programTableModel.getPcRow(), true);
+        programTable.scrollToRow(programTableModel.getPcRow());
         programWindow.repaint();
         dataWindow.repaint();
     }

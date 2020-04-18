@@ -15,8 +15,20 @@ public class DataWindow extends SideWindow<DataTable, DataTableModel> {
 
     public DataWindow(final MainWindow parent, final Cpu cpu) {
         super(parent, "Dados", cpu);
+        initTable(cpu);
+        initLayout();
+        initEvents();
+    }
 
-        addScrollPane();
+    @Override
+    protected void initTable(final Cpu cpu) {
+        model = new DataTableModel(cpu);
+        table = new DataTable(model);
+    }
+
+    @Override
+    protected void initLayout() {
+        super.initLayout();
 
         final JPanel lowerPanel = new JPanel();
         final GridBagLayout layout = new GridBagLayout();
@@ -49,12 +61,5 @@ public class DataWindow extends SideWindow<DataTable, DataTableModel> {
         add(lowerPanel);
 
         pack();
-        initEvents();
-    }
-
-    @Override
-    protected void initTable(final Cpu cpu) {
-        model = new DataTableModel(cpu);
-        table = new DataTable(model);
     }
 }

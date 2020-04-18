@@ -10,8 +10,9 @@ public class Cpu {
     public static final int BEGIN_DISPLAY_ADDRESS = 65500;
     public static final int END_DISPLAY_ADDRESS = 65535;
     public static final int DATA_START_ADDRESS = 1024;
-    private static final int PC = 7;
-    private static final int SP = 6;
+
+    static final int PC = 7;
+    static final int SP = 6;
 
     private final ConditionRegister conditionRegister;
     private final short[] registers;
@@ -99,10 +100,12 @@ public class Cpu {
     }
 
     private byte readByte(final int address) {
+        ++memoryAccessCount;
         return memory[0xFFFF & address];
     }
 
     private void writeByte(final int address, final byte value) {
+        ++memoryAccessCount;
         memory[0xFFFF & address] = value;
     }
 
@@ -113,8 +116,6 @@ public class Cpu {
     }
 
     private short readWord(final int address) {
-        ++memoryAccessCount;
-
         // TODO: Verificar o quê deve acontecer nos endereços dos periféricos
         if (isIOAddress(address)) {
             final byte lsb = readByte(address);
@@ -128,8 +129,6 @@ public class Cpu {
     }
 
     private void writeWord(final int address, final short word) {
-        ++memoryAccessCount;
-
         // TODO: Verificar o quê deve acontecer nos endereços dos periféricos
         final byte[] bytes = Shorts.toBytes(word);
         if (isIOAddress(address)) {
@@ -165,7 +164,7 @@ public class Cpu {
 
         final byte firstByte = fetchNextByte();
         final int firstBits = 0x0F & (firstByte & 0xF0) >> 4;
-        final Instruction instruction = Instruction.fromInt(firstBits);
+        final CpuInstruction instruction = CpuInstruction.fromInt(firstBits);
 
         switch (instruction) {
             case NOP:
@@ -182,7 +181,8 @@ public class Cpu {
             }
 
             case CONDITIONAL_BRANCH: {
-                final ConditionalInstruction conditionalInstruction = ConditionalInstruction.fromInt(firstByte & 0x0F);
+                final CpuConditionalInstruction conditionalInstruction = CpuConditionalInstruction
+                        .fromInt(firstByte & 0x0F);
                 final byte nextByte = fetchNextByte();
                 executeConditionalInstruction(conditionalInstruction, nextByte);
                 return ExecutionResult.OK;
@@ -235,7 +235,7 @@ public class Cpu {
 
             case ONE_OPERAND_INSTRUCTION: {
                 final int code = firstByte & 0x0F;
-                final OneOperandInstruction oneOperandInstruction = OneOperandInstruction.fromInt(code);
+                final CpuOneOperandInstruction oneOperandInstruction = CpuOneOperandInstruction.fromInt(code);
                 final byte nextByte = fetchNextByte();
                 executeOneOperandInstruction(oneOperandInstruction, nextByte);
                 return ExecutionResult.OK;
@@ -260,7 +260,7 @@ public class Cpu {
         return ExecutionResult.INVALID_INSTRUCTION;
     }
 
-    private void executeConditionalInstruction(final ConditionalInstruction instruction, final byte offset) {
+    private void executeConditionalInstruction(final CpuConditionalInstruction instruction, final byte offset) {
         switch (instruction) {
             case BR:
                 registers[PC] += offset;
@@ -352,7 +352,7 @@ public class Cpu {
         }
     }
 
-    private void executeOneOperandInstruction(final OneOperandInstruction instruction, final byte nextByte) {
+    private void executeOneOperandInstruction(final CpuOneOperandInstruction instruction, final byte nextByte) {
         final int mmm = (nextByte & 0b0011_1000) >> 3;
         final int rrr = nextByte & 0b0000_0111;
         final Operand operand = getOperand(mmm, rrr);
@@ -472,7 +472,7 @@ public class Cpu {
             }
         }
 
-        if (instruction != OneOperandInstruction.TST) {
+        if (instruction != CpuOneOperandInstruction.TST) {
             if (operand.addressMode == AddressMode.REGISTER) {
                 registers[rrr] = result;
             }
@@ -484,7 +484,7 @@ public class Cpu {
         }
     }
 
-    private void executeTwoOperandInstruction(final Instruction instruction, final short word) {
+    private void executeTwoOperandInstruction(final CpuInstruction instruction, final short word) {
         final int uWord = Shorts.toUnsignedInt(word);
         final int mmm1 = (uWord & 0b0000_1110_0000_0000) >> 9;
         final int rrr1 = (uWord & 0b0000_0001_1100_0000) >> 6;
@@ -614,7 +614,7 @@ public class Cpu {
                 break;
             }
 
-            case INDEX_INDIRECT: {
+            case INDEXED_INDIRECT: {
                 final short nextWord = readWord(registers[PC]);
                 registers[PC] += 2;
                 final int firstAddress = 0xFFFF & nextWord + registers[registerNumber];
@@ -626,44 +626,33 @@ public class Cpu {
         return address;
     }
 
-    enum Instruction {
+    enum CpuInstruction {
         NOP, CCC, SCC, CONDITIONAL_BRANCH, JMP, SOB, JSR, RTS, ONE_OPERAND_INSTRUCTION, MOV, ADD, SUB, CMP, AND, OR,
         HLT;
 
-        private static Instruction[] array = Instruction.values();
+        private static CpuInstruction[] array = CpuInstruction.values();
 
-        public static Instruction fromInt(final int index) {
+        public static CpuInstruction fromInt(final int index) {
             return array[index];
         }
     }
 
-    enum ConditionalInstruction {
+    enum CpuConditionalInstruction {
         BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS;
 
-        private static final ConditionalInstruction[] array = ConditionalInstruction.values();
+        private static final CpuConditionalInstruction[] array = CpuConditionalInstruction.values();
 
-        public static ConditionalInstruction fromInt(final int index) {
+        public static CpuConditionalInstruction fromInt(final int index) {
             return array[index];
         }
     }
 
-    enum OneOperandInstruction {
+    enum CpuOneOperandInstruction {
         CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC;
 
-        private static final OneOperandInstruction[] array = OneOperandInstruction.values();
+        private static final CpuOneOperandInstruction[] array = CpuOneOperandInstruction.values();
 
-        public static OneOperandInstruction fromInt(final int index) {
-            return array[index];
-        }
-    }
-
-    enum AddressMode {
-        REGISTER, REGISTER_POST_INCREMENTED, REGISTER_PRE_DECREMENTED, INDEXED, REGISTER_INDIRECT,
-        POST_INCREMENTED_INDIRECT, PRE_DECREMENTED_INDIRECT, INDEX_INDIRECT;
-
-        private static final AddressMode[] array = AddressMode.values();
-
-        public static AddressMode fromInt(final int index) {
+        public static CpuOneOperandInstruction fromInt(final int index) {
             return array[index];
         }
     }
@@ -671,5 +660,4 @@ public class Cpu {
     public enum ExecutionResult {
         HALT, INVALID_INSTRUCTION, NOOP, OK, BREAK_POINT
     }
-
 }

@@ -32,27 +32,16 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
     protected TableType table;
     protected TableModelType model;
 
-    protected MainWindow parent;
-
     public SideWindow(final MainWindow parent, final String title, final Cpu cpu) {
         super(parent, title);
+        setIconImage(null);
         setFocusable(false);
         setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-        initTable(cpu);
-
         currentAddress = 0;
         currentValue = 0;
-
         addressLabel = new JLabel("[0]");
         valueField = new JTextField(6);
         valueField.setMinimumSize(valueField.getPreferredSize());
-
-        this.parent = parent;
-        final JPanel panel = new JPanel();
-        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        final BoxLayout layout = new BoxLayout(panel, BoxLayout.Y_AXIS);
-        panel.setLayout(layout);
-        setContentPane(panel);
     }
 
     public TableType getTable() {
@@ -115,7 +104,13 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         });
     }
 
-    protected void addScrollPane() {
+    protected void initLayout() {
+        final JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        final BoxLayout layout = new BoxLayout(panel, BoxLayout.Y_AXIS);
+        panel.setLayout(layout);
+        setContentPane(panel);
+
         final JScrollPane scrollPane = new JScrollPane(table);
         final Dimension tableSize = table.getPreferredSize();
         final int scrollBarWidth = 15;
@@ -132,5 +127,5 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         valueField.setText(Integer.toString(currentValue, radix));
     }
 
-    abstract void initTable(final Cpu cpu);
+    abstract protected void initTable(final Cpu cpu);
 }
