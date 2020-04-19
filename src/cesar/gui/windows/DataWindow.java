@@ -16,6 +16,7 @@ public class DataWindow extends SideWindow<DataTable, DataTableModel> {
         initEvents();
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     protected void initLayout() {
         super.initLayout();

@@ -29,12 +29,12 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         setIconImage(null);
         setFocusable(false);
         setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+        initTable(cpu);
         currentAddress = 0;
         currentValue = 0;
         addressLabel = new JLabel("[0]");
         valueField = new JTextField(6);
         valueField.setMinimumSize(valueField.getPreferredSize());
-        initTable(cpu);
     }
 
     public TableType getTable() {

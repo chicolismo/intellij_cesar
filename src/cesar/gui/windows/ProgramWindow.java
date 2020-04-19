@@ -20,6 +20,7 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
         initEvents();
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     protected void initLayout() {
         super.initLayout();
