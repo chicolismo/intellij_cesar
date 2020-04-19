@@ -1,12 +1,11 @@
 package cesar.gui.panels;
 
-import java.awt.Component;
-import java.awt.Font;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -43,46 +42,38 @@ public class ButtonPanel extends JPanel {
     public final JButton btnNext;
 
     public ButtonPanel() {
-        btnDec = new JToggleButton("Dec");
-        btnHex = new JToggleButton("Hex");
+        btnDec = new JToggleButton("0..9");
+        btnHex = new JToggleButton("0..F");
         btnRun = new JToggleButton(new ImageIcon(runIcon));
         btnNext = new JButton(new ImageIcon(nextIcon));
+
+        if (System.getProperty("os.name").equals("Mac OS X")) {
+            btnDec.putClientProperty("JButton.buttonType", "segmented");
+            btnDec.putClientProperty("JComponent.sizeVariant", "small");
+            btnDec.putClientProperty("JButton.segmentPosition", "first");
+            btnHex.putClientProperty("JButton.buttonType", "segmented");
+            btnHex.putClientProperty("JComponent.sizeVariant", "small");
+            btnHex.putClientProperty("JButton.segmentPosition", "last");
+        }
+
         initLayout();
-        setAlignmentY(Component.BOTTOM_ALIGNMENT);
     }
 
     private void initLayout() {
-        final BoxLayout box = new BoxLayout(this, BoxLayout.X_AXIS);
-        setLayout(box);
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setAlignmentY(BOTTOM_ALIGNMENT);
 
-        btnNext.setAlignmentY(Component.CENTER_ALIGNMENT);
-        btnRun.setAlignmentY(Component.CENTER_ALIGNMENT);
-        btnDec.setAlignmentY(Component.CENTER_ALIGNMENT);
-        btnHex.setAlignmentY(Component.CENTER_ALIGNMENT);
+        final Insets margins = new Insets(1, 1, 1, 1);
+        final AbstractButton[] buttons = new AbstractButton[] { btnDec, btnHex, btnRun, btnNext };
+        for (final AbstractButton button : buttons) {
+            button.setMargin(margins);
+            button.setAlignmentY(CENTER_ALIGNMENT);
+            button.setFocusable(false);
+        }
 
-        btnDec.setFocusable(false);
-        btnHex.setFocusable(false);
-        btnRun.setFocusable(false);
-        btnNext.setFocusable(false);
-
-        final Font font = new Font(Font.MONOSPACED, Font.PLAIN, 10);
-        final Insets margins = new Insets(0, 0, 0, 0);
-
-        btnDec.putClientProperty("JButton.buttonType", "segmentedTextured");
-        btnDec.putClientProperty("JButton.segmentPosition", "first");
-        btnDec.setFont(font);
-        btnHex.putClientProperty("JButton.buttonType", "segmentedTextured");
-        btnHex.putClientProperty("JButton.segmentPosition", "last");
-        btnHex.setFont(font);
-
-        btnDec.setMargin(margins);
-        btnHex.setMargin(margins);
-        btnRun.setMargin(margins);
-        btnNext.setMargin(margins);
-
-        final ButtonGroup g = new ButtonGroup();
-        g.add(btnDec);
-        g.add(btnHex);
+        final ButtonGroup changeBaseGroup = new ButtonGroup();
+        changeBaseGroup.add(btnDec);
+        changeBaseGroup.add(btnHex);
 
         add(btnDec);
         add(btnHex);

@@ -3,26 +3,27 @@ package cesar.hardware;
 import cesar.utils.Shorts;
 
 public class Mnemonic {
-    public int size;
-    public String value;
     private static final int WORD_INCREMENT = 2;
+    private static final String NEGATIVE = "N";
+    private static final String ZERO = "Z";
+    private static final String OVERFLOW = "V";
+    private static final String CARRY = "C";
+    private static final String EMPTY_STRING = "";
 
-    static String conditionToString(final byte opCode) {
+    private static String conditionToString(final byte opCode) {
         final int lsb = opCode & 0x0F;
-        final String n = (lsb & 0b1000) > 0 ? "N" : "";
-        final String z = (lsb & 0b0100) > 0 ? "Z" : "";
-        final String o = (lsb & 0b0010) > 0 ? "V" : "";
-        final String v = (lsb & 0b0001) > 0 ? "C" : "";
-        return n + z + o + v;
+        final String n = (lsb & 0b1000) > 0 ? NEGATIVE : EMPTY_STRING;
+        final String z = (lsb & 0b0100) > 0 ? ZERO : EMPTY_STRING;
+        final String v = (lsb & 0b0010) > 0 ? OVERFLOW : EMPTY_STRING;
+        final String c = (lsb & 0b0001) > 0 ? CARRY : EMPTY_STRING;
+        return n + z + v + c;
     }
 
-    public static int updateMnemonics(final Cpu cpu, final String[] mnemonics, final int startAt) {
-        return updateMnemonics(cpu, mnemonics, startAt, false);
+    public static int updateMnemonics(final Cpu cpu, final int startAt) {
+        return updateMnemonics(cpu, startAt, false);
     }
 
-    public static int updateMnemonics(final Cpu cpu, final String[] mnemonics, final int startAt,
-            final boolean refreshAll) {
-
+    public static int updateMnemonics(final Cpu cpu, final int startAt, final boolean refreshAll) {
         int row = startAt;
 
         /*
@@ -32,16 +33,10 @@ public class Mnemonic {
             // Termina quando chegar no final ou quando o mnemônico produzido para um
             // determinado índice for igual ao do arranjo de mnemônicos.
             final byte opCode = cpu.getByte(row);
-            String mnemonic;
+            final String mnemonic;
             int increment = 1;
             final Instruction instruction = Instruction.getInstruction(opCode);
             final String format = instruction.getFormatString();
-
-            // Se a linha for vazia, é sinal que se trada de um operando para outra
-            // instrução, e portanto não precisa ser rotulada.
-            if (mnemonics[row] != null && mnemonics[row].equals("")) {
-                break;
-            }
 
             switch (instruction) {
                 case NOP:
@@ -224,16 +219,16 @@ public class Mnemonic {
             }
 
             if (refreshAll) {
-                mnemonics[row] = mnemonic;
+                cpu.setMnemonic(row, mnemonic);
                 for (int j = 1; j < increment; ++j) {
-                    mnemonics[0xFFFF & row + j] = "";
+                    cpu.setMnemonic(row + j, "");
                 }
             }
             else {
-                if (mnemonics[row] == null || !mnemonics[row].equals(mnemonic)) {
-                    mnemonics[row] = mnemonic;
+                if (cpu.getMnemonic(row) == null || !cpu.getMnemonic(row).equals(mnemonic)) {
+                    cpu.setMnemonic(row, mnemonic);
                     for (int j = 1; j < increment; ++j) {
-                        mnemonics[0xFFFF & row + j] = "";
+                        cpu.setMnemonic(row + j, "");
                     }
                 }
                 else {

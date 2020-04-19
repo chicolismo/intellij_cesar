@@ -27,7 +27,14 @@ public class Main {
             else {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             }
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//            for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+//                System.out.println(info.getName());
+//                if (info.getName().equals("Metal")) {
+//                    UIManager.setLookAndFeel(info.getClassName());
+//                }
+//            }
+//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
         catch (IllegalAccessException | InstantiationException | ClassNotFoundException
                 | UnsupportedLookAndFeelException e) {

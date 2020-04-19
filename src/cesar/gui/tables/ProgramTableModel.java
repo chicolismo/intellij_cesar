@@ -27,7 +27,7 @@ public class ProgramTableModel extends TableModel {
                 return formatNumber(cpu.getByte(row));
             case 3:
             default:
-                return " Não implementado";
+                return cpu.getMnemonic(row);
         }
     }
 

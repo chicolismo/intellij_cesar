@@ -142,6 +142,7 @@ public class MainWindow extends JFrame {
         textDisplay.repaint();
 
         dataTable.scrollToRow(Cpu.DATA_START_ADDRESS, true);
+        updateDisplays();
     }
 
     private JPanel createMainPanel() {
@@ -351,9 +352,10 @@ public class MainWindow extends JFrame {
                 updateDisplays();
                 executionPanel.incrementInstructions();
                 if (cpu.hasMemoryChanged()) {
-                    final int address = cpu.getLastChangedAddress();
-                    programTableModel.fireTableRowsUpdated(address, address + 1);
-                    dataTableModel.fireTableRowsUpdated(address, address + 1);
+                    final int start = cpu.getLastChangedAddress();
+                    final int end = cpu.getLastChangedMnemonic();
+                    programTableModel.fireTableRowsUpdated(start, end);
+                    dataTableModel.fireTableRowsUpdated(start, start + 1);
                     textDisplay.repaint();
                 }
                 updateProgramCounterRow();
@@ -387,6 +389,8 @@ public class MainWindow extends JFrame {
         conditionPanel.setOverflow(cpu.isOverflow());
         conditionPanel.setCarry(cpu.isCarry());
         executionPanel.setMemoryAccessCount(cpu.getMemoryAccessCount());
+        instructionPanel.setRiText(cpu.getReadInstruction());
+        instructionPanel.setMnemText(cpu.getReadMnemonic());
     }
 
     private void updateInterface() {

@@ -17,26 +17,36 @@ public class Cpu {
     private final ConditionRegister conditionRegister;
     private final short[] registers;
     private final byte[] memory;
+    private final String[] mnemonics;
     private short breakPoint;
 
     private boolean memoryChanged;
     private int lastChangedAddress;
+    private int lastChangedMnemonic;
     private int memoryAccessCount;
+    private String readInstruction;
+    private String readMnemonic;
 
     public Cpu() {
         registers = new short[8];
         memory = new byte[MEMORY_SIZE];
+        mnemonics = new String[MEMORY_SIZE];
+        Mnemonic.updateMnemonics(this, 0, true);
         breakPoint = (short) 0xFFFF;
         conditionRegister = new ConditionRegister();
         memoryAccessCount = 0;
         memoryChanged = false;
         lastChangedAddress = 0;
+
+        readInstruction = "0";
+        readMnemonic = Instruction.NOP.toString();
     }
 
     public void setMemory(final byte[] bytes) {
         final int maxSize = Math.min(bytes.length, memory.length);
         final int offset = bytes.length > memory.length ? bytes.length - memory.length : 0;
         System.arraycopy(bytes, 0 + offset, memory, 0, maxSize);
+        Mnemonic.updateMnemonics(this, 0, true);
     }
 
     public byte[] getMemory() {
@@ -53,6 +63,18 @@ public class Cpu {
 
     public int getLastChangedAddress() {
         return lastChangedAddress;
+    }
+
+    public int getLastChangedMnemonic() {
+        return lastChangedMnemonic;
+    }
+
+    public String getReadInstruction() {
+        return readInstruction.trim();
+    }
+
+    public String getReadMnemonic() {
+        return readMnemonic;
     }
 
     public void setBreakPoint(final int bp) {
@@ -91,8 +113,17 @@ public class Cpu {
         return conditionRegister.isCarry();
     }
 
+    public void setMnemonic(final int address, final String value) {
+        mnemonics[0xFFFF & address] = value;
+    }
+
+    public String getMnemonic(final int address) {
+        return mnemonics[0xFFFF & address];
+    }
+
     public void setByte(final int address, final byte value) {
         memory[0xFFFF & address] = value;
+        lastChangedMnemonic = Mnemonic.updateMnemonics(this, address);
     }
 
     public byte getByte(final int address) {
@@ -111,6 +142,7 @@ public class Cpu {
 
     private byte fetchNextByte() {
         final byte nextByte = readByte(Shorts.toUnsignedInt(registers[PC]));
+        readInstruction += String.format(" %d", 0xFF & nextByte);
         registers[PC]++;
         return nextByte;
     }
@@ -138,6 +170,7 @@ public class Cpu {
             writeByte(address, bytes[0]);
             writeByte(address + 1, bytes[1]);
         }
+        lastChangedMnemonic = Mnemonic.updateMnemonics(this, address);
     }
 
     private void push(final short word) {
@@ -161,6 +194,9 @@ public class Cpu {
         if (registers[PC] == breakPoint) {
             return ExecutionResult.BREAK_POINT;
         }
+
+        readInstruction = "";
+        readMnemonic = getMnemonic(registers[PC]);
 
         final byte firstByte = fetchNextByte();
         final int firstBits = 0x0F & (firstByte & 0xF0) >> 4;

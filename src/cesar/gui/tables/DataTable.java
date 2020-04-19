@@ -1,20 +1,21 @@
 package cesar.gui.tables;
 
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 
 public class DataTable extends Table {
     private static final long serialVersionUID = -5256889056472626825L;
 
     public DataTable(final DataTableModel model) {
         super(model);
+    }
 
-        final TableColumnModel columnModel = getColumnModel();
-
-        TableColumn column = columnModel.getColumn(0);
-        column.setMinWidth(60);
-
-        column = columnModel.getColumn(1);
-        column.setMinWidth(60);
+    @Override
+    void initColumnWidths() {
+        final int[] columnWidths = new int[] { 62, 52 };
+        for (int i = 0; i < columnWidths.length; ++i) {
+            final TableColumn column = getColumnModel().getColumn(i);
+            column.setMaxWidth(columnWidths[i]);
+            column.setMinWidth(columnWidths[i]);
+        }
     }
 }

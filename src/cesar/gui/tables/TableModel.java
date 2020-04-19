@@ -35,11 +35,11 @@ public abstract class TableModel extends AbstractTableModel {
     }
 
     protected String formatNumber(final byte number) {
-        return String.format(formatString, 0xFF & number);
+        return String.format(formatString, 0xFF & number).toUpperCase();
     }
 
     protected String formatNumber(final int number) {
-        return String.format(formatString, number);
+        return String.format(formatString, number).toUpperCase();
     }
 
     @Override

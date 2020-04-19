@@ -1,41 +1,53 @@
 package cesar.gui.tables;
 
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Rectangle;
 
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 public abstract class Table extends JTable {
     private static final long serialVersionUID = -8733831578127444505L;
+    private final int rowHeight;
 
     public Table(final TableModel model) {
         super(model);
         setFocusable(false);
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        setShowGrid(false);
+        setShowVerticalLines(true);
         setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-
-        final JTableHeader header = getTableHeader();
-        header.setReorderingAllowed(false);
+        getTableHeader().setReorderingAllowed(false);
+        rowHeight = getRowHeight();
+        initColumnWidths();
     }
 
-    public void scrollToRow(final int row, final boolean topRow) {
-        final int rowHeight = getRowHeight();
+    @Override
+    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+        JComponent c = (JComponent) super.prepareRenderer(renderer, row, column);
+        c.setBorder(BorderFactory.createEmptyBorder(0, 6, 0, 6));
+        return c;
+    }
+
+    public void scrollToRow(final int row, final boolean onTop) {
         final Rectangle rect;
-        if (topRow) {
-            final int parentHeight = getParent().getHeight();
-            rect = new Rectangle(0, (row - 1) * rowHeight + parentHeight, getWidth(), rowHeight);
+        if (onTop) {
+            rect = new Rectangle(0, (row - 1) * rowHeight + getParent().getHeight(), getWidth(), rowHeight);
         }
         else {
             rect = getCellRect(row, 0, true);
         }
-
         scrollRectToVisible(rect);
     }
 
     public void scrollToRow(final int row) {
         scrollToRow(row, false);
     }
+
+    abstract void initColumnWidths();
 }

@@ -8,9 +8,9 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
@@ -105,19 +105,16 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
     }
 
     protected void initLayout() {
-        final JPanel panel = new JPanel();
-        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        final BoxLayout layout = new BoxLayout(panel, BoxLayout.Y_AXIS);
-        panel.setLayout(layout);
-        setContentPane(panel);
+        final JComponent contentPane = (JComponent) getContentPane();
+        contentPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
 
         final JScrollPane scrollPane = new JScrollPane(table);
         final Dimension tableSize = table.getPreferredSize();
-        final int scrollBarWidth = 15;
+        final int scrollBarWidth = scrollPane.getVerticalScrollBar().getPreferredSize().width;
         final Dimension scrollPaneSize = new Dimension(tableSize.width + scrollBarWidth, tableSize.height);
         scrollPane.setPreferredSize(scrollPaneSize);
-        scrollPane.getVerticalScrollBar().setSize(new Dimension(scrollBarWidth, 0));
-        add(scrollPane);
+        contentPane.add(scrollPane);
     }
 
     public void setBase(final Base base) {
