@@ -1,11 +1,14 @@
 package cesar.gui.windows;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+
+import javax.swing.Box;
+import javax.swing.JPanel;
+
 import cesar.gui.tables.DataTable;
 import cesar.gui.tables.DataTableModel;
 import cesar.hardware.Cpu;
-
-import javax.swing.*;
-import java.awt.*;
 
 public class DataWindow extends SideWindow<DataTable, DataTableModel> {
     public static final long serialVersionUID = -7816298913045696756L;
@@ -13,10 +16,8 @@ public class DataWindow extends SideWindow<DataTable, DataTableModel> {
     public DataWindow(final MainWindow parent, final Cpu cpu) {
         super(parent, "Dados", cpu);
         initLayout();
-        initEvents();
     }
 
-    @SuppressWarnings("DuplicatedCode")
     @Override
     protected void initLayout() {
         super.initLayout();

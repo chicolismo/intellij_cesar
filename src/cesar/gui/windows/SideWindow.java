@@ -14,8 +14,7 @@ import java.awt.event.MouseEvent;
 
 public abstract class SideWindow<TableType extends Table, TableModelType extends TableModel> extends JDialog {
     public static final long serialVersionUID = 3602114587032491724L;
-
-    protected static final String LABEL_FORMAT = "[%s]";
+    public static final String LABEL_FORMAT = "[%s]";
 
     protected final JLabel addressLabel;
     protected final JTextField valueField;
@@ -30,8 +29,8 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         setFocusable(false);
         setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         initTable(cpu);
-        currentAddress = 0;
-        currentValue = 0;
+        setCurrentAddress(0);
+        setCurrentValue(0);
         addressLabel = new JLabel("[0]");
         valueField = new JTextField(6);
         valueField.setMinimumSize(valueField.getPreferredSize());
@@ -41,52 +40,28 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         return table;
     }
 
-    protected void initEvents() {
-        table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseReleased(final MouseEvent e) {
-                if (table.getSelectedRow() >= 0) {
-                    final int row = table.getSelectedRow();
-                    final String address = model.getAddressAsString(row);
-                    final String value = model.getValueAsString(row);
-                    addressLabel.setText(String.format(LABEL_FORMAT, address));
-                    valueField.setText(value);
-                    valueField.requestFocus();
-                    valueField.selectAll();
+    public JLabel getAddressLabel() {
+        return addressLabel;
+    }
 
-                    final int radix = Base.toInt(model.getBase());
-                    currentAddress = Integer.parseInt(address, radix);
-                    currentValue = Integer.parseInt(value, radix);
-                }
-            }
-        });
+    public JTextField getValueField() {
+        return valueField;
+    }
 
-        valueField.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent actionEvent) {
-                final int radix = Base.toInt(model.getBase());
-                final String value = valueField.getText();
-                final int newValue;
-                try {
-                    newValue = Integer.parseInt(value, radix);
-                }
-                catch (final NumberFormatException exception) {
-                    // Se o valor digitado for inválido, ignorar o ENTER
-                    return;
-                }
-                if (newValue <= 0xFF && newValue >= Byte.MIN_VALUE) {
-                    currentValue = newValue;
-                    model.setValue(currentAddress, (byte) (0xFF & currentValue));
-                    // Seleciona a próxima linha
-                    currentAddress = 0xFFFF & currentAddress + 1;
-                    table.setRowSelectionInterval(currentAddress, currentAddress);
-                    valueField.setText(model.getValueAsString(currentAddress));
-                    table.scrollToRow(currentAddress);
-                    valueField.requestFocus();
-                    valueField.selectAll();
-                }
-            }
-        });
+    public void setCurrentAddress(final int address) {
+        currentAddress = address;
+    }
+
+    public int getCurrentAddress() {
+        return currentAddress;
+    }
+
+    public void setCurrentValue(final int value) {
+        currentValue = value;
+    }
+
+    public int getCurrentValue() {
+        return currentValue;
     }
 
     protected void initLayout() {

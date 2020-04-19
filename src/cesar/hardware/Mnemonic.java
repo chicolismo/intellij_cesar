@@ -14,18 +14,18 @@ public class Mnemonic {
         return updateMnemonics(cpu, startAt, false);
     }
 
-    public static int updateMnemonics(final Cpu cpu, final int startAt, final boolean refreshAll) {
-        int row = Math.max(0, startAt);
+    public static int updateMnemonics(final Cpu cpu, final int startAt, final boolean forceAllRows) {
+        int currentRow = Math.max(0, startAt);
 
         /*
          * Só avança no (R7)+ ou nos casos de ddd(Rx) ou (ddd(Rx))
          */
-        while (row < Cpu.MEMORY_SIZE) {
+        while (currentRow < Cpu.MEMORY_SIZE) {
             // Termina quando chegar no final ou quando o mnemônico produzido para um
             // determinado índice for igual ao do arranjo de mnemônicos.
-            final byte opCode = cpu.getByte(row);
+            final byte opCode = cpu.getByte(currentRow);
             final String mnemonic;
-            int increment = 1;
+            int rowIncrement = 1;
             final Instruction instruction = Instruction.getInstruction(opCode);
             final String format = instruction.getFormatString();
 
@@ -56,22 +56,22 @@ public class Mnemonic {
                 case BLE:
                 case BHI:
                 case BLS: {
-                    final byte nextByte = cpu.getByte(row + increment);
-                    ++increment;
+                    final byte nextByte = cpu.getByte(currentRow + rowIncrement);
+                    ++rowIncrement;
                     mnemonic = String.format(format, 0xFF & nextByte);
                     break;
                 }
 
                 case JMP: {
-                    final byte nextByte = cpu.getByte(row + increment);
-                    ++increment;
+                    final byte nextByte = cpu.getByte(currentRow + rowIncrement);
+                    ++rowIncrement;
                     final int mmm = (nextByte & 0b00111000) >> 3;
                     final int rrr = nextByte & 0b00000111;
                     final AddressMode addressMode = AddressMode.fromInt(mmm);
                     if (addressMode.isIndexed()) {
-                        final byte msb = cpu.getByte(row + increment);
-                        final byte lsb = cpu.getByte(row + increment + 1);
-                        increment += WORD_INCREMENT;
+                        final byte msb = cpu.getByte(currentRow + rowIncrement);
+                        final byte lsb = cpu.getByte(currentRow + rowIncrement + 1);
+                        rowIncrement += WORD_INCREMENT;
                         final int ddd = Shorts.toUnsignedInt(Shorts.fromBytes(msb, lsb));
                         mnemonic = String.format(format, addressMode.asString(ddd, rrr));
                     }
@@ -82,22 +82,22 @@ public class Mnemonic {
                 }
                 case SOB: {
                     final int rrr = opCode & 0b0000_0111;
-                    final int ddd = 0xFF & cpu.getByte(row + increment);
-                    ++increment;
+                    final int ddd = 0xFF & cpu.getByte(currentRow + rowIncrement);
+                    ++rowIncrement;
                     mnemonic = String.format(format, rrr, ddd);
                     break;
                 }
                 case JSR: {
                     final int register = opCode & 0b0000_0111;
-                    final byte nextByte = cpu.getByte(row + increment);
-                    ++increment;
+                    final byte nextByte = cpu.getByte(currentRow + rowIncrement);
+                    ++rowIncrement;
                     final int mmm = (nextByte & 0b00111000) >> 3;
                     final int rrr = nextByte & 0b00000111;
                     final AddressMode addressMode = AddressMode.fromInt(mmm);
                     if (addressMode.isIndexed()) {
-                        final byte msb = cpu.getByte(row + increment);
-                        final byte lsb = cpu.getByte(row + increment + 1);
-                        increment += WORD_INCREMENT;
+                        final byte msb = cpu.getByte(currentRow + rowIncrement);
+                        final byte lsb = cpu.getByte(currentRow + rowIncrement + 1);
+                        rowIncrement += WORD_INCREMENT;
                         final int ddd = Shorts.toUnsignedInt(Shorts.fromBytes(msb, lsb));
                         mnemonic = String.format(format, register, addressMode.asString(ddd, rrr));
                     }
@@ -106,7 +106,7 @@ public class Mnemonic {
                     }
 
                     if (addressMode.isPostIncremented() && rrr == Cpu.PC) {
-                        increment += WORD_INCREMENT;
+                        rowIncrement += WORD_INCREMENT;
                     }
                     break;
                 }
@@ -129,16 +129,16 @@ public class Mnemonic {
                 case ASL:
                 case ADC:
                 case SBC: {
-                    final byte nextByte = cpu.getByte(row + increment);
-                    ++increment;
+                    final byte nextByte = cpu.getByte(currentRow + rowIncrement);
+                    ++rowIncrement;
                     final int mmm = (nextByte & 0b00111000) >> 3;
                     final int rrr = nextByte & 0b00000111;
                     final AddressMode addressMode = AddressMode.fromInt(mmm);
 
                     if (addressMode.isIndexed()) {
-                        final byte msb = cpu.getByte(row + increment);
-                        final byte lsb = cpu.getByte(row + increment + 1);
-                        increment += WORD_INCREMENT;
+                        final byte msb = cpu.getByte(currentRow + rowIncrement);
+                        final byte lsb = cpu.getByte(currentRow + rowIncrement + 1);
+                        rowIncrement += WORD_INCREMENT;
                         final int ddd = Shorts.toUnsignedInt(Shorts.fromBytes(msb, lsb));
                         mnemonic = String.format(format, addressMode.asString(ddd, rrr));
                     }
@@ -147,7 +147,7 @@ public class Mnemonic {
                     }
 
                     if (addressMode.isPostIncremented() && rrr == Cpu.PC) {
-                        increment += WORD_INCREMENT;
+                        rowIncrement += WORD_INCREMENT;
                     }
 
                     break;
@@ -159,8 +159,8 @@ public class Mnemonic {
                 case CMP:
                 case AND:
                 case OR: {
-                    final byte nextByte = cpu.getByte(row + increment);
-                    ++increment;
+                    final byte nextByte = cpu.getByte(currentRow + rowIncrement);
+                    ++rowIncrement;
                     final int word = Shorts.toUnsignedInt(Shorts.fromBytes(opCode, nextByte));
                     final int mmm1 = (word & 0b0000_1110_0000_0000) >> 9;
                     final int rrr1 = (word & 0b0000_0001_1100_0000) >> 6;
@@ -171,9 +171,9 @@ public class Mnemonic {
 
                     final String srcString;
                     if (srcMode.isIndexed()) {
-                        final byte msb = cpu.getByte(row + increment);
-                        final byte lsb = cpu.getByte(row + increment + 1);
-                        increment += WORD_INCREMENT;
+                        final byte msb = cpu.getByte(currentRow + rowIncrement);
+                        final byte lsb = cpu.getByte(currentRow + rowIncrement + 1);
+                        rowIncrement += WORD_INCREMENT;
                         final int ddd = Shorts.toUnsignedInt(Shorts.fromBytes(msb, lsb));
                         srcString = srcMode.asString(ddd, rrr1);
                     }
@@ -182,15 +182,15 @@ public class Mnemonic {
                     }
 
                     if (srcMode.isPostIncremented() && rrr1 == Cpu.PC) {
-                        increment += WORD_INCREMENT;
+                        rowIncrement += WORD_INCREMENT;
                     }
 
                     final AddressMode dstMode = AddressMode.fromInt(mmm2);
                     final String dstString;
                     if (dstMode.isIndexed()) {
-                        final byte msb = cpu.getByte(row + increment);
-                        final byte lsb = cpu.getByte(row + increment + 1);
-                        increment += WORD_INCREMENT;
+                        final byte msb = cpu.getByte(currentRow + rowIncrement);
+                        final byte lsb = cpu.getByte(currentRow + rowIncrement + 1);
+                        rowIncrement += WORD_INCREMENT;
                         final int ddd = Shorts.toUnsignedInt(Shorts.fromBytes(msb, lsb));
                         dstString = dstMode.asString(ddd, rrr2);
                     }
@@ -199,7 +199,7 @@ public class Mnemonic {
                     }
 
                     if (dstMode.isPostIncremented() && rrr2 == Cpu.PC) {
-                        increment += WORD_INCREMENT;
+                        rowIncrement += WORD_INCREMENT;
                     }
 
                     mnemonic = String.format(format, srcString, dstString);
@@ -210,26 +210,26 @@ public class Mnemonic {
                     mnemonic = Instruction.NOP.getFormatString();
             }
 
-            if (refreshAll) {
-                cpu.setMnemonic(row, mnemonic);
-                for (int j = 1; j < increment; ++j) {
-                    cpu.setMnemonic(row + j, EMPTY_STRING);
+            if (forceAllRows) {
+                cpu.setMnemonic(currentRow, mnemonic);
+                for (int j = 1; j < rowIncrement; ++j) {
+                    cpu.setMnemonic(currentRow + j, EMPTY_STRING);
                 }
             }
             else {
-                if (cpu.getMnemonic(row) == null || !cpu.getMnemonic(row).equals(mnemonic)) {
-                    cpu.setMnemonic(row, mnemonic);
-                    for (int j = 1; j < increment; ++j) {
-                        cpu.setMnemonic(row + j, EMPTY_STRING);
+                if (cpu.getMnemonic(currentRow) == null || !cpu.getMnemonic(currentRow).equals(mnemonic)) {
+                    cpu.setMnemonic(currentRow, mnemonic);
+                    for (int j = 1; j < rowIncrement; ++j) {
+                        cpu.setMnemonic(currentRow + j, EMPTY_STRING);
                     }
                 }
                 else {
                     break;
                 }
             }
-            row += increment;
+            currentRow += rowIncrement;
         }
-        return row;
+        return currentRow;
     }
 
     private static String conditionToString(final byte opCode) {

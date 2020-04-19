@@ -12,10 +12,10 @@ public class TextWindow extends JDialog {
 
     public TextWindow(final MainWindow parent, final Cpu cpu) {
         super(parent, "Visor");
-        setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-        setFocusable(false);
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
+        setFocusable(true);
         display = new TextDisplay(cpu);
-        getContentPane().add(display);
+        add(display);
         pack();
         setResizable(false);
     }

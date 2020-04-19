@@ -10,9 +10,8 @@ public class Cpu {
     public static final int BEGIN_DISPLAY_ADDRESS = 65500;
     public static final int END_DISPLAY_ADDRESS = 65535;
     public static final int DATA_START_ADDRESS = 1024;
-
-    static final int PC = 7;
-    static final int SP = 6;
+    public static final int PC = 7;
+    public static final int SP = 6;
 
     private final ConditionRegister conditionRegister;
     private final short[] registers;
@@ -28,7 +27,7 @@ public class Cpu {
     private String readMnemonic;
 
     public Cpu() {
-        registers = new short[8];
+        registers = new short[REGISTER_COUNT];
         memory = new byte[MEMORY_SIZE];
         mnemonics = new String[MEMORY_SIZE];
         Mnemonic.updateMnemonics(this, 0, true);
@@ -37,7 +36,6 @@ public class Cpu {
         memoryAccessCount = 0;
         memoryChanged = false;
         lastChangedAddress = 0;
-
         readInstruction = "0";
         readMnemonic = Instruction.NOP.toString();
     }
@@ -182,7 +180,7 @@ public class Cpu {
         return word;
     }
 
-    private boolean isIOAddress(final int address) {
+    public boolean isIOAddress(final int address) {
         return address >= KEYBOARD_STATE_ADDRESS && address <= END_DISPLAY_ADDRESS;
     }
 
@@ -658,6 +656,11 @@ public class Cpu {
         }
 
         return address;
+    }
+
+    public void setTypedKey(final byte keyValue) {
+        setByte(KEYBOARD_STATE_ADDRESS, (byte) 0x80);
+        setByte(LAST_CHAR_ADDRESS, keyValue);
     }
 
     enum CpuInstruction {

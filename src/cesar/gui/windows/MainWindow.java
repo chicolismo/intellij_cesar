@@ -1,48 +1,21 @@
 package cesar.gui.windows;
 
-import java.awt.Component;
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import cesar.gui.displays.RegisterDisplay;
+import cesar.gui.displays.TextDisplay;
+import cesar.gui.panels.*;
+import cesar.gui.tables.*;
+import cesar.hardware.Cpu;
+import cesar.utils.Base;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
-import cesar.gui.displays.RegisterDisplay;
-import cesar.gui.displays.TextDisplay;
-import cesar.gui.panels.ButtonPanel;
-import cesar.gui.panels.ConditionPanel;
-import cesar.gui.panels.ExecutionPanel;
-import cesar.gui.panels.InstructionPanel;
-import cesar.gui.panels.RegisterPanel;
-import cesar.gui.panels.StatusBar;
-import cesar.gui.tables.DataTable;
-import cesar.gui.tables.DataTableModel;
-import cesar.gui.tables.ProgramTable;
-import cesar.gui.tables.ProgramTableModel;
-import cesar.hardware.Cpu;
-import cesar.utils.Base;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class MainWindow extends JFrame {
     public static final long serialVersionUID = -4182598865843186332L;
@@ -200,6 +173,22 @@ public class MainWindow extends JFrame {
             }
         });
 
+        final KeyListener keyListener = new KeyAdapter() {
+            @Override
+            public void keyPressed(final KeyEvent event) {
+                if (event.getModifiersEx() == 0) {
+                    // TODO: Testar se está no intervalo válido do alfabeto
+                    byte keyValue = (byte) (0xFF & event.getKeyCode());
+                    cpu.setTypedKey(keyValue);
+                    programTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
+                    dataTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
+                }
+            }
+        };
+
+        addKeyListener(keyListener);
+        textWindow.addKeyListener(keyListener);
+
         for (final RegisterDisplay display : registerPanel.getDisplays()) {
             final int registerNumber = display.getNumber();
             display.addMouseListener(new MouseAdapter() {
@@ -212,8 +201,10 @@ public class MainWindow extends JFrame {
             });
         }
 
-        final Component[][] pairs = new Component[][] { { programWindow, menuBar.viewProgram },
-            { dataWindow, menuBar.viewData }, { textWindow, menuBar.viewDisplay } };
+        final Component[][] pairs = new Component[][] {
+                { programWindow, menuBar.viewProgram },
+                { dataWindow, menuBar.viewData }, { textWindow, menuBar.viewDisplay }
+        };
 
         for (final Component[] pair : pairs) {
             final JDialog subWindow = (JDialog) pair[0];
@@ -280,8 +271,10 @@ public class MainWindow extends JFrame {
             }
         });
 
-        final Object[][] buttons = new Object[][] { { buttonPanel.btnDec, Base.DECIMAL },
-            { buttonPanel.btnHex, Base.HEXADECIMAL } };
+        final Object[][] buttons = new Object[][] {
+                { buttonPanel.btnDec, Base.DECIMAL },
+                { buttonPanel.btnHex, Base.HEXADECIMAL }
+        };
 
         for (final Object[] pair : buttons) {
             final JToggleButton button = (JToggleButton) pair[0];
@@ -290,6 +283,67 @@ public class MainWindow extends JFrame {
                 @Override
                 public void actionPerformed(final ActionEvent actionEvent) {
                     setBase(base);
+                }
+            });
+        }
+
+        for (final SideWindow<?, ?> window : new SideWindow<?, ?>[] { programWindow, dataWindow }) {
+            final Table table = window.getTable();
+            final TableModel model = (TableModel) table.getModel();
+            final JLabel addressLabel = window.getAddressLabel();
+            final JTextField valueField = window.getValueField();
+
+            table.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseReleased(final MouseEvent e) {
+                    if (table.getSelectedRow() >= 0) {
+                        final int row = table.getSelectedRow();
+                        final String address = model.getAddressAsString(row);
+                        final String value = model.getValueAsString(row);
+                        addressLabel.setText(String.format(SideWindow.LABEL_FORMAT, address));
+                        valueField.setText(value);
+                        valueField.requestFocus();
+                        valueField.selectAll();
+
+                        final int radix = Base.toInt(model.getBase());
+                        final int currentAddress = Integer.parseInt(address, radix);
+                        final int currentValue = Integer.parseInt(value, radix);
+
+                        window.setCurrentAddress(currentAddress);
+                        window.setCurrentValue(currentValue);
+                    }
+                }
+            });
+
+            valueField.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(final ActionEvent actionEvent) {
+                    final int radix = Base.toInt(model.getBase());
+                    final String value = valueField.getText();
+                    final int newValue;
+                    try {
+                        newValue = Integer.parseInt(value, radix);
+                    }
+                    catch (final NumberFormatException exception) {
+                        // Se o valor digitado for inválido, ignorar o ENTER
+                        return;
+                    }
+                    if (newValue <= 0xFF && newValue >= Byte.MIN_VALUE) {
+                        window.setCurrentValue(newValue);
+                        int currentAddress = window.getCurrentAddress();
+                        model.setValue(currentAddress, (byte) (0xFF & window.getCurrentValue()));
+                        if (cpu.isIOAddress(currentAddress)) {
+                            textDisplay.repaint();
+                        }
+                        // Seleciona a próxima linha
+                        currentAddress = 0xFFFF & currentAddress + 1;
+                        table.setRowSelectionInterval(currentAddress, currentAddress);
+                        valueField.setText(model.getValueAsString(currentAddress));
+                        table.scrollToRow(currentAddress);
+                        valueField.requestFocus();
+                        valueField.selectAll();
+                        window.setCurrentAddress(currentAddress);
+                    }
                 }
             });
         }
