@@ -1,17 +1,11 @@
 package cesar.gui.windows;
 
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-
-import javax.swing.Box;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
 import cesar.gui.tables.ProgramTable;
 import cesar.gui.tables.ProgramTableModel;
 import cesar.hardware.Cpu;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
     public static final long serialVersionUID = 8452878222228144644L;
@@ -20,15 +14,10 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
 
     public ProgramWindow(final MainWindow parent, final Cpu cpu) {
         super(parent, "Programa", cpu);
-        initTable(cpu);
         bpField = new JTextField(4);
         bpField.setMinimumSize(bpField.getPreferredSize());
         initLayout();
         initEvents();
-    }
-
-    public JTextField getBreakPointField() {
-        return bpField;
     }
 
     @Override
@@ -88,5 +77,9 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
     protected void initTable(final Cpu cpu) {
         model = new ProgramTableModel(cpu);
         table = new ProgramTable(model);
+    }
+
+    public JTextField getBreakPointField() {
+        return bpField;
     }
 }

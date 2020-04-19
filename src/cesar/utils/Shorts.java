@@ -12,10 +12,6 @@ public class Shorts {
         return s & 0xffff;
     }
 
-    public static long toUnsignedLong(final short s) {
-        return s & 0xffff;
-    }
-
     public static byte[] toBytes(final short s) {
         final byte msb = (byte) ((s & 0xFF00) >> 4);
         final byte lsb = (byte) (s & 0xFF);

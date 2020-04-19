@@ -10,21 +10,12 @@ public class Mnemonic {
     private static final String CARRY = "C";
     private static final String EMPTY_STRING = "";
 
-    private static String conditionToString(final byte opCode) {
-        final int lsb = opCode & 0x0F;
-        final String n = (lsb & 0b1000) > 0 ? NEGATIVE : EMPTY_STRING;
-        final String z = (lsb & 0b0100) > 0 ? ZERO : EMPTY_STRING;
-        final String v = (lsb & 0b0010) > 0 ? OVERFLOW : EMPTY_STRING;
-        final String c = (lsb & 0b0001) > 0 ? CARRY : EMPTY_STRING;
-        return n + z + v + c;
-    }
-
     public static int updateMnemonics(final Cpu cpu, final int startAt) {
         return updateMnemonics(cpu, startAt, false);
     }
 
     public static int updateMnemonics(final Cpu cpu, final int startAt, final boolean refreshAll) {
-        int row = startAt;
+        int row = Math.max(0, startAt);
 
         /*
          * Só avança no (R7)+ ou nos casos de ddd(Rx) ou (ddd(Rx))
@@ -143,6 +134,7 @@ public class Mnemonic {
                     final int mmm = (nextByte & 0b00111000) >> 3;
                     final int rrr = nextByte & 0b00000111;
                     final AddressMode addressMode = AddressMode.fromInt(mmm);
+
                     if (addressMode.isIndexed()) {
                         final byte msb = cpu.getByte(row + increment);
                         final byte lsb = cpu.getByte(row + increment + 1);
@@ -221,14 +213,14 @@ public class Mnemonic {
             if (refreshAll) {
                 cpu.setMnemonic(row, mnemonic);
                 for (int j = 1; j < increment; ++j) {
-                    cpu.setMnemonic(row + j, "");
+                    cpu.setMnemonic(row + j, EMPTY_STRING);
                 }
             }
             else {
                 if (cpu.getMnemonic(row) == null || !cpu.getMnemonic(row).equals(mnemonic)) {
                     cpu.setMnemonic(row, mnemonic);
                     for (int j = 1; j < increment; ++j) {
-                        cpu.setMnemonic(row + j, "");
+                        cpu.setMnemonic(row + j, EMPTY_STRING);
                     }
                 }
                 else {
@@ -238,5 +230,14 @@ public class Mnemonic {
             row += increment;
         }
         return row;
+    }
+
+    private static String conditionToString(final byte opCode) {
+        final int lsb = opCode & 0x0F;
+        final String n = (lsb & 0b1000) > 0 ? NEGATIVE : EMPTY_STRING;
+        final String z = (lsb & 0b0100) > 0 ? ZERO : EMPTY_STRING;
+        final String v = (lsb & 0b0010) > 0 ? OVERFLOW : EMPTY_STRING;
+        final String c = (lsb & 0b0001) > 0 ? CARRY : EMPTY_STRING;
+        return n + z + v + c;
     }
 }

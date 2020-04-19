@@ -1,29 +1,19 @@
 package cesar.gui.windows;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-
-import javax.swing.Box;
-import javax.swing.JPanel;
-
 import cesar.gui.tables.DataTable;
 import cesar.gui.tables.DataTableModel;
 import cesar.hardware.Cpu;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class DataWindow extends SideWindow<DataTable, DataTableModel> {
     public static final long serialVersionUID = -7816298913045696756L;
 
     public DataWindow(final MainWindow parent, final Cpu cpu) {
         super(parent, "Dados", cpu);
-        initTable(cpu);
         initLayout();
         initEvents();
-    }
-
-    @Override
-    protected void initTable(final Cpu cpu) {
-        model = new DataTableModel(cpu);
-        table = new DataTable(model);
     }
 
     @Override
@@ -61,5 +51,11 @@ public class DataWindow extends SideWindow<DataTable, DataTableModel> {
         add(lowerPanel);
 
         pack();
+    }
+
+    @Override
+    protected void initTable(final Cpu cpu) {
+        model = new DataTableModel(cpu);
+        table = new DataTable(model);
     }
 }

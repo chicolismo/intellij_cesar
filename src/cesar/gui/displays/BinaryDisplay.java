@@ -1,12 +1,10 @@
 package cesar.gui.displays;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.swing.JPanel;
 
 public class BinaryDisplay extends JPanel {
     private static final long serialVersionUID = -5490249529061282417L;
@@ -18,7 +16,7 @@ public class BinaryDisplay extends JPanel {
     private static final int START_X = 75;
     private static final int START_Y = 0;
     private static final int BITS = 16;
-    private static BufferedImage[] displayImages;
+    private static final BufferedImage[] displayImages;
 
     static {
         displayImages = new BufferedImage[2];

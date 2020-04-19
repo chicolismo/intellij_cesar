@@ -42,15 +42,15 @@ public class Cpu {
         readMnemonic = Instruction.NOP.toString();
     }
 
+    public byte[] getMemory() {
+        return memory;
+    }
+
     public void setMemory(final byte[] bytes) {
         final int maxSize = Math.min(bytes.length, memory.length);
         final int offset = bytes.length > memory.length ? bytes.length - memory.length : 0;
-        System.arraycopy(bytes, 0 + offset, memory, 0, maxSize);
+        System.arraycopy(bytes, offset, memory, 0, maxSize);
         Mnemonic.updateMnemonics(this, 0, true);
-    }
-
-    public byte[] getMemory() {
-        return memory;
     }
 
     public int getMemoryAccessCount() {
@@ -148,7 +148,6 @@ public class Cpu {
     }
 
     private short readWord(final int address) {
-        // TODO: Verificar o quê deve acontecer nos endereços dos periféricos
         if (isIOAddress(address)) {
             final byte lsb = readByte(address);
             return Shorts.fromBytes((byte) 0, lsb);
@@ -161,7 +160,6 @@ public class Cpu {
     }
 
     private void writeWord(final int address, final short word) {
-        // TODO: Verificar o quê deve acontecer nos endereços dos periféricos
         final byte[] bytes = Shorts.toBytes(word);
         if (isIOAddress(address)) {
             writeByte(address, bytes[1]);
@@ -437,7 +435,7 @@ public class Cpu {
                 break;
 
             case TST:
-                result = value;
+                // result = value
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.setCarry(false);
@@ -666,12 +664,13 @@ public class Cpu {
         NOP, CCC, SCC, CONDITIONAL_BRANCH, JMP, SOB, JSR, RTS, ONE_OPERAND_INSTRUCTION, MOV, ADD, SUB, CMP, AND, OR,
         HLT;
 
-        private static CpuInstruction[] array = CpuInstruction.values();
+        private static final CpuInstruction[] array = CpuInstruction.values();
 
         public static CpuInstruction fromInt(final int index) {
             return array[index];
         }
     }
+
 
     enum CpuConditionalInstruction {
         BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS;
@@ -683,6 +682,7 @@ public class Cpu {
         }
     }
 
+
     enum CpuOneOperandInstruction {
         CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC;
 
@@ -692,6 +692,7 @@ public class Cpu {
             return array[index];
         }
     }
+
 
     public enum ExecutionResult {
         HALT, INVALID_INSTRUCTION, NOOP, OK, BREAK_POINT

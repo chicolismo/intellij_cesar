@@ -1,13 +1,11 @@
 package cesar.gui.tables;
 
-import java.awt.Component;
+import cesar.utils.Defaults;
 
-import javax.swing.JLabel;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
-
-import cesar.utils.Defaults;
+import java.awt.*;
 
 public class ProgramTable extends Table {
     private static final long serialVersionUID = -8843361396327035069L;

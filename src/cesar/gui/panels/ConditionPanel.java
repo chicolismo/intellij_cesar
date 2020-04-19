@@ -1,8 +1,6 @@
 package cesar.gui.panels;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class ConditionPanel extends JPanel {
     public static final long serialVersionUID = -595687570078206074L;
@@ -18,8 +16,8 @@ public class ConditionPanel extends JPanel {
         overflow = new LedPanel("V");
         carry = new LedPanel("C");
 
-        final BoxLayout vbox = new BoxLayout(this, BoxLayout.X_AXIS);
-        setLayout(vbox);
+        final BoxLayout verticalBox = new BoxLayout(this, BoxLayout.X_AXIS);
+        setLayout(verticalBox);
         add(negative);
         add(Box.createHorizontalGlue());
         add(zero);

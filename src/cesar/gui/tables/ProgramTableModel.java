@@ -5,22 +5,20 @@ import cesar.hardware.Cpu;
 public class ProgramTableModel extends TableModel {
     public static final long serialVersionUID = -5373447997057887767L;
     private static final String ARROW = " \u279C";
-    private static final String EMPTY_STRING = "";
 
-    private int pcRow;
+    private int programCounterRow;
 
     public ProgramTableModel(final Cpu cpu) {
-        super(cpu);
-        columnNames = new String[] { "PC", "Endereço", "Dado", "Mnemônico" };
-        classNames = new Class<?>[] { String.class, Integer.class, Byte.class, String.class };
-        pcRow = 0;
+        super(cpu, new String[] { "PC", "Endereço", "Dado", "Mnemônico" },
+                new Class<?>[] { String.class, Integer.class, Byte.class, String.class });
+        setProgramCounterRow(0);
     }
 
     @Override
     public Object getValueAt(final int row, final int column) {
         switch (column) {
             case 0:
-                return formatPcRow(row);
+                return getProgramCounterRowAsString(row);
             case 1:
                 return formatNumber(row);
             case 2:
@@ -29,6 +27,10 @@ public class ProgramTableModel extends TableModel {
             default:
                 return cpu.getMnemonic(row);
         }
+    }
+
+    private String getProgramCounterRowAsString(final int row) {
+        return row == getProgramCounterRow() ? ARROW : "";
     }
 
     @Override
@@ -41,18 +43,14 @@ public class ProgramTableModel extends TableModel {
         return (String) getValueAt(row, 2);
     }
 
-    private String formatPcRow(final int row) {
-        return row == pcRow ? ARROW : EMPTY_STRING;
+    public int getProgramCounterRow() {
+        return programCounterRow;
     }
 
-    public int getPcRow() {
-        return pcRow;
-    }
-
-    public void setPcRow(final int programCounter) {
-        final int oldPcRow = pcRow;
-        pcRow = programCounter;
-        fireTableRowsUpdated(oldPcRow, oldPcRow);
-        fireTableRowsUpdated(pcRow, pcRow);
+    public void setProgramCounterRow(final int programCounter) {
+        final int oldValue = programCounterRow;
+        programCounterRow = programCounter;
+        fireTableRowsUpdated(oldValue, oldValue);
+        fireTableRowsUpdated(programCounterRow, programCounterRow);
     }
 }

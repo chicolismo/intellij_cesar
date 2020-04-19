@@ -9,19 +9,16 @@ public abstract class TableModel extends AbstractTableModel {
     private static final long serialVersionUID = -124231497089309828L;
     protected final Cpu cpu;
 
-    protected String[] columnNames;
-    protected Class<?>[] classNames;
-    protected String formatString;
-    protected Base currentBase;
+    private final String[] columnNames;
+    private final Class<?>[] classNames;
+    private String formatString;
+    private Base currentBase;
 
-    public TableModel(final Cpu cpu) {
+    public TableModel(final Cpu cpu, final String[] columnNames, final Class<?>[] classNames) {
         this.cpu = cpu;
+        this.columnNames = columnNames;
+        this.classNames = classNames;
         setBase(Base.DECIMAL);
-    }
-
-    @Override
-    public Class<?> getColumnClass(final int column) {
-        return classNames[column];
     }
 
     public Base getBase() {
@@ -45,6 +42,11 @@ public abstract class TableModel extends AbstractTableModel {
     @Override
     public String getColumnName(final int col) {
         return columnNames[col];
+    }
+
+    @Override
+    public Class<?> getColumnClass(final int column) {
+        return classNames[column];
     }
 
     @Override

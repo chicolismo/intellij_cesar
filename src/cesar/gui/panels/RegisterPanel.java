@@ -1,30 +1,22 @@
 package cesar.gui.panels;
 
-import java.awt.GridLayout;
+import cesar.gui.displays.RegisterDisplay;
+import cesar.utils.Base;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.border.BevelBorder;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
-
-import cesar.gui.displays.RegisterDisplay;
-import cesar.utils.Base;
-
 public class RegisterPanel extends JPanel {
     private static final long serialVersionUID = 2962079321929645473L;
     private static final BufferedImage COMPUTER_ICON;
     private static final BufferedImage WEBER_ICON;
-    private boolean isComputerShowing;
-    private final ImageIcon computerIcon;
-    private final ImageIcon weberIcon;
 
     static {
         BufferedImage computerIcon = null;
@@ -41,15 +33,20 @@ public class RegisterPanel extends JPanel {
         WEBER_ICON = weberIcon;
     }
 
+    private final ImageIcon computerIcon;
+    private final ImageIcon weberIcon;
     private final RegisterDisplay[] registerDisplays;
     private final LedPanel interruptionPanel;
+    private boolean isComputerShowing;
 
     public RegisterPanel() {
         super(true);
 
-        registerDisplays = new RegisterDisplay[] { new RegisterDisplay(0, "R0:"), new RegisterDisplay(1, "R1:"),
-            new RegisterDisplay(2, "R2:"), new RegisterDisplay(3, "R3:"), new RegisterDisplay(4, "R4:"),
-            new RegisterDisplay(5, "R5:"), new RegisterDisplay(6, "R6: (SP)"), new RegisterDisplay(7, "R7: (PC)"), };
+        registerDisplays = new RegisterDisplay[] {
+                new RegisterDisplay(0, "R0:"), new RegisterDisplay(1, "R1:"),
+                new RegisterDisplay(2, "R2:"), new RegisterDisplay(3, "R3:"), new RegisterDisplay(4, "R4:"),
+                new RegisterDisplay(5, "R5:"), new RegisterDisplay(6, "R6: (SP)"), new RegisterDisplay(7, "R7: (PC)"),
+                };
 
         interruptionPanel = new LedPanel("IS");
 

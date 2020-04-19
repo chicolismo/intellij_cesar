@@ -1,12 +1,9 @@
 package cesar.utils;
 
-import java.awt.Color;
-import java.awt.Font;
-
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+import java.awt.*;
 
 public class Defaults {
     public static final Font DEFAULT_FONT;
@@ -39,8 +36,8 @@ public class Defaults {
     }
 
     public static Border createTitledBorder(final String title, final int align) {
-        final TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), title, align,
-                TitledBorder.CENTER);
+        final TitledBorder border = BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(), title, align, TitledBorder.CENTER);
         border.setTitleFont(DEFAULT_FONT);
         return border;
     }

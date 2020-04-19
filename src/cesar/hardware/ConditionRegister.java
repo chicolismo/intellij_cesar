@@ -3,10 +3,6 @@ package cesar.hardware;
 import cesar.utils.Shorts;
 
 class ConditionRegister {
-    enum CarryOperation {
-        PLUS, MINUS
-    }
-
     private boolean negative;
     private boolean zero;
     private boolean carry;
@@ -27,17 +23,17 @@ class ConditionRegister {
         update();
     }
 
-    public void scc(final int newValue) {
-        // TODO: Testar
-        bits |= newValue;
-        update();
-    }
-
     private void update() {
         setNegative((bits & 8) == 8);
         setZero((bits & 4) == 4);
         setCarry((bits & 2) == 2);
         setOverflow((bits & 1) == 1);
+    }
+
+    public void scc(final int newValue) {
+        // TODO: Testar
+        bits |= newValue;
+        update();
     }
 
     public boolean isNegative() {
@@ -99,5 +95,9 @@ class ConditionRegister {
             result = ua - ub;
         }
         setCarry((result & 0x1_0000) == 0x1_0000);
+    }
+
+    enum CarryOperation {
+        PLUS, MINUS
     }
 }

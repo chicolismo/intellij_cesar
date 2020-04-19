@@ -1,24 +1,16 @@
 package cesar.gui.windows;
 
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.WindowConstants;
-
 import cesar.gui.tables.Table;
 import cesar.gui.tables.TableModel;
 import cesar.hardware.Cpu;
 import cesar.utils.Base;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public abstract class SideWindow<TableType extends Table, TableModelType extends TableModel> extends JDialog {
     public static final long serialVersionUID = 3602114587032491724L;
@@ -42,18 +34,11 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         addressLabel = new JLabel("[0]");
         valueField = new JTextField(6);
         valueField.setMinimumSize(valueField.getPreferredSize());
+        initTable(cpu);
     }
 
     public TableType getTable() {
         return table;
-    }
-
-    public JLabel getAddressLabel() {
-        return addressLabel;
-    }
-
-    public JTextField getValueField() {
-        return valueField;
     }
 
     protected void initEvents() {

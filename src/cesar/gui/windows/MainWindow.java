@@ -71,6 +71,7 @@ public class MainWindow extends JFrame {
 
     private final MenuBar menuBar;
     private final StatusBar statusBar;
+    private final JFileChooser fileChooser;
 
     private boolean running;
 
@@ -84,10 +85,13 @@ public class MainWindow extends JFrame {
         setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
         setFocusable(true);
         setAutoRequestFocus(true);
-        final BoxLayout mainLayout = new BoxLayout(getContentPane(), BoxLayout.Y_AXIS);
-        getContentPane().setLayout(mainLayout);
+        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
         cpu = new Cpu();
+
+        fileChooser = new JFileChooser();
+        fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos do Cesar (*.mem)", "mem"));
 
         running = false;
         currentBase = Base.DECIMAL;
@@ -242,18 +246,10 @@ public class MainWindow extends JFrame {
             }
         });
 
-        final JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setMultiSelectionEnabled(false);
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos do Cesar (*.mem)", "mem"));
-
         menuBar.fileOpen.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(final ActionEvent actionEvent) {
-                final int choice = fileChooser.showDialog(MainWindow.this, null);
-
-                if (choice == JFileChooser.APPROVE_OPTION) {
-                    MainWindow.this.openFile(fileChooser.getSelectedFile());
-                }
+            public void actionPerformed(ActionEvent e) {
+                openFile();
             }
         });
 
@@ -268,7 +264,7 @@ public class MainWindow extends JFrame {
         buttonPanel.btnNext.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                MainWindow.this.executeNextInstruction();
+                executeNextInstruction();
             }
         });
 
@@ -293,15 +289,17 @@ public class MainWindow extends JFrame {
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent actionEvent) {
-                    currentBase = base;
-                    programWindow.setBase(base);
-                    dataWindow.setBase(base);
-                    for (final RegisterDisplay register : registerPanel.getDisplays()) {
-                        register.setBase(base);
-                    }
+                    setBase(base);
                 }
             });
         }
+    }
+
+    private void setBase(final Base base) {
+        currentBase = base;
+        programWindow.setBase(base);
+        dataWindow.setBase(base);
+        registerPanel.setBase(base);
     }
 
     private void updateSubWindowsPositions() {
@@ -318,7 +316,11 @@ public class MainWindow extends JFrame {
         requestFocus();
     }
 
-    private void openFile(final File file) {
+    private void openFile() {
+        if (fileChooser.showDialog(this, null) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        final File file = fileChooser.getSelectedFile();
         try {
             final FileInputStream inputStream = new FileInputStream(file);
             final int size = (int) file.length();
@@ -362,8 +364,6 @@ public class MainWindow extends JFrame {
                 break;
 
             case BREAK_POINT:
-                stopRunning();
-                break;
 
             case INVALID_INSTRUCTION:
                 stopRunning();
@@ -373,7 +373,7 @@ public class MainWindow extends JFrame {
 
     private void updateProgramCounterRow() {
         final int programCounter = cpu.getProgramCounter();
-        programTableModel.setPcRow(programCounter);
+        programTableModel.setProgramCounterRow(programCounter);
         programTable.setRowSelectionInterval(programCounter, programCounter);
         if (!isRunning()) {
             programTable.scrollToRow(programCounter);
@@ -390,7 +390,7 @@ public class MainWindow extends JFrame {
         conditionPanel.setCarry(cpu.isCarry());
         executionPanel.setMemoryAccessCount(cpu.getMemoryAccessCount());
         instructionPanel.setRiText(cpu.getReadInstruction());
-        instructionPanel.setMnemText(cpu.getReadMnemonic());
+        instructionPanel.setMnemonicText(cpu.getReadMnemonic());
     }
 
     private void updateInterface() {
@@ -398,7 +398,7 @@ public class MainWindow extends JFrame {
         updateProgramCounterRow();
         repaint();
         textWindow.repaint();
-        programTable.scrollToRow(programTableModel.getPcRow());
+        programTable.scrollToRow(programTableModel.getProgramCounterRow());
         programWindow.repaint();
         dataWindow.repaint();
     }
@@ -409,18 +409,20 @@ public class MainWindow extends JFrame {
         final String input = JOptionPane.showInputDialog(display,
                 String.format("Digite um valor %s para o registrador %d", currentBase.toString(), registerNumber),
                 Integer.toString(cpu.getRegister(registerNumber), radix));
-        if (input == null) {
-            return;
-        }
-        try {
-            final int newValue = Integer.parseInt(input, radix);
-            if (newValue <= 0xFFFF && newValue >= Short.MIN_VALUE) {
-                cpu.setRegister(registerNumber, (short) (0xFFFF & newValue));
-                updateInterface();
+        if (input != null) {
+            try {
+                final int newValue = Integer.parseInt(input, radix);
+                if (newValue <= 0xFFFF && newValue >= Short.MIN_VALUE) {
+                    cpu.setRegister(registerNumber, (short) (0xFFFF & newValue));
+                    updateInterface();
+                }
+                else {
+                    throw new NumberFormatException();
+                }
             }
-        }
-        catch (final NumberFormatException e) {
-            statusBar.setText("O valor digitado é inválido: " + input);
+            catch (final NumberFormatException e) {
+                statusBar.setText("O valor digitado é inválido: " + input);
+            }
         }
     }
 }

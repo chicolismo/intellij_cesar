@@ -15,7 +15,7 @@ public enum Instruction {
     private static final HashSet<Instruction> TWO_OP_INSTRUCTIONS;
 
     static {
-        INSTRUCTION_MAP = new HashMap<Integer, Instruction>();
+        INSTRUCTION_MAP = new HashMap<>();
         INSTRUCTION_MAP.put(0b0000, NOP);
         INSTRUCTION_MAP.put(0b0001, CCC);
         INSTRUCTION_MAP.put(0b0010, SCC);
@@ -63,7 +63,7 @@ public enum Instruction {
         // Instrução de parada
         INSTRUCTION_MAP.put(0b1111, HLT);
 
-        CONDITIONAL_BRANCH_INSTRUCTIONS = new HashSet<Instruction>(15);
+        CONDITIONAL_BRANCH_INSTRUCTIONS = new HashSet<>(15);
         CONDITIONAL_BRANCH_INSTRUCTIONS.add(BR);
         CONDITIONAL_BRANCH_INSTRUCTIONS.add(BNE);
         CONDITIONAL_BRANCH_INSTRUCTIONS.add(BEQ);
@@ -80,7 +80,7 @@ public enum Instruction {
         CONDITIONAL_BRANCH_INSTRUCTIONS.add(BHI);
         CONDITIONAL_BRANCH_INSTRUCTIONS.add(BLS);
 
-        ONE_OP_INSTRUCTIONS = new HashSet<Instruction>(12);
+        ONE_OP_INSTRUCTIONS = new HashSet<>(12);
         ONE_OP_INSTRUCTIONS.add(CLR);
         ONE_OP_INSTRUCTIONS.add(NOT);
         ONE_OP_INSTRUCTIONS.add(INC);
@@ -94,7 +94,7 @@ public enum Instruction {
         ONE_OP_INSTRUCTIONS.add(ADC);
         ONE_OP_INSTRUCTIONS.add(SBC);
 
-        TWO_OP_INSTRUCTIONS = new HashSet<Instruction>(6);
+        TWO_OP_INSTRUCTIONS = new HashSet<>(6);
         TWO_OP_INSTRUCTIONS.add(MOV);
         TWO_OP_INSTRUCTIONS.add(ADD);
         TWO_OP_INSTRUCTIONS.add(SUB);
@@ -102,7 +102,7 @@ public enum Instruction {
         TWO_OP_INSTRUCTIONS.add(AND);
         TWO_OP_INSTRUCTIONS.add(OR);
 
-        FORMAT = new HashMap<Instruction, String>();
+        FORMAT = new HashMap<>();
         FORMAT.put(NOP, "NOP");
         FORMAT.put(HLT, "HLT");
         FORMAT.put(CCC, "CCC %s");

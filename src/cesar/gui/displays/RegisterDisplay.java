@@ -1,15 +1,11 @@
 package cesar.gui.displays;
 
-import java.awt.Dimension;
-
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-
 import cesar.utils.Base;
 import cesar.utils.Defaults;
 import cesar.utils.Shorts;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class RegisterDisplay extends JPanel {
     private static final long serialVersionUID = 7050289063551512021L;
