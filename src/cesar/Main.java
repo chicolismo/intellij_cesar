@@ -1,12 +1,9 @@
 package cesar;
 
 import cesar.gui.windows.MainWindow;
-import com.sun.glass.events.KeyEvent;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class Main {
     public static void main(final String[] args) {

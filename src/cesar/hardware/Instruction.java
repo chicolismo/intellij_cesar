@@ -1,18 +1,19 @@
 package cesar.hardware;
 
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 
 public enum Instruction {
-    NOP, CCC, SCC, BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS, JMP, SOB, JSR, RTS, CLR,
-    NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC, MOV, ADD, SUB, CMP, AND, OR, HLT;
+    NOP, CCC, SCC, BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS, JMP, SOB, JSR, RTS, CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC, MOV, ADD, SUB, CMP, AND, OR, HLT;
+
 
     private static final HashMap<Integer, Instruction> INSTRUCTION_MAP;
-    private static final HashMap<Instruction, String> FORMAT;
+    private static final EnumMap<Instruction, String> FORMAT;
 
-    private static final HashSet<Instruction> CONDITIONAL_BRANCH_INSTRUCTIONS;
-    private static final HashSet<Instruction> ONE_OP_INSTRUCTIONS;
-    private static final HashSet<Instruction> TWO_OP_INSTRUCTIONS;
+    private static final EnumSet<Instruction> CONDITIONAL_BRANCH_INSTRUCTIONS;
+    private static final EnumSet<Instruction> ONE_OP_INSTRUCTIONS;
+    private static final EnumSet<Instruction> TWO_OP_INSTRUCTIONS;
 
     static {
         INSTRUCTION_MAP = new HashMap<>();
@@ -63,46 +64,11 @@ public enum Instruction {
         // Instrução de parada
         INSTRUCTION_MAP.put(0b1111, HLT);
 
-        CONDITIONAL_BRANCH_INSTRUCTIONS = new HashSet<>(15);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BR);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BNE);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BEQ);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BPL);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BMI);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BVC);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BVS);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BCC);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BCS);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BGE);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BLT);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BGT);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BLE);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BHI);
-        CONDITIONAL_BRANCH_INSTRUCTIONS.add(BLS);
+        CONDITIONAL_BRANCH_INSTRUCTIONS = EnumSet.of(BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS);
+        ONE_OP_INSTRUCTIONS = EnumSet.of(CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC);
+        TWO_OP_INSTRUCTIONS = EnumSet.of(MOV, ADD, SUB, CMP, AND, OR);
 
-        ONE_OP_INSTRUCTIONS = new HashSet<>(12);
-        ONE_OP_INSTRUCTIONS.add(CLR);
-        ONE_OP_INSTRUCTIONS.add(NOT);
-        ONE_OP_INSTRUCTIONS.add(INC);
-        ONE_OP_INSTRUCTIONS.add(DEC);
-        ONE_OP_INSTRUCTIONS.add(NEG);
-        ONE_OP_INSTRUCTIONS.add(TST);
-        ONE_OP_INSTRUCTIONS.add(ROR);
-        ONE_OP_INSTRUCTIONS.add(ROL);
-        ONE_OP_INSTRUCTIONS.add(ASR);
-        ONE_OP_INSTRUCTIONS.add(ASL);
-        ONE_OP_INSTRUCTIONS.add(ADC);
-        ONE_OP_INSTRUCTIONS.add(SBC);
-
-        TWO_OP_INSTRUCTIONS = new HashSet<>(6);
-        TWO_OP_INSTRUCTIONS.add(MOV);
-        TWO_OP_INSTRUCTIONS.add(ADD);
-        TWO_OP_INSTRUCTIONS.add(SUB);
-        TWO_OP_INSTRUCTIONS.add(CMP);
-        TWO_OP_INSTRUCTIONS.add(AND);
-        TWO_OP_INSTRUCTIONS.add(OR);
-
-        FORMAT = new HashMap<>();
+        FORMAT = new EnumMap<>(Instruction.class);
         FORMAT.put(NOP, "NOP");
         FORMAT.put(HLT, "HLT");
         FORMAT.put(CCC, "CCC %s");

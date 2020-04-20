@@ -1,6 +1,6 @@
 package cesar.hardware;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 
 public enum AddressMode {
     REGISTER, REGISTER_POST_INCREMENTED, REGISTER_PRE_DECREMENTED, INDEXED, REGISTER_INDIRECT,
@@ -8,10 +8,10 @@ public enum AddressMode {
 
     private static final AddressMode[] ARRAY = AddressMode.values();
 
-    private static final HashMap<AddressMode, String> FORMAT;
+    private static final EnumMap<AddressMode, String> FORMAT;
 
     static {
-        FORMAT = new HashMap<>();
+        FORMAT = new EnumMap<>(AddressMode.class);
         FORMAT.put(REGISTER, "R%d");
         FORMAT.put(REGISTER_POST_INCREMENTED, "(R%d)+");
         FORMAT.put(REGISTER_PRE_DECREMENTED, "-(R%d)");

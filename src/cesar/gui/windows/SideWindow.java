@@ -7,10 +7,6 @@ import cesar.utils.Base;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 public abstract class SideWindow<TableType extends Table, TableModelType extends TableModel> extends JDialog {
     public static final long serialVersionUID = 3602114587032491724L;
@@ -85,4 +81,11 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
     }
 
     abstract protected void initTable(final Cpu cpu);
+
+    protected static GridBagLayout getGridLayout(double[] rowWeights, double[] colWeights) {
+        final GridBagLayout grid = new GridBagLayout();
+        grid.rowWeights = rowWeights;
+        grid.columnWeights = colWeights;
+        return grid;
+    }
 }

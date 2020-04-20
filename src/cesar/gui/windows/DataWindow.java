@@ -22,11 +22,7 @@ public class DataWindow extends SideWindow<DataTable, DataTableModel> {
     protected void initLayout() {
         super.initLayout();
 
-        final JPanel lowerPanel = new JPanel();
-        final GridBagLayout layout = new GridBagLayout();
-        layout.columnWeights = new double[] { 1.0, 0.0, 0.0 };
-        layout.rowWeights = new double[] { 1.0 };
-        lowerPanel.setLayout(layout);
+        final JPanel lowerPanel = new JPanel(getGridLayout(new double[] { 1.0 }, new double[] { 1.0, 0.0, 0.0 }));
 
         final GridBagConstraints c_0 = new GridBagConstraints();
         c_0.ipadx = 4;

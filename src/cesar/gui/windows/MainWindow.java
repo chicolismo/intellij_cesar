@@ -332,6 +332,7 @@ public class MainWindow extends JFrame {
                         window.setCurrentValue(newValue);
                         int currentAddress = window.getCurrentAddress();
                         model.setValue(currentAddress, (byte) (0xFF & window.getCurrentValue()));
+                        model.fireTableDataChanged();
                         if (cpu.isIOAddress(currentAddress)) {
                             textDisplay.repaint();
                         }
@@ -471,11 +472,11 @@ public class MainWindow extends JFrame {
                     updateInterface();
                 }
                 else {
-                    throw new NumberFormatException();
+                    throw new NumberFormatException("O valor digitado excede o tamanho da palavra: " + newValue);
                 }
             }
             catch (final NumberFormatException e) {
-                statusBar.setText("O valor digitado é inválido: " + input);
+                statusBar.setText(e.getMessage());
             }
         }
     }

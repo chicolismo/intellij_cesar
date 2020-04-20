@@ -170,13 +170,13 @@ public class Cpu {
     }
 
     private void push(final short word) {
-        registers[SP] -= 2;
+        registers[SP] = (short) (registers[SP] - 2);
         writeWord(Shorts.toUnsignedInt(registers[SP]), word);
     }
 
     private short pop() {
         final short word = readWord(registers[SP]);
-        registers[SP] += 2;
+        registers[SP] = (short) (registers[SP] + 2);
         return word;
     }
 
@@ -295,90 +295,90 @@ public class Cpu {
     private void executeConditionalInstruction(final CpuConditionalInstruction instruction, final byte offset) {
         switch (instruction) {
             case BR:
-                registers[PC] += offset;
+                registers[PC] = (short) (registers[PC] + offset);
                 break;
 
             case BNE:
                 if (!conditionRegister.isZero()) {
-                    registers[PC] += offset;
+                    registers[PC] = (short) (registers[PC] + offset);
                 }
                 break;
 
             case BEQ:
                 if (conditionRegister.isZero()) {
-                    registers[PC] += offset;
+                    registers[PC] = (short) (registers[PC] + offset);
                 }
                 break;
 
             case BPL:
                 if (!conditionRegister.isNegative()) {
-                    registers[PC] += offset;
+                    registers[PC] = (short) (registers[PC] + offset);
                 }
                 break;
 
             case BMI:
                 if (conditionRegister.isNegative()) {
-                    registers[PC] += offset;
+                    registers[PC] = (short) (registers[PC] + offset);
                 }
                 break;
 
             case BVC:
                 if (!conditionRegister.isOverflow()) {
-                    registers[PC] += offset;
+                    registers[PC] = (short) (registers[PC] + offset);
                 }
                 break;
 
             case BVS:
                 if (conditionRegister.isOverflow()) {
-                    registers[PC] += offset;
+                    registers[PC] = (short) (registers[PC] + offset);
                 }
                 break;
 
             case BCC:
                 if (!conditionRegister.isCarry()) {
-                    registers[PC] += offset;
+                    registers[PC] = (short) (registers[PC] + offset);
                 }
                 break;
 
             case BCS:
                 if (conditionRegister.isCarry()) {
-                    registers[PC] += offset;
+                    registers[PC] = (short) (registers[PC] + offset);
                 }
                 break;
 
             case BGE:
                 if (conditionRegister.isNegative() == conditionRegister.isOverflow()) {
-                    registers[PC] += offset;
+                    registers[PC] = (short) (registers[PC] + offset);
                 }
                 break;
 
             case BLT:
                 if (conditionRegister.isNegative() != conditionRegister.isOverflow()) {
-                    registers[PC] += offset;
+                    registers[PC] = (short) (registers[PC] + offset);
                 }
                 break;
 
             case BGT:
                 if (conditionRegister.isNegative() == conditionRegister.isOverflow() && !conditionRegister.isZero()) {
-                    registers[PC] += offset;
+                    registers[PC] = (short) (registers[PC] + offset);
                 }
                 break;
 
             case BLE:
                 if (conditionRegister.isNegative() != conditionRegister.isOverflow() || conditionRegister.isZero()) {
-                    registers[PC] += offset;
+                    registers[PC] = (short) (registers[PC] + offset);
                 }
                 break;
 
             case BHI:
                 if (!conditionRegister.isCarry() && !conditionRegister.isZero()) {
-                    registers[PC] += offset;
+                    registers[PC] = (short) (registers[PC] + offset);
                 }
                 break;
 
             case BLS:
                 if (conditionRegister.isCarry() || conditionRegister.isZero()) {
-                    registers[PC] += offset;
+                    registers[PC] = (short) (registers[PC] + offset);
                 }
                 break;
         }
@@ -441,20 +441,18 @@ public class Cpu {
                 break;
 
             case ROR: {
-                final int lsb = value & 0x0001;
-                final int c = conditionRegister.isCarry() ? 1 : 0;
-                result = (short) (c & value >> 1);
+                final int lsb = (value & 0x0001) << 0xF;
+                result = (short) (lsb | (0xFFFF & value) >> 1);
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
-                conditionRegister.setCarry(lsb == 1);
+                conditionRegister.setCarry(lsb == 0x8000);
                 conditionRegister.setOverflow(conditionRegister.isNegative() ^ conditionRegister.isCarry());
                 break;
             }
 
             case ROL: {
                 final int msb = (value & 0x8000) >> 0xF;
-                final int c = conditionRegister.isCarry() ? 1 : 0;
-                result = (short) (value << 1 & c);
+                result = (short) ((0xFFFF & value) << 1 | msb);
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.setCarry(msb == 1);
@@ -596,7 +594,7 @@ public class Cpu {
     private Operand getOperand(final int mmm, final int rrr) {
         final AddressMode mode = AddressMode.fromInt(mmm);
         if (mode == AddressMode.REGISTER) {
-            return new Operand(registers[rrr], rrr, mode);
+            return new Operand(registers[rrr], rrr, AddressMode.REGISTER);
         }
         else {
             final int address = getAddress(mode, rrr);
@@ -613,17 +611,17 @@ public class Cpu {
 
             case REGISTER_POST_INCREMENTED:
                 address = Shorts.toUnsignedInt(registers[registerNumber]);
-                registers[registerNumber] += 2;
+                registers[registerNumber] = (short) (registers[registerNumber] + 2);
                 break;
 
             case REGISTER_PRE_DECREMENTED:
-                registers[registerNumber] -= 2;
+                registers[registerNumber] = (short) (registers[registerNumber] - 2);
                 address = Shorts.toUnsignedInt(registers[registerNumber]);
                 break;
 
             case INDEXED: {
                 final short word = readWord(registers[PC]);
-                registers[PC] += 2;
+                registers[PC] = (short) (registers[PC] + 2);
                 address = 0xFFFF & registers[registerNumber] + word;
                 break;
             }
@@ -634,13 +632,13 @@ public class Cpu {
 
             case POST_INCREMENTED_INDIRECT: {
                 final int firstAddress = Shorts.toUnsignedInt(registers[registerNumber]);
-                registers[registerNumber] += 2;
+                registers[registerNumber] = (short) (registers[registerNumber] + 2);
                 address = Shorts.toUnsignedInt(readWord(firstAddress));
                 break;
             }
 
             case PRE_DECREMENTED_INDIRECT: {
-                registers[registerNumber] -= 2;
+                registers[registerNumber] = (short) (registers[registerNumber] - 2);
                 final int firstAddress = Shorts.toUnsignedInt(registers[registerNumber]);
                 address = Shorts.toUnsignedInt(readWord(firstAddress));
                 break;
@@ -648,7 +646,7 @@ public class Cpu {
 
             case INDEXED_INDIRECT: {
                 final short nextWord = readWord(registers[PC]);
-                registers[PC] += 2;
+                registers[PC] = (short) (registers[PC] + 2);
                 final int firstAddress = 0xFFFF & nextWord + registers[registerNumber];
                 address = Shorts.toUnsignedInt(readWord(firstAddress));
                 break;
