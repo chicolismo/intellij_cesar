@@ -119,6 +119,10 @@ public class Cpu {
         return mnemonics[0xFFFF & address];
     }
 
+    public String[] getMnemonics() {
+        return mnemonics;
+    }
+
     public void setByte(final int address, final byte value) {
         memory[0xFFFF & address] = value;
         lastChangedMnemonic = Mnemonic.updateMnemonics(this, address);
@@ -463,7 +467,7 @@ public class Cpu {
             case ASR: {
                 final int msb = value & 0x8000;
                 final int lsb = value & 1;
-                result = (short) (msb & value >> 1);
+                result = (short) (msb | (0x7FFF & value >> 1));
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.setCarry(lsb == 1);
@@ -472,11 +476,11 @@ public class Cpu {
             }
 
             case ASL: {
-                final int msb = (value & 0x8000) >> 0xF;
+                final int msb = (value & 0x8000);
                 result = (short) (value << 1 & 0xFFFE);
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
-                conditionRegister.setCarry(msb == 1);
+                conditionRegister.setCarry(msb == 0x8000);
                 conditionRegister.setOverflow(conditionRegister.isNegative() ^ conditionRegister.isCarry());
                 break;
             }

@@ -1,11 +1,15 @@
 package cesar.gui.windows;
 
+import javax.swing.plaf.basic.BasicIconFactory;
+
 import cesar.gui.displays.RegisterDisplay;
 import cesar.gui.displays.TextDisplay;
 import cesar.gui.panels.*;
 import cesar.gui.tables.*;
 import cesar.hardware.Cpu;
+import cesar.hardware.TextConverter;
 import cesar.utils.Base;
+import com.sun.java.swing.plaf.windows.WindowsIconFactory;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -52,8 +56,7 @@ public class MainWindow extends JFrame {
 
     public MainWindow() {
         super("Cesar");
-        setIconImage(
-                Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource("/cesar/gui/assets/computer.png")));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource("/cesar/gui/assets/computer.png")));
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
         setFocusable(true);
@@ -138,8 +141,7 @@ public class MainWindow extends JFrame {
         mainPanel.add(registerPanel);
         mainPanel.add(middlePanel);
         mainPanel.add(instructionPanel);
-        mainPanel.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1),
-                BorderFactory.createBevelBorder(BevelBorder.LOWERED)));
+        mainPanel.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1), BorderFactory.createBevelBorder(BevelBorder.LOWERED)));
         return mainPanel;
     }
 
@@ -202,8 +204,7 @@ public class MainWindow extends JFrame {
         }
 
         final Component[][] pairs = new Component[][] {
-                { programWindow, menuBar.viewProgram },
-                { dataWindow, menuBar.viewData }, { textWindow, menuBar.viewDisplay }
+                { programWindow, menuBar.viewProgram }, { dataWindow, menuBar.viewData }, { textWindow, menuBar.viewDisplay }
         };
 
         for (final Component[] pair : pairs) {
@@ -244,6 +245,20 @@ public class MainWindow extends JFrame {
             }
         });
 
+        menuBar.fileOpenPartially.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                JOptionPane.showMessageDialog(getParent(), "Carga parcial não implementada...", null, JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        menuBar.fileSaveText.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                saveAsText();
+            }
+        });
+
         menuBar.fileExit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent actionEvent) {
@@ -272,8 +287,7 @@ public class MainWindow extends JFrame {
         });
 
         final Object[][] buttons = new Object[][] {
-                { buttonPanel.btnDec, Base.DECIMAL },
-                { buttonPanel.btnHex, Base.HEXADECIMAL }
+                { buttonPanel.btnDec, Base.DECIMAL }, { buttonPanel.btnHex, Base.HEXADECIMAL }
         };
 
         for (final Object[] pair : buttons) {
@@ -371,6 +385,10 @@ public class MainWindow extends JFrame {
         requestFocus();
     }
 
+    private void saveAsText() {
+        TextConverter.saveAsText(this, cpu, currentBase);
+    }
+
     private void openFile() {
         if (fileChooser.showDialog(this, null) != JFileChooser.APPROVE_OPTION) {
             return;
@@ -390,8 +408,7 @@ public class MainWindow extends JFrame {
             dataTable.scrollToRow(Cpu.DATA_START_ADDRESS, true);
         }
         catch (final IOException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Um erro ocorreu ao abrir o arquivo",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Um erro ocorreu ao abrir o arquivo", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }
@@ -461,9 +478,7 @@ public class MainWindow extends JFrame {
     private void showNewRegisterValueDialog(final RegisterDisplay display, final int registerNumber) {
         statusBar.clear();
         final int radix = currentBase.toInt();
-        final String input = JOptionPane.showInputDialog(display,
-                String.format("Digite um valor %s para o registrador %d", currentBase.toString(), registerNumber),
-                Integer.toString(cpu.getRegister(registerNumber), radix));
+        final String input = JOptionPane.showInputDialog(display, String.format("Digite um valor %s para o registrador %d", currentBase.toString(), registerNumber), Integer.toString(cpu.getRegister(registerNumber), radix));
         if (input != null) {
             try {
                 final int newValue = Integer.parseInt(input, radix);

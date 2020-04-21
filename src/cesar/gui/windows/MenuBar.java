@@ -1,30 +1,60 @@
 package cesar.gui.windows;
 
+import com.sun.javafx.scene.control.Keystroke;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class MenuBar extends JMenuBar {
     private static final long serialVersionUID = -7618206299229330211L;
 
     public final JMenuItem fileOpen;
+    public final JMenuItem fileOpenPartially;
+    public final JMenuItem fileSaveText;
     public final JMenuItem fileExit;
     public final JCheckBoxMenuItem viewProgram;
     public final JCheckBoxMenuItem viewData;
     public final JCheckBoxMenuItem viewDisplay;
+    private final static int CTRL_KEY;
+    private final static int ALT_KEY;
+
+    static {
+        int ctrlKey;
+        try {
+            Method m = Toolkit.class.getMethod("getMenuShortcutKeyMask");
+            ctrlKey = (int) m.invoke(Toolkit.getDefaultToolkit());
+        }
+        catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            ctrlKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+        }
+        ALT_KEY = KeyEvent.ALT_MASK;
+        CTRL_KEY = ctrlKey;
+    };
 
     public MenuBar() {
-        // int ctrlKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
-        final int ctrlKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
-        fileOpen = new JMenuItem("Carregar", KeyEvent.VK_C);
-        fileOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ctrlKey));
+        fileOpen = new JMenuItem("Carregar...", KeyEvent.VK_C);
+        fileOpen.setIcon(UIManager.getIcon("FileView.directoryIcon"));
+        fileOpen.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, CTRL_KEY));
 
-        fileExit = new JMenuItem("Sair", KeyEvent.VK_S);
-        fileExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ctrlKey));
+        fileOpenPartially = new JMenuItem("Carga parcial...", KeyEvent.VK_P);
+        fileOpenPartially.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, CTRL_KEY));
+
+        fileSaveText = new JMenuItem("Salvar texto...", KeyEvent.VK_T);
+        fileSaveText.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, CTRL_KEY));
+
+        fileExit = new JMenuItem("Sair", KeyEvent.VK_R);
+        //fileExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ctrlKey));
 
         final JMenu fileMenu = new JMenu("Arquivo");
+        fileMenu.setMnemonic(KeyEvent.VK_A);
         fileMenu.add(fileOpen);
+        fileMenu.add(fileOpenPartially);
+        fileMenu.add(fileSaveText);
         fileMenu.addSeparator();
         fileMenu.add(fileExit);
 
