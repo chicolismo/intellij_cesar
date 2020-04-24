@@ -20,9 +20,8 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
     protected TableModelType model;
 
     public SideWindow(final MainWindow parent, final String title, final Cpu cpu) {
-        super(parent, title);
-        setIconImage(null);
-        setFocusable(false);
+        super(parent, title, false);
+        setFocusable(true);
         setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         initTable(cpu);
         setCurrentAddress(0);

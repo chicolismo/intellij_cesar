@@ -19,6 +19,7 @@ public class MenuBar extends JMenuBar {
     public final JCheckBoxMenuItem viewProgram;
     public final JCheckBoxMenuItem viewData;
     public final JCheckBoxMenuItem viewDisplay;
+    public final JMenuItem helpAbout;
     private final static int CTRL_KEY;
     private final static int ALT_KEY;
 
@@ -51,7 +52,6 @@ public class MenuBar extends JMenuBar {
         //fileExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ctrlKey));
 
         final JMenu fileMenu = new JMenu("Arquivo");
-        fileMenu.setMnemonic(KeyEvent.VK_A);
         fileMenu.add(fileOpen);
         fileMenu.add(fileOpenPartially);
         fileMenu.add(fileSaveText);
@@ -61,10 +61,14 @@ public class MenuBar extends JMenuBar {
         final JMenu editMenu = new JMenu("Editar");
 
         final JMenu viewMenu = new JMenu("Visualizar");
-//        viewProgram = new JMenuItem("Exibir programa");
-        viewProgram = new JCheckBoxMenuItem("Exibir janela de programa");
-        viewData = new JCheckBoxMenuItem("Exibir janela de dados");
-        viewDisplay = new JCheckBoxMenuItem("Exibir janela do visor");
+        viewProgram = new JCheckBoxMenuItem("Memória - Programa");
+        viewProgram.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0));
+
+        viewData = new JCheckBoxMenuItem("Memória - Dados");
+        viewData.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
+
+        viewDisplay = new JCheckBoxMenuItem("Saída");
+
         viewMenu.add(viewProgram);
         viewMenu.add(viewData);
         viewMenu.add(viewDisplay);
@@ -72,6 +76,15 @@ public class MenuBar extends JMenuBar {
         final JMenu execMenu = new JMenu("Executar");
 
         final JMenu helpMenu = new JMenu("?");
+        helpAbout = new JMenuItem("Sobre....", KeyEvent.VK_S);
+        helpMenu.add(helpAbout);
+
+
+        fileMenu.setMnemonic(KeyEvent.VK_A);
+        editMenu.setMnemonic(KeyEvent.VK_E);
+        viewMenu.setMnemonic(KeyEvent.VK_V);
+        execMenu.setMnemonic(KeyEvent.VK_X);
+        helpMenu.setMnemonic('?');
 
         add(fileMenu);
         add(editMenu);

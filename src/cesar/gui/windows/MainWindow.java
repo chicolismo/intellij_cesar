@@ -1,7 +1,5 @@
 package cesar.gui.windows;
 
-import javax.swing.plaf.basic.BasicIconFactory;
-
 import cesar.gui.displays.RegisterDisplay;
 import cesar.gui.displays.TextDisplay;
 import cesar.gui.panels.*;
@@ -9,7 +7,6 @@ import cesar.gui.tables.*;
 import cesar.hardware.Cpu;
 import cesar.hardware.TextConverter;
 import cesar.utils.Base;
-import com.sun.java.swing.plaf.windows.WindowsIconFactory;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -168,6 +165,8 @@ public class MainWindow extends JFrame {
     }
 
     private void initEvents() {
+        final MainWindow mainWindow = this;
+
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentMoved(final ComponentEvent e) {
@@ -177,19 +176,22 @@ public class MainWindow extends JFrame {
 
         final KeyListener keyListener = new KeyAdapter() {
             @Override
-            public void keyPressed(final KeyEvent event) {
-                if (event.getModifiersEx() == 0) {
-                    // TODO: Testar se está no intervalo válido do alfabeto
-                    byte keyValue = (byte) (0xFF & event.getKeyCode());
-                    cpu.setTypedKey(keyValue);
-                    programTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
-                    dataTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
-                }
+            public void keyTyped(final KeyEvent event) {
+                cpu.setTypedKey((byte) event.getKeyChar());
+                programTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
+                dataTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
             }
         };
-
         addKeyListener(keyListener);
-        textWindow.addKeyListener(keyListener);
+
+        for (final JDialog sideWindow : new JDialog[] { programWindow, dataWindow, textWindow }) {
+            sideWindow.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyTyped(final KeyEvent e) {
+                    mainWindow.processKeyEvent(e);
+                }
+            });
+        }
 
         for (final RegisterDisplay display : registerPanel.getDisplays()) {
             final int registerNumber = display.getNumber();
@@ -208,10 +210,10 @@ public class MainWindow extends JFrame {
         };
 
         for (final Component[] pair : pairs) {
-            final JDialog subWindow = (JDialog) pair[0];
+            final JDialog sideWindow = (JDialog) pair[0];
             final JCheckBoxMenuItem checkBox = (JCheckBoxMenuItem) pair[1];
 
-            subWindow.addComponentListener(new ComponentAdapter() {
+            sideWindow.addComponentListener(new ComponentAdapter() {
                 @Override
                 public void componentHidden(final ComponentEvent e) {
                     super.componentHidden(e);
@@ -222,7 +224,7 @@ public class MainWindow extends JFrame {
             checkBox.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent actionEvent) {
-                    subWindow.setVisible(checkBox.getState());
+                    sideWindow.setVisible(checkBox.getState());
                 }
             });
         }

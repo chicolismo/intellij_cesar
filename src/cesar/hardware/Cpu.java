@@ -13,6 +13,8 @@ public class Cpu {
     public static final int PC = 7;
     public static final int SP = 6;
 
+    private static final byte ZERO_BYTE = (byte) 0;
+
     private final ConditionRegister conditionRegister;
     private final short[] registers;
     private final byte[] memory;
@@ -152,7 +154,7 @@ public class Cpu {
     private short readWord(final int address) {
         if (isIOAddress(address)) {
             final byte lsb = readByte(address);
-            return Shorts.fromBytes((byte) 0, lsb);
+            return Shorts.fromBytes(ZERO_BYTE, lsb);
         }
         else {
             final byte msb = readByte(address);
@@ -217,8 +219,7 @@ public class Cpu {
             }
 
             case CONDITIONAL_BRANCH: {
-                final CpuConditionalInstruction conditionalInstruction = CpuConditionalInstruction
-                        .fromInt(firstByte & 0x0F);
+                final CpuConditionalInstruction conditionalInstruction = CpuConditionalInstruction.fromInt(firstByte & 0x0F);
                 final byte nextByte = fetchNextByte();
                 executeConditionalInstruction(conditionalInstruction, nextByte);
                 return ExecutionResult.OK;
@@ -661,13 +662,16 @@ public class Cpu {
     }
 
     public void setTypedKey(final byte keyValue) {
-        setByte(KEYBOARD_STATE_ADDRESS, (byte) 0x80);
-        setByte(LAST_CHAR_ADDRESS, keyValue);
+        // O valor do último byte digitado só é alterado quando o endereço do estado do teclado for 0 (ZERO).
+        // (que indica que está esperando uma tecla).
+        if (readByte(KEYBOARD_STATE_ADDRESS) == ZERO_BYTE) {
+            setByte(KEYBOARD_STATE_ADDRESS, (byte) 0x80);
+            setByte(LAST_CHAR_ADDRESS, keyValue);
+        }
     }
 
     enum CpuInstruction {
-        NOP, CCC, SCC, CONDITIONAL_BRANCH, JMP, SOB, JSR, RTS, ONE_OPERAND_INSTRUCTION, MOV, ADD, SUB, CMP, AND, OR,
-        HLT;
+        NOP, CCC, SCC, CONDITIONAL_BRANCH, JMP, SOB, JSR, RTS, ONE_OPERAND_INSTRUCTION, MOV, ADD, SUB, CMP, AND, OR, HLT;
 
         private static final CpuInstruction[] array = CpuInstruction.values();
 
