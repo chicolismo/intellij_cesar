@@ -1,7 +1,6 @@
 package cesar.gui.windows;
 
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 
 import javax.swing.Box;
 import javax.swing.JPanel;

@@ -13,7 +13,7 @@ public class Cpu {
     public static final int PC = 7;
     public static final int SP = 6;
 
-    private static final byte ZERO_BYTE = (byte) 0;
+    private static final byte ZERO_BYTE = 0;
 
     private final ConditionRegister conditionRegister;
     private final short[] registers;
@@ -186,7 +186,7 @@ public class Cpu {
         return word;
     }
 
-    public boolean isIOAddress(final int address) {
+    public static boolean isIOAddress(final int address) {
         return address >= KEYBOARD_STATE_ADDRESS && address <= END_DISPLAY_ADDRESS;
     }
 
@@ -664,10 +664,11 @@ public class Cpu {
     public void setTypedKey(final byte keyValue) {
         // O valor do último byte digitado só é alterado quando o endereço do estado do teclado for 0 (ZERO).
         // (que indica que está esperando uma tecla).
-        if (readByte(KEYBOARD_STATE_ADDRESS) == ZERO_BYTE) {
+
+        //if (readByte(KEYBOARD_STATE_ADDRESS) == ZERO_BYTE) {
             setByte(KEYBOARD_STATE_ADDRESS, (byte) 0x80);
             setByte(LAST_CHAR_ADDRESS, keyValue);
-        }
+        //}
     }
 
     enum CpuInstruction {

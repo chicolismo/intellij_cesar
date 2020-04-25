@@ -14,6 +14,7 @@ public class Main {
             else {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             }
+            //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
         catch (UnsupportedLookAndFeelException | IllegalAccessException | InstantiationException | ClassNotFoundException e) {
             e.printStackTrace();

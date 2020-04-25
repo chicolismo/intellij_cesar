@@ -2,9 +2,6 @@ package cesar.hardware;
 
 import cesar.utils.Base;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,41 +15,35 @@ public class TextConverter {
 
     private static final String BYTE_SEPARATOR = "  ";
 
-    private final Component parent;
     private final Cpu cpu;
     private final String addressFormat;
     private final String byteFormat;
     private final String emptyString;
     private int maxByteCount;
-    private final JFileChooser fileChooser;
 
-    private TextConverter(final Component parent, final Cpu cpu, final Base base) {
-        this.parent = parent;
+    public TextConverter(final Cpu cpu, final Base base) {
         this.cpu = cpu;
         addressFormat = base == Base.DECIMAL ? "%5d" : "%4x";
         byteFormat = base == Base.DECIMAL ? "%3d" : "%2x";
         emptyString = base == Base.DECIMAL ? "   " : "  ";
-        fileChooser = new JFileChooser();
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos texto (*.txt)", "txt"));
     }
 
-    public void showDialog() {
-        if (fileChooser.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
-            final File file = fileChooser.getSelectedFile();
-            writeToFile(file);
-        }
-    }
-
-    public static void saveAsText(final Component parent, final Cpu cpu, final Base base) {
-        TextConverter converter = new TextConverter(parent, cpu, base);
-        converter.showDialog();
-    }
-
-    private void writeToFile(final File file) {
+    public void writeToFile(final File file, int startProgramAddress, int endProgramAddress, int startDataAddress,
+            int endDataAddress) {
         try {
             OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.US_ASCII);
-            for (final Line line : getLines()) {
-                writer.write(convertLineToString(line));
+            ArrayList<Line> lines = getLines();
+            for (int i = startProgramAddress; i <= endProgramAddress; ++i) {
+                final Line line = lines.get(i);
+                if (line.address <= endProgramAddress) {
+                    writer.write(convertLineToString(line));
+                }
+            }
+            writer.write(ENDL);
+            for (int i = startDataAddress; i <= endDataAddress; ++i) {
+                String addressString = String.format(addressFormat, i);
+                String byteString = String.format(byteFormat, 0xFF & cpu.getByte(i));
+                writer.write(String.format("%s   %s%s", addressString, byteString, ENDL));
             }
             writer.close();
         }
@@ -132,4 +123,5 @@ public class TextConverter {
             string = mnemonic;
         }
     }
+
 }

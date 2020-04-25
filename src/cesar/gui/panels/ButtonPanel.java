@@ -1,5 +1,7 @@
 package cesar.gui.panels;
 
+import cesar.utils.Base;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -35,7 +37,10 @@ public class ButtonPanel extends JPanel {
 
     public ButtonPanel() {
         btnDec = new JToggleButton("0..9");
+        btnDec.putClientProperty("Base.value", Base.DECIMAL);
+
         btnHex = new JToggleButton("0..F");
+        btnHex.putClientProperty("Base.value", Base.HEXADECIMAL);
         btnRun = new JToggleButton(new ImageIcon(runIcon));
         btnNext = new JButton(new ImageIcon(nextIcon));
 

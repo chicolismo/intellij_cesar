@@ -30,7 +30,7 @@ public class ProgramTable extends Table {
 
     @Override
     void initColumnWidths() {
-        final int[] COLUMN_WIDTHS = new int[] { 30, 62, 62, 130 };
+        final int[] COLUMN_WIDTHS = new int[] { 35, 62, 55, 135 };
         for (int i = 0; i < COLUMN_WIDTHS.length; ++i) {
             final TableColumn column = getColumnModel().getColumn(i);
             column.setMaxWidth(COLUMN_WIDTHS[i]);

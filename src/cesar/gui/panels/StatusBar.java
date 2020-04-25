@@ -23,6 +23,10 @@ public class StatusBar extends JPanel {
         label.setText(text);
     }
 
+    public String getText() {
+        return label.getText();
+    }
+
     public void clear() {
         label.setText(" ");
     }

@@ -1,11 +1,11 @@
 package cesar.gui.windows;
 
+import cesar.gui.dialogs.SaveTextDialog;
 import cesar.gui.displays.RegisterDisplay;
 import cesar.gui.displays.TextDisplay;
 import cesar.gui.panels.*;
 import cesar.gui.tables.*;
 import cesar.hardware.Cpu;
-import cesar.hardware.TextConverter;
 import cesar.utils.Base;
 
 import javax.swing.*;
@@ -30,6 +30,8 @@ public class MainWindow extends JFrame {
     private final ProgramTable programTable;
     private final ProgramTableModel programTableModel;
 
+    private final SaveTextDialog saveTextDialog;
+
     private final DataWindow dataWindow;
     private final DataTable dataTable;
     private final DataTableModel dataTableModel;
@@ -53,9 +55,10 @@ public class MainWindow extends JFrame {
 
     public MainWindow() {
         super("Cesar");
-        setIconImage(Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource("/cesar/gui/assets/computer.png")));
+        setIconImage(
+                Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource("/cesar/gui/assets/computer.png")));
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
+        //setModalExclusionType(Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
         setFocusable(true);
         setAutoRequestFocus(true);
         setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
@@ -72,6 +75,7 @@ public class MainWindow extends JFrame {
         programWindow = new ProgramWindow(this, cpu);
         programTable = programWindow.getTable();
         programTableModel = (ProgramTableModel) programTable.getModel();
+        saveTextDialog = new SaveTextDialog(this);
 
         dataWindow = new DataWindow(this, cpu);
         dataTable = dataWindow.getTable();
@@ -91,7 +95,10 @@ public class MainWindow extends JFrame {
         buttonPanel.btnDec.doClick();
 
         registerPanel.setAlignmentX(CENTER_ALIGNMENT);
-        buttonPanel.setAlignmentY(CENTER_ALIGNMENT);
+        registerPanel.setAlignmentY(TOP_ALIGNMENT);
+
+        buttonPanel.setAlignmentX(CENTER_ALIGNMENT);
+        buttonPanel.setAlignmentY(BOTTOM_ALIGNMENT);
 
         statusBar = new StatusBar();
         statusBar.setText("Bem-vindos");
@@ -120,12 +127,16 @@ public class MainWindow extends JFrame {
 
         dataTable.scrollToRow(Cpu.DATA_START_ADDRESS, true);
         updateDisplays();
+
+        ToolTipManager ttm = ToolTipManager.sharedInstance();
+        ttm.setInitialDelay(300);
     }
 
     private JPanel createMainPanel() {
         final JPanel middleRightPanel = new JPanel();
         middleRightPanel.setLayout(new BoxLayout(middleRightPanel, BoxLayout.Y_AXIS));
         middleRightPanel.add(conditionPanel);
+        middleRightPanel.add(Box.createVerticalGlue());
         middleRightPanel.add(buttonPanel);
 
         final JPanel middlePanel = new JPanel();
@@ -138,7 +149,8 @@ public class MainWindow extends JFrame {
         mainPanel.add(registerPanel);
         mainPanel.add(middlePanel);
         mainPanel.add(instructionPanel);
-        mainPanel.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1), BorderFactory.createBevelBorder(BevelBorder.LOWERED)));
+        mainPanel.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1),
+                BorderFactory.createBevelBorder(BevelBorder.LOWERED)));
         return mainPanel;
     }
 
@@ -165,6 +177,14 @@ public class MainWindow extends JFrame {
     }
 
     private void initEvents() {
+        initKeyListenerEvents();
+        initRegisterDisplayEvents();
+        initMenuEvents();
+        initButtonEvents();
+        initSideWindowEvents();
+    }
+
+    private void initKeyListenerEvents() {
         final MainWindow mainWindow = this;
 
         addComponentListener(new ComponentAdapter() {
@@ -174,39 +194,56 @@ public class MainWindow extends JFrame {
             }
         });
 
-        final KeyListener keyListener = new KeyAdapter() {
+        final KeyListener keyListener = new KeyListener() {
             @Override
             public void keyTyped(final KeyEvent event) {
+                menuBar.dispatchEvent(event);
                 cpu.setTypedKey((byte) event.getKeyChar());
                 programTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
                 dataTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
+                mainWindow.requestFocus();
+            }
+
+            @Override
+            public void keyPressed(final KeyEvent event) {
+                menuBar.dispatchEvent(event);
+                mainWindow.requestFocus();
+            }
+
+            @Override
+            public void keyReleased(final KeyEvent event) {
+                menuBar.dispatchEvent(event);
+                mainWindow.requestFocus();
             }
         };
-        addKeyListener(keyListener);
 
-        for (final JDialog sideWindow : new JDialog[] { programWindow, dataWindow, textWindow }) {
-            sideWindow.addKeyListener(new KeyAdapter() {
-                @Override
-                public void keyTyped(final KeyEvent e) {
-                    mainWindow.processKeyEvent(e);
+        mainWindow.addKeyListener(keyListener);
+        programWindow.addKeyListener(keyListener);
+        dataWindow.addKeyListener(keyListener);
+        textWindow.addKeyListener(keyListener);
+    }
+
+    private void initRegisterDisplayEvents() {
+        final MouseListener registerPanelMouseListener = new MouseAdapter() {
+            @Override
+            public void mouseClicked(final MouseEvent event) {
+                if (event.getClickCount() == 2) {
+                    final RegisterDisplay display = (RegisterDisplay) event.getSource();
+                    showNewRegisterValueDialog(display, display.getNumber());
                 }
-            });
-        }
+            }
+        };
 
         for (final RegisterDisplay display : registerPanel.getDisplays()) {
-            final int registerNumber = display.getNumber();
-            display.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(final MouseEvent event) {
-                    if (event.getClickCount() == 2) {
-                        showNewRegisterValueDialog(display, registerNumber);
-                    }
-                }
-            });
+            display.addMouseListener(registerPanelMouseListener);
         }
+    }
 
+
+    private void initMenuEvents() {
         final Component[][] pairs = new Component[][] {
-                { programWindow, menuBar.viewProgram }, { dataWindow, menuBar.viewData }, { textWindow, menuBar.viewDisplay }
+                { programWindow, menuBar.viewProgram }, { dataWindow, menuBar.viewData },
+                { textWindow, menuBar.viewDisplay }
         };
 
         for (final Component[] pair : pairs) {
@@ -229,28 +266,18 @@ public class MainWindow extends JFrame {
             });
         }
 
-        programTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(final MouseEvent event) {
-                final int selectedRow;
-                if (event.getClickCount() == 2 && (selectedRow = programTable.getSelectedRow()) != -1) {
-                    cpu.setRegister(7, (short) (0xFFFF & selectedRow));
-                    updateInterface();
-                }
-            }
-        });
-
-        menuBar.fileOpen.addActionListener(new ActionListener() {
+        menuBar.fileLoad.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 openFile();
             }
         });
 
-        menuBar.fileOpenPartially.addActionListener(new ActionListener() {
+        menuBar.fileLoadPartially.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
-                JOptionPane.showMessageDialog(getParent(), "Carga parcial não implementada...", null, JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(getParent(), "Carga parcial não implementada...", null,
+                        JOptionPane.WARNING_MESSAGE);
             }
         });
 
@@ -269,6 +296,9 @@ public class MainWindow extends JFrame {
             }
         });
 
+    }
+
+    private void initButtonEvents() {
         buttonPanel.btnNext.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
@@ -288,20 +318,17 @@ public class MainWindow extends JFrame {
             }
         });
 
-        final Object[][] buttons = new Object[][] {
-                { buttonPanel.btnDec, Base.DECIMAL }, { buttonPanel.btnHex, Base.HEXADECIMAL }
-        };
-
-        for (final Object[] pair : buttons) {
-            final JToggleButton button = (JToggleButton) pair[0];
-            final Base base = (Base) pair[1];
-            button.addActionListener(new ActionListener() {
+        for (final JToggleButton tglBtn : new JToggleButton[] { buttonPanel.btnDec, buttonPanel.btnHex }) {
+            tglBtn.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent actionEvent) {
-                    setBase(base);
+                    setBase((Base) tglBtn.getClientProperty("Base.value"));
                 }
             });
         }
+    }
+
+    private void initSideWindowEvents() {
 
         for (final SideWindow<?, ?> window : new SideWindow<?, ?>[] { programWindow, dataWindow }) {
             final Table table = window.getTable();
@@ -347,9 +374,10 @@ public class MainWindow extends JFrame {
                     if (newValue <= 0xFF && newValue >= Byte.MIN_VALUE) {
                         window.setCurrentValue(newValue);
                         int currentAddress = window.getCurrentAddress();
-                        model.setValue(currentAddress, (byte) (0xFF & window.getCurrentValue()));
-                        model.fireTableDataChanged();
-                        if (cpu.isIOAddress(currentAddress)) {
+                        cpu.setByte(currentAddress, (byte) (0xFF & newValue));
+                        programTableModel.fireTableDataChanged();
+                        dataTableModel.fireTableDataChanged();
+                        if (Cpu.isIOAddress(currentAddress)) {
                             textDisplay.repaint();
                         }
                         // Seleciona a próxima linha
@@ -364,6 +392,17 @@ public class MainWindow extends JFrame {
                 }
             });
         }
+
+        programTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(final MouseEvent event) {
+                final int selectedRow;
+                if (event.getClickCount() == 2 && (selectedRow = programTable.getSelectedRow()) != -1) {
+                    cpu.setRegister(7, (short) (0xFFFF & selectedRow));
+                    updateInterface();
+                }
+            }
+        });
     }
 
     private void setBase(final Base base) {
@@ -388,7 +427,7 @@ public class MainWindow extends JFrame {
     }
 
     private void saveAsText() {
-        TextConverter.saveAsText(this, cpu, currentBase);
+        saveTextDialog.saveText(cpu, currentBase);
     }
 
     private void openFile() {
@@ -410,7 +449,8 @@ public class MainWindow extends JFrame {
             dataTable.scrollToRow(Cpu.DATA_START_ADDRESS, true);
         }
         catch (final IOException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Um erro ocorreu ao abrir o arquivo", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Um erro ocorreu ao abrir o arquivo",
+                    JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }
@@ -480,7 +520,9 @@ public class MainWindow extends JFrame {
     private void showNewRegisterValueDialog(final RegisterDisplay display, final int registerNumber) {
         statusBar.clear();
         final int radix = currentBase.toInt();
-        final String input = JOptionPane.showInputDialog(display, String.format("Digite um valor %s para o registrador %d", currentBase.toString(), registerNumber), Integer.toString(cpu.getRegister(registerNumber), radix));
+        final String input = JOptionPane.showInputDialog(display,
+                String.format("Digite um valor %s para o registrador %d", currentBase.toString(), registerNumber),
+                Integer.toString(cpu.getRegister(registerNumber), radix));
         if (input != null) {
             try {
                 final int newValue = Integer.parseInt(input, radix);
@@ -496,5 +538,30 @@ public class MainWindow extends JFrame {
                 statusBar.setText(e.getMessage());
             }
         }
+    }
+
+    /**
+     * Escreve uma mensagem temporária na barra de status.
+     *
+     * @param message A mensagem a ser escrita na barra de status.
+     */
+    private void setTempMessage(final String message) {
+        final long milliseconds = 3000;
+
+        Thread tempThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String currentText = statusBar.getText();
+                statusBar.setText(message);
+                try {
+                    Thread.sleep(milliseconds);
+                }
+                catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                statusBar.setText(currentText);
+            }
+        });
+        tempThread.start();
     }
 }
