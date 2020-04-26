@@ -34,4 +34,29 @@ public class StatusBar extends JPanel {
     public void setText(final String text) {
         label.setText(text);
     }
+
+    /**
+     * Escreve uma mensagem temporária na barra de status.
+     *
+     * @param message A mensagem a ser escrita na barra de status.
+     */
+    public void setTempMessage(final String message) {
+        final long milliseconds = 3000;
+        final String currentText = getText();
+
+        final Thread tempThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                setText(message);
+                try {
+                    Thread.sleep(milliseconds);
+                }
+                catch (final InterruptedException e) {
+                    e.printStackTrace();
+                }
+                setText(currentText);
+            }
+        });
+        tempThread.start();
+    }
 }

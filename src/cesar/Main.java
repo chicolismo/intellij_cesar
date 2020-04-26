@@ -5,10 +5,9 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-
-import cesar.gui.windows.MainWindow;
 
 public class Main {
     public static void centerComponent(final Component c) {
@@ -37,11 +36,17 @@ public class Main {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                final MainWindow window = new MainWindow();
-                window.setLocationRelativeTo(null);
-                window.setVisible(true);
-                centerComponent(window);
+                final ToolTipManager ttm = ToolTipManager.sharedInstance();
+                ttm.setInitialDelay(300);
 
+                ApplicationController controller = new ApplicationController();
+                controller.run();
+//                final Cpu cpu = new Cpu();
+//                final MainWindow window = new MainWindow(cpu);
+//                window.setLocationRelativeTo(null);
+//                window.setVisible(true);
+//                centerComponent(window);
+//
             }
         });
     }

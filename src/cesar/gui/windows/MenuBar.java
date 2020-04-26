@@ -128,7 +128,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.setToolTipText("Exibe / oculta janelas");
 
         viewProgram = new JCheckBoxMenuItem("Memória - Programa");
-        viewProgram.setAccelerator(KeyStroke.getKeyStroke(APPLE ? KeyEvent.VK_F10 : KeyEvent.VK_F11, 0));
+        viewProgram.setAccelerator(KeyStroke.getKeyStroke(APPLE ? KeyEvent.VK_F9 : KeyEvent.VK_F11, 0));
         viewProgram.setToolTipText("Exibe / oculta janela de memória do programa");
 
         viewData = new JCheckBoxMenuItem("Memória - Dados");
