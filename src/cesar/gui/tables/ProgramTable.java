@@ -1,11 +1,13 @@
 package cesar.gui.tables;
 
-import cesar.utils.Defaults;
+import java.awt.Component;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
-import java.awt.*;
+
+import cesar.utils.Defaults;
 
 public class ProgramTable extends Table {
     private static final long serialVersionUID = -8843361396327035069L;
@@ -17,9 +19,10 @@ public class ProgramTable extends Table {
             private static final long serialVersionUID = -1783966912103512015L;
 
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-                    boolean hasFocus, int row, int col) {
-                JLabel c = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+            public Component getTableCellRendererComponent(final JTable table, final Object value,
+                    final boolean isSelected, final boolean hasFocus, final int row, final int col) {
+                final JLabel c = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                        col);
                 c.setForeground(Defaults.ARROW_COLOR);
                 c.setHorizontalAlignment(JLabel.CENTER);
                 c.setBorder(Defaults.createEmptyBorder(0));

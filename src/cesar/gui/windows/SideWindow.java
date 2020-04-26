@@ -1,22 +1,39 @@
 package cesar.gui.windows;
 
+import java.awt.Dimension;
+import java.awt.GridBagLayout;
+
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.WindowConstants;
+
 import cesar.gui.tables.Table;
 import cesar.gui.tables.TableModel;
 import cesar.hardware.Cpu;
 import cesar.utils.Base;
 
-import javax.swing.*;
-import java.awt.*;
-
 public abstract class SideWindow<TableType extends Table, TableModelType extends TableModel> extends JDialog {
     public static final long serialVersionUID = 3602114587032491724L;
     public static final String LABEL_FORMAT = "[%s]";
+
+    protected static GridBagLayout getGridLayout(final double[] rowWeights, final double[] colWeights) {
+        final GridBagLayout grid = new GridBagLayout();
+        grid.rowWeights = rowWeights;
+        grid.columnWeights = colWeights;
+        return grid;
+    }
 
     protected final JLabel addressLabel;
     protected final JTextField valueField;
     protected int currentAddress;
     protected int currentValue;
     protected TableType table;
+
     protected TableModelType model;
 
     public SideWindow(final MainWindow parent, final String title, final Cpu cpu) {
@@ -31,32 +48,24 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         valueField.setMinimumSize(valueField.getPreferredSize());
     }
 
-    public TableType getTable() {
-        return table;
-    }
-
     public JLabel getAddressLabel() {
         return addressLabel;
-    }
-
-    public JTextField getValueField() {
-        return valueField;
-    }
-
-    public void setCurrentAddress(final int address) {
-        currentAddress = address;
     }
 
     public int getCurrentAddress() {
         return currentAddress;
     }
 
-    public void setCurrentValue(final int value) {
-        currentValue = value;
-    }
-
     public int getCurrentValue() {
         return currentValue;
+    }
+
+    public TableType getTable() {
+        return table;
+    }
+
+    public JTextField getValueField() {
+        return valueField;
     }
 
     protected void initLayout() {
@@ -72,6 +81,8 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         contentPane.add(scrollPane);
     }
 
+    abstract protected void initTable(final Cpu cpu);
+
     public void setBase(final Base base) {
         final int radix = Base.toInt(base);
         model.setBase(base);
@@ -79,12 +90,11 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         valueField.setText(Integer.toString(currentValue, radix));
     }
 
-    abstract protected void initTable(final Cpu cpu);
+    public void setCurrentAddress(final int address) {
+        currentAddress = address;
+    }
 
-    protected static GridBagLayout getGridLayout(double[] rowWeights, double[] colWeights) {
-        final GridBagLayout grid = new GridBagLayout();
-        grid.rowWeights = rowWeights;
-        grid.columnWeights = colWeights;
-        return grid;
+    public void setCurrentValue(final int value) {
+        currentValue = value;
     }
 }

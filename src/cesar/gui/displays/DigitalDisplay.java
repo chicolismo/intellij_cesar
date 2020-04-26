@@ -1,14 +1,18 @@
 package cesar.gui.displays;
 
 
-import cesar.utils.Base;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import javax.swing.border.BevelBorder;
+
+import cesar.utils.Base;
 
 public class DigitalDisplay extends JPanel {
     private static final long serialVersionUID = 7750416402778310401L;
@@ -59,18 +63,6 @@ public class DigitalDisplay extends JPanel {
         setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
     }
 
-    public void setValue(final int unsignedValue) {
-        if (this.unsignedValue != unsignedValue) {
-            this.unsignedValue = unsignedValue;
-            repaint();
-        }
-    }
-
-    public void setBase(final Base newBase) {
-        currentBase = newBase;
-        numberOfDigits = currentBase == Base.DECIMAL ? 5 : 4;
-    }
-
     @Override
     public void paintComponent(final Graphics g) {
         super.paintComponent(g);
@@ -94,6 +86,18 @@ public class DigitalDisplay extends JPanel {
             g.drawImage(displayNull, x, START_Y, DIGIT_WIDTH, DIGIT_HEIGHT, null);
             x -= DIGIT_OFFSET;
             ++currentDigit;
+        }
+    }
+
+    public void setBase(final Base newBase) {
+        currentBase = newBase;
+        numberOfDigits = currentBase == Base.DECIMAL ? 5 : 4;
+    }
+
+    public void setValue(final int unsignedValue) {
+        if (this.unsignedValue != unsignedValue) {
+            this.unsignedValue = unsignedValue;
+            repaint();
         }
     }
 }

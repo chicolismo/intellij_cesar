@@ -1,12 +1,15 @@
 package cesar.gui.displays;
 
-import cesar.hardware.Cpu;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
+
+import cesar.hardware.Cpu;
 
 public class TextDisplay extends JPanel {
     private static final long serialVersionUID = 1744904008121167731L;

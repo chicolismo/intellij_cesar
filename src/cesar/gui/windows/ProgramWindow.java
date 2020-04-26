@@ -1,11 +1,17 @@
 package cesar.gui.windows;
 
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+
+import javax.swing.Box;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
 import cesar.gui.tables.ProgramTable;
 import cesar.gui.tables.ProgramTableModel;
 import cesar.hardware.Cpu;
-
-import javax.swing.*;
-import java.awt.*;
+import cesar.utils.Base;
 
 public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
     public static final long serialVersionUID = 8452878222228144644L;
@@ -19,6 +25,26 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
         initLayout();
     }
 
+    public void clickOnRow(final int row) {
+        table.setRowSelectionInterval(row, row);
+        table.scrollToRow(row);
+        final String address = model.getAddressAsString(row);
+        final String value = model.getValueAsString(row);
+        addressLabel.setText(String.format(SideWindow.LABEL_FORMAT, address));
+        valueField.setText(value);
+        valueField.requestFocus();
+        valueField.selectAll();
+        final int radix = Base.toInt(model.getBase());
+        final int currentAddress = Integer.parseInt(address, radix);
+        final int currentValue = Integer.parseInt(value, radix);
+        setCurrentAddress(currentAddress);
+        setCurrentValue(currentValue);
+    }
+
+    public JTextField getBreakPointField() {
+        return bpField;
+    }
+
     @Override
     protected void initLayout() {
         super.initLayout();
@@ -26,7 +52,8 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
         final JLabel bpLabel = new JLabel("BP:");
         bpLabel.setForeground(Color.RED);
 
-        final JPanel lowerPanel = new JPanel(getGridLayout(new double[] { 1.0 }, new double[] { 0.0, 0.0, 1.0, 0.0, 0.0 }));
+        final JPanel lowerPanel = new JPanel(
+                getGridLayout(new double[] { 1.0 }, new double[] { 0.0, 0.0, 1.0, 0.0, 0.0 }));
 
         final GridBagConstraints c_0 = new GridBagConstraints();
         c_0.ipadx = 4;
@@ -72,9 +99,5 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
     protected void initTable(final Cpu cpu) {
         model = new ProgramTableModel(cpu);
         table = new ProgramTable(model);
-    }
-
-    public JTextField getBreakPointField() {
-        return bpField;
     }
 }

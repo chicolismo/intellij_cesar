@@ -1,20 +1,30 @@
 package cesar.gui.dialogs;
 
-import cesar.hardware.Cpu;
-import cesar.hardware.TextConverter;
-import cesar.utils.Base;
-
-import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import cesar.hardware.Cpu;
+import cesar.hardware.TextConverter;
+import cesar.utils.Base;
+
 public class SaveTextDialog extends JDialog {
+    private static final long serialVersionUID = 476591876321607487L;
     private static final int MIN_VALUE = 0;
     private static final int MAX_VALUE = Cpu.MEMORY_SIZE - 1;
 
@@ -75,7 +85,7 @@ public class SaveTextDialog extends JDialog {
             public void actionPerformed(final ActionEvent e) {
                 convertValues();
                 if (valuesOk && outputFile != null) {
-                    TextConverter converter = new TextConverter(cpu, base);
+                    final TextConverter converter = new TextConverter(cpu, base);
                     converter.writeToFile(outputFile, startProgramAddress, endProgramAddress, startDataAddress,
                             endDataAddress);
                     outputFile = null;
@@ -93,19 +103,6 @@ public class SaveTextDialog extends JDialog {
         });
     }
 
-    public void saveText(Cpu cpu, Base base) {
-        if (fileChooser.showSaveDialog(getParent()) == JFileChooser.APPROVE_OPTION) {
-            this.cpu = cpu;
-            this.base = base;
-            outputFile = fileChooser.getSelectedFile();
-            setVisible(true);
-        }
-    }
-
-    private void setText(String message) {
-        statusBar.setText(message);
-    }
-
     private void convertValues() {
         valuesOk = false;
 
@@ -116,7 +113,7 @@ public class SaveTextDialog extends JDialog {
                 return;
             }
         }
-        catch (NumberFormatException e) {
+        catch (final NumberFormatException e) {
             setText("Erro: Endereço inicial do programa incorreto.");
             return;
         }
@@ -128,7 +125,7 @@ public class SaveTextDialog extends JDialog {
                 return;
             }
         }
-        catch (NumberFormatException e) {
+        catch (final NumberFormatException e) {
             setText("Erro: Endereço final do programa incorreto.");
             return;
         }
@@ -140,7 +137,7 @@ public class SaveTextDialog extends JDialog {
                 return;
             }
         }
-        catch (NumberFormatException e) {
+        catch (final NumberFormatException e) {
             setText("Erro: Endereço inicial dos dados incorreto.");
             return;
         }
@@ -152,23 +149,12 @@ public class SaveTextDialog extends JDialog {
                 return;
             }
         }
-        catch (NumberFormatException e) {
+        catch (final NumberFormatException e) {
             setText("Erro: Endereço final dos dados incorreto.");
             return;
         }
 
         valuesOk = true;
-    }
-
-    private void setDefaultValues() {
-        startProgramAddress = MIN_VALUE;
-        endProgramAddress = 1_023;
-        startDataAddress = 65_000;
-        endDataAddress = MAX_VALUE;
-        startProgramAddressField.setText(Integer.toString(startProgramAddress, 10));
-        endProgramAddressField.setText(Integer.toString(endProgramAddress, 10));
-        startDataAddressField.setText(Integer.toString(startDataAddress, 10));
-        endDataAddressField.setText(Integer.toString(endDataAddress, 10));
     }
 
     private JPanel createContentPane() {
@@ -179,18 +165,16 @@ public class SaveTextDialog extends JDialog {
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
 
         final GridLayout programGrid = new GridLayout(2, 2, 5, 5);
-        final GridLayout dataGrid = new GridLayout(2, 2, 5, 5);
         programPanel.setLayout(programGrid);
-        programPanel.setBorder(
-                BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Região do programa",
-                        TitledBorder.LEFT, TitledBorder.TOP));
+        programPanel.setBorder(BorderFactory.createTitledBorder("Região do programa"));
         programPanel.add(new JLabel("Endereço inicial"));
         programPanel.add(startProgramAddressField);
         programPanel.add(new JLabel("Endereço final"));
         programPanel.add(endProgramAddressField);
+
+        final GridLayout dataGrid = new GridLayout(2, 2, 5, 5);
         dataPanel.setLayout(dataGrid);
-        dataPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Região de dados",
-                TitledBorder.LEFT, TitledBorder.TOP));
+        dataPanel.setBorder(BorderFactory.createTitledBorder("Região de dados"));
         dataPanel.add(new JLabel("Endereço inicial"));
         dataPanel.add(startDataAddressField);
         dataPanel.add(new JLabel("Endereço final"));
@@ -205,6 +189,30 @@ public class SaveTextDialog extends JDialog {
         panel.add(buttonPanel);
 
         return panel;
+    }
+
+    public void saveText(final Cpu cpu, final Base base) {
+        if (fileChooser.showSaveDialog(getParent()) == JFileChooser.APPROVE_OPTION) {
+            this.cpu = cpu;
+            this.base = base;
+            outputFile = fileChooser.getSelectedFile();
+            setVisible(true);
+        }
+    }
+
+    private void setDefaultValues() {
+        startProgramAddress = MIN_VALUE;
+        endProgramAddress = 1_023;
+        startDataAddress = 65_000;
+        endDataAddress = MAX_VALUE;
+        startProgramAddressField.setText(Integer.toString(startProgramAddress, 10));
+        endProgramAddressField.setText(Integer.toString(endProgramAddress, 10));
+        startDataAddressField.setText(Integer.toString(startDataAddress, 10));
+        endDataAddressField.setText(Integer.toString(endDataAddress, 10));
+    }
+
+    private void setText(final String message) {
+        statusBar.setText(message);
     }
 
 }

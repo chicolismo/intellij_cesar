@@ -1,12 +1,18 @@
 package cesar.gui.panels;
 
-import cesar.utils.Base;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 
 public class ButtonPanel extends JPanel {
     private static final long serialVersionUID = -1509965084306287422L;
@@ -37,10 +43,7 @@ public class ButtonPanel extends JPanel {
 
     public ButtonPanel() {
         btnDec = new JToggleButton("0..9");
-        btnDec.putClientProperty("Base.value", Base.DECIMAL);
-
         btnHex = new JToggleButton("0..F");
-        btnHex.putClientProperty("Base.value", Base.HEXADECIMAL);
         btnRun = new JToggleButton(new ImageIcon(runIcon));
         btnNext = new JButton(new ImageIcon(nextIcon));
 

@@ -5,7 +5,8 @@ import java.util.EnumSet;
 import java.util.HashMap;
 
 public enum Instruction {
-    NOP, CCC, SCC, BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS, JMP, SOB, JSR, RTS, CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC, MOV, ADD, SUB, CMP, AND, OR, HLT;
+    NOP, CCC, SCC, BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS, JMP, SOB, JSR, RTS, CLR,
+    NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC, MOV, ADD, SUB, CMP, AND, OR, HLT;
 
 
     private static final HashMap<Integer, Instruction> INSTRUCTION_MAP;
@@ -64,7 +65,8 @@ public enum Instruction {
         // Instrução de parada
         INSTRUCTION_MAP.put(0b1111, HLT);
 
-        CONDITIONAL_BRANCH_INSTRUCTIONS = EnumSet.of(BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS);
+        CONDITIONAL_BRANCH_INSTRUCTIONS = EnumSet.of(BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE,
+                BHI, BLS);
         ONE_OP_INSTRUCTIONS = EnumSet.of(CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC);
         TWO_OP_INSTRUCTIONS = EnumSet.of(MOV, ADD, SUB, CMP, AND, OR);
 

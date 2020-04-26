@@ -1,18 +1,24 @@
 package cesar.gui.panels;
 
-import cesar.gui.displays.RegisterDisplay;
-import cesar.utils.Base;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.TitledBorder;
+
+import cesar.gui.displays.RegisterDisplay;
+import cesar.utils.Base;
 
 public class RegisterPanel extends JPanel {
     private static final long serialVersionUID = 2962079321929645473L;
@@ -43,13 +49,11 @@ public class RegisterPanel extends JPanel {
     public RegisterPanel() {
         super(true);
 
-        registerDisplays = new RegisterDisplay[] {
-                new RegisterDisplay(0, "R0:"), new RegisterDisplay(1, "R1:"),
-                new RegisterDisplay(2, "R2:"), new RegisterDisplay(3, "R3:"), new RegisterDisplay(4, "R4:"),
-                new RegisterDisplay(5, "R5:"), new RegisterDisplay(6, "R6: (SP)"), new RegisterDisplay(7, "R7: (PC)"),
-                };
+        registerDisplays = new RegisterDisplay[] { new RegisterDisplay(0, "R0:"), new RegisterDisplay(1, "R1:"),
+            new RegisterDisplay(2, "R2:"), new RegisterDisplay(3, "R3:"), new RegisterDisplay(4, "R4:"),
+            new RegisterDisplay(5, "R5:"), new RegisterDisplay(6, "R6: (SP)"), new RegisterDisplay(7, "R7: (PC)"), };
 
-        TitledBorder border = (TitledBorder) registerDisplays[7].getBorder();
+        final TitledBorder border = (TitledBorder) registerDisplays[7].getBorder();
         border.setTitleColor(new Color(0, 96, 0));
 
         interruptionPanel = new LedPanel("IS");
@@ -62,6 +66,14 @@ public class RegisterPanel extends JPanel {
         isComputerShowing = true;
 
         doLayout();
+    }
+
+    public RegisterDisplay getDisplay(final int i) {
+        return registerDisplays[i];
+    }
+
+    public RegisterDisplay[] getDisplays() {
+        return registerDisplays;
     }
 
     private void initLayout() {
@@ -110,13 +122,5 @@ public class RegisterPanel extends JPanel {
         for (final RegisterDisplay display : registerDisplays) {
             display.setBase(base);
         }
-    }
-
-    public RegisterDisplay[] getDisplays() {
-        return registerDisplays;
-    }
-
-    public RegisterDisplay getDisplay(final int i) {
-        return registerDisplays[i];
     }
 }

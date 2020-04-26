@@ -3,10 +3,15 @@ package cesar.hardware;
 import cesar.utils.Shorts;
 
 class ConditionRegister {
+    enum CarryOperation {
+        PLUS, MINUS
+    }
+
     private boolean negative;
     private boolean zero;
     private boolean carry;
     private boolean overflow;
+
     private int bits;
 
     public ConditionRegister() {
@@ -23,11 +28,20 @@ class ConditionRegister {
         update();
     }
 
-    private void update() {
-        setNegative((bits & 8) == 8);
-        setZero((bits & 4) == 4);
-        setCarry((bits & 2) == 2);
-        setOverflow((bits & 1) == 1);
+    public boolean isCarry() {
+        return carry;
+    }
+
+    public boolean isNegative() {
+        return negative;
+    }
+
+    public boolean isOverflow() {
+        return overflow;
+    }
+
+    public boolean isZero() {
+        return zero;
     }
 
     public void scc(final int newValue) {
@@ -36,8 +50,9 @@ class ConditionRegister {
         update();
     }
 
-    public boolean isNegative() {
-        return negative;
+    public void setCarry(final boolean value) {
+        carry = value;
+        bits |= 0b0010;
     }
 
     public void setNegative(final boolean value) {
@@ -45,43 +60,14 @@ class ConditionRegister {
         bits |= 0b1000;
     }
 
-    public boolean isZero() {
-        return zero;
-    }
-
-    public void setZero(final boolean value) {
-        zero = value;
-        bits |= 0b0100;
-    }
-
-    public boolean isCarry() {
-        return carry;
-    }
-
-    public void setCarry(final boolean value) {
-        carry = value;
-        bits |= 0b0010;
-    }
-
-    public boolean isOverflow() {
-        return overflow;
-    }
-
     public void setOverflow(final boolean value) {
         overflow = value;
         bits |= 0b0001;
     }
 
-    public void testNegative(final short value) {
-        setNegative(value < 0);
-    }
-
-    public void testZero(final short value) {
-        setZero(value == 0);
-    }
-
-    public void testOverflow(final short op1, final short op2, final short result) {
-        setOverflow(op1 > 0 && op2 > 0 && result < 0 || op1 < 0 && op2 < 0 && result > 0);
+    public void setZero(final boolean value) {
+        zero = value;
+        bits |= 0b0100;
     }
 
     public void testCarry(final short a, final short b, final CarryOperation operation) {
@@ -97,7 +83,22 @@ class ConditionRegister {
         setCarry((result & 0x1_0000) == 0x1_0000);
     }
 
-    enum CarryOperation {
-        PLUS, MINUS
+    public void testNegative(final short value) {
+        setNegative(value < 0);
+    }
+
+    public void testOverflow(final short op1, final short op2, final short result) {
+        setOverflow(op1 > 0 && op2 > 0 && result < 0 || op1 < 0 && op2 < 0 && result > 0);
+    }
+
+    public void testZero(final short value) {
+        setZero(value == 0);
+    }
+
+    private void update() {
+        setNegative((bits & 8) == 8);
+        setZero((bits & 4) == 4);
+        setCarry((bits & 2) == 2);
+        setOverflow((bits & 1) == 1);
     }
 }

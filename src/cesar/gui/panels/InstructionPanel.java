@@ -1,12 +1,16 @@
 package cesar.gui.panels;
 
-import cesar.utils.Defaults;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
-import java.awt.*;
+
+import cesar.utils.Defaults;
 
 public class InstructionPanel extends JPanel {
     private static final long serialVersionUID = -7005281883928099202L;
@@ -70,11 +74,11 @@ public class InstructionPanel extends JPanel {
         setBorder(border);
     }
 
-    public void setRiText(final String text) {
-        riText.setText(text);
-    }
-
     public void setMnemonicText(final String text) {
         mnemonicText.setText(text);
+    }
+
+    public void setRiText(final String text) {
+        riText.setText(text);
     }
 }

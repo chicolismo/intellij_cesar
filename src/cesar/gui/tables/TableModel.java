@@ -21,16 +21,6 @@ public abstract class TableModel extends AbstractTableModel {
         setBase(Base.DECIMAL);
     }
 
-    public Base getBase() {
-        return currentBase;
-    }
-
-    public void setBase(final Base base) {
-        currentBase = base;
-        formatString = base == Base.DECIMAL ? "%d" : "%x";
-        fireTableDataChanged();
-    }
-
     protected String formatNumber(final byte number) {
         return String.format(formatString, 0xFF & number).toUpperCase();
     }
@@ -39,9 +29,10 @@ public abstract class TableModel extends AbstractTableModel {
         return String.format(formatString, number).toUpperCase();
     }
 
-    @Override
-    public String getColumnName(final int col) {
-        return columnNames[col];
+    abstract public String getAddressAsString(final int row);
+
+    public Base getBase() {
+        return currentBase;
     }
 
     @Override
@@ -50,19 +41,28 @@ public abstract class TableModel extends AbstractTableModel {
     }
 
     @Override
+    public int getColumnCount() {
+        return columnNames.length;
+    }
+
+    @Override
+    public String getColumnName(final int col) {
+        return columnNames[col];
+    }
+
+    @Override
     public int getRowCount() {
         return Cpu.MEMORY_SIZE;
         // return cpu.getMemory().length;
     }
 
-    @Override
-    public int getColumnCount() {
-        return columnNames.length;
-    }
-
-    abstract public String getAddressAsString(final int row);
-
     abstract public String getValueAsString(final int row);
+
+    public void setBase(final Base base) {
+        currentBase = base;
+        formatString = base == Base.DECIMAL ? "%d" : "%x";
+        fireTableDataChanged();
+    }
 
     public void setValue(final int row, final byte value) {
         cpu.setByte(row, value);

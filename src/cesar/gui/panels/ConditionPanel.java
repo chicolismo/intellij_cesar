@@ -1,6 +1,8 @@
 package cesar.gui.panels;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
 
 public class ConditionPanel extends JPanel {
     public static final long serialVersionUID = -595687570078206074L;
@@ -27,19 +29,19 @@ public class ConditionPanel extends JPanel {
         add(carry);
     }
 
-    public void setNegative(final boolean value) {
-        negative.setValue(value);
+    public void setCarry(final boolean value) {
+        carry.setValue(value);
     }
 
-    public void setZero(final boolean value) {
-        zero.setValue(value);
+    public void setNegative(final boolean value) {
+        negative.setValue(value);
     }
 
     public void setOverflow(final boolean value) {
         overflow.setValue(value);
     }
 
-    public void setCarry(final boolean value) {
-        carry.setValue(value);
+    public void setZero(final boolean value) {
+        zero.setValue(value);
     }
 }

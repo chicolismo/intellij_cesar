@@ -1,10 +1,12 @@
 package cesar.gui.displays;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.JPanel;
 
 public class BinaryDisplay extends JPanel {
     private static final long serialVersionUID = -5490249529061282417L;
@@ -45,13 +47,6 @@ public class BinaryDisplay extends JPanel {
         unsignedValue = 0;
     }
 
-    public void setValue(final int newValue) {
-        if (unsignedValue != newValue) {
-            unsignedValue = newValue;
-            repaint();
-        }
-    }
-
     @Override
     public void paintComponent(final Graphics g) {
         super.paintComponent(g);
@@ -71,6 +66,13 @@ public class BinaryDisplay extends JPanel {
             ++currentDigit;
             g.drawImage(displayImages[0], x, START_Y, IMAGE_WIDTH, IMAGE_HEIGHT, null);
             x -= IMAGE_OFFSET;
+        }
+    }
+
+    public void setValue(final int newValue) {
+        if (unsignedValue != newValue) {
+            unsignedValue = newValue;
+            repaint();
         }
     }
 }

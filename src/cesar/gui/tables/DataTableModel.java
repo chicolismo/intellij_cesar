@@ -15,12 +15,12 @@ public class DataTableModel extends TableModel {
     }
 
     @Override
-    public Object getValueAt(final int row, final int col) {
-        return col == 0 ? formatNumber(row) : formatNumber(cpu.getByte(row));
+    public String getValueAsString(final int row) {
+        return (String) getValueAt(row, 1);
     }
 
     @Override
-    public String getValueAsString(final int row) {
-        return (String) getValueAt(row, 1);
+    public Object getValueAt(final int row, final int col) {
+        return col == 0 ? formatNumber(row) : formatNumber(cpu.getByte(row));
     }
 }

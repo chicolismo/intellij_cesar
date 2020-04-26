@@ -27,16 +27,16 @@ public enum AddressMode {
         return ARRAY[index];
     }
 
-    public boolean isIndexed() {
-        return this == INDEXED || this == INDEXED_INDIRECT;
+    public String asString(final int rrr) {
+        return String.format(FORMAT.get(this), rrr);
     }
 
     public String asString(final int ddd, final int rrr) {
         return String.format(FORMAT.get(this), ddd, rrr);
     }
 
-    public String asString(final int rrr) {
-        return String.format(FORMAT.get(this), rrr);
+    public boolean isIndexed() {
+        return this == INDEXED || this == INDEXED_INDIRECT;
     }
 
     public boolean isPostIncremented() {

@@ -15,6 +15,24 @@ public class ProgramTableModel extends TableModel {
     }
 
     @Override
+    public String getAddressAsString(final int row) {
+        return (String) getValueAt(row, 1);
+    }
+
+    public int getProgramCounterRow() {
+        return programCounterRow;
+    }
+
+    private String getProgramCounterRowAsString(final int row) {
+        return row == getProgramCounterRow() ? ARROW : "";
+    }
+
+    @Override
+    public String getValueAsString(final int row) {
+        return (String) getValueAt(row, 2);
+    }
+
+    @Override
     public Object getValueAt(final int row, final int column) {
         switch (column) {
             case 0:
@@ -27,24 +45,6 @@ public class ProgramTableModel extends TableModel {
             default:
                 return cpu.getMnemonic(row);
         }
-    }
-
-    private String getProgramCounterRowAsString(final int row) {
-        return row == getProgramCounterRow() ? ARROW : "";
-    }
-
-    @Override
-    public String getAddressAsString(final int row) {
-        return (String) getValueAt(row, 1);
-    }
-
-    @Override
-    public String getValueAsString(final int row) {
-        return (String) getValueAt(row, 2);
-    }
-
-    public int getProgramCounterRow() {
-        return programCounterRow;
     }
 
     public void setProgramCounterRow(final int programCounter) {

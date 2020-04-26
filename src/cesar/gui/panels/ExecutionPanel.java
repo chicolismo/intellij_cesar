@@ -1,12 +1,15 @@
 package cesar.gui.panels;
 
-import cesar.gui.displays.DigitalDisplay;
-import cesar.utils.Defaults;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
-import java.awt.*;
+
+import cesar.gui.displays.DigitalDisplay;
+import cesar.utils.Defaults;
 
 public class ExecutionPanel extends JPanel {
     private static final long serialVersionUID = 8981667379501321204L;
@@ -61,12 +64,12 @@ public class ExecutionPanel extends JPanel {
         setBorder(new CompoundBorder(outer, inner));
     }
 
-    public void setMemoryAccessCount(final int accesses) {
-        memoryAccessCountDisplay.setValue(accesses);
-    }
-
     public void incrementInstructions() {
         ++instructionCount;
         instructionCountDisplay.setValue(instructionCount);
+    }
+
+    public void setMemoryAccessCount(final int accesses) {
+        memoryAccessCountDisplay.setValue(accesses);
     }
 }
