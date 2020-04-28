@@ -1,6 +1,6 @@
 package cesar;
 
-import static cesar.ApplicationProperties.getProperty;
+import static cesar.Properties.getProperty;
 import static cesar.utils.Integers.clamp;
 
 import java.awt.Component;

@@ -8,7 +8,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import cesar.ApplicationProperties;
+import cesar.Properties;
 import cesar.gui.tables.ProgramTable;
 import cesar.gui.tables.ProgramTableModel;
 import cesar.hardware.Cpu;
@@ -20,7 +20,7 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
     private final JTextField bpField;
 
     public ProgramWindow(final MainWindow parent, final Cpu cpu) {
-        super(parent, ApplicationProperties.getProperty("ProgramWindow.title"), cpu);
+        super(parent, Properties.getProperty("ProgramWindow.title"), cpu);
         bpField = new JTextField(4);
         bpField.setMinimumSize(bpField.getPreferredSize());
         initLayout();
@@ -50,9 +50,9 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
     protected void initLayout() {
         super.initLayout();
 
-        final JLabel bpLabel = new JLabel(ApplicationProperties.getProperty("ProgramWindow.BreakPoint.text"));
+        final JLabel bpLabel = new JLabel(Properties.getProperty("ProgramWindow.BreakPoint.text"));
         try {
-            final int rgb = Integer.parseInt(ApplicationProperties.getProperty("ProgramWindow.BreakPoint.color"), 16);
+            final int rgb = Integer.parseInt(Properties.getProperty("ProgramWindow.BreakPoint.color"), 16);
             bpLabel.setForeground(new Color(rgb));
         }
         catch (final NumberFormatException e) {

@@ -12,7 +12,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
-import cesar.ApplicationProperties;
+import cesar.Properties;
 import cesar.gui.tables.Table;
 import cesar.gui.tables.TableModel;
 import cesar.hardware.Cpu;
@@ -20,7 +20,7 @@ import cesar.utils.Base;
 
 public abstract class SideWindow<TableType extends Table, TableModelType extends TableModel> extends JDialog {
     public static final long serialVersionUID = 3602114587032491724L;
-    public static final String LABEL_FORMAT = ApplicationProperties.getProperty("SideWindow.labelFormat");
+    public static final String LABEL_FORMAT = Properties.getProperty("SideWindow.labelFormat");
 
     protected static GridBagLayout getGridLayout(final double[] rowWeights, final double[] colWeights) {
         final GridBagLayout grid = new GridBagLayout();

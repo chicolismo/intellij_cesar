@@ -1,6 +1,6 @@
 package cesar.gui.dialogs;
 
-import static cesar.ApplicationProperties.getProperty;
+import static cesar.Properties.getProperty;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;

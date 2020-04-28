@@ -6,7 +6,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import cesar.ApplicationProperties;
+import cesar.Properties;
 import cesar.utils.Defaults;
 
 public class StatusBar extends JPanel {
@@ -16,7 +16,7 @@ public class StatusBar extends JPanel {
 
     public StatusBar() {
         super(true);
-        label = new JLabel(ApplicationProperties.getProperty("StatusBar.inicialValue"));
+        label = new JLabel(Properties.getProperty("StatusBar.inicialValue"));
         label.setFont(Defaults.DEFAULT_FONT);
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         this.add(label);

@@ -1,20 +1,18 @@
 package cesar;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Properties;
 
-import javax.swing.JOptionPane;
-
-public class ApplicationProperties {
-    private static final Properties PROP;
+public class Properties {
+    private static final java.util.Properties properties;
     private final static String filename = "/cesar/config.properties";
 
     static {
-        InputStream stream = ApplicationProperties.class.getResourceAsStream(filename);
-        PROP = new Properties();
+        InputStream stream = Properties.class.getResourceAsStream(filename);
+        properties = new java.util.Properties();
         try {
-            PROP.load(stream);
+            properties.load(stream);
         }
         catch (IOException e) {
             JOptionPane.showMessageDialog(null,
@@ -24,10 +22,10 @@ public class ApplicationProperties {
         }
     }
 
-    private ApplicationProperties() {
+    private Properties() {
     }
 
     public static String getProperty(final String propertyName) {
-        return PROP.getProperty(propertyName);
+        return properties.getProperty(propertyName);
     }
 }

@@ -17,7 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.TitledBorder;
 
-import cesar.ApplicationProperties;
+import cesar.Properties;
 import cesar.gui.displays.RegisterDisplay;
 import cesar.hardware.Cpu;
 import cesar.utils.Base;
@@ -53,9 +53,9 @@ public class RegisterPanel extends JPanel {
 
         registerDisplays = new RegisterDisplay[Cpu.REGISTER_COUNT];
         for (int i = 0; i < Cpu.REGISTER_COUNT; ++i) {
-            final String label = ApplicationProperties.getProperty(String.format("R%d.label", i));
-            final String title = ApplicationProperties.getProperty(String.format("R%d.newValueTitle", i));
-            final String message = ApplicationProperties.getProperty(String.format("R%d.newValueMessage", i));
+            final String label = Properties.getProperty(String.format("R%d.label", i));
+            final String title = Properties.getProperty(String.format("R%d.newValueTitle", i));
+            final String message = Properties.getProperty(String.format("R%d.newValueMessage", i));
             registerDisplays[i] = new RegisterDisplay(i, label, title, message);
         }
 

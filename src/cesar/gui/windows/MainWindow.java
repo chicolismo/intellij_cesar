@@ -1,6 +1,6 @@
 package cesar.gui.windows;
 
-import static cesar.ApplicationProperties.getProperty;
+import static cesar.Properties.getProperty;
 
 import java.awt.Dialog.ModalExclusionType;
 import java.awt.Dimension;
