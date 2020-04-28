@@ -5,6 +5,7 @@ import java.awt.GridBagConstraints;
 import javax.swing.Box;
 import javax.swing.JPanel;
 
+import cesar.ApplicationProperties;
 import cesar.gui.tables.DataTable;
 import cesar.gui.tables.DataTableModel;
 import cesar.hardware.Cpu;
@@ -13,7 +14,7 @@ public class DataWindow extends SideWindow<DataTable, DataTableModel> {
     public static final long serialVersionUID = -7816298913045696756L;
 
     public DataWindow(final MainWindow parent, final Cpu cpu) {
-        super(parent, "Dados", cpu);
+        super(parent, ApplicationProperties.getProperty("DataWindow.title"), cpu);
         initLayout();
     }
 

@@ -17,7 +17,9 @@ import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.TitledBorder;
 
+import cesar.ApplicationProperties;
 import cesar.gui.displays.RegisterDisplay;
+import cesar.hardware.Cpu;
 import cesar.utils.Base;
 
 public class RegisterPanel extends JPanel {
@@ -49,9 +51,13 @@ public class RegisterPanel extends JPanel {
     public RegisterPanel() {
         super(true);
 
-        registerDisplays = new RegisterDisplay[] { new RegisterDisplay(0, "R0:"), new RegisterDisplay(1, "R1:"),
-            new RegisterDisplay(2, "R2:"), new RegisterDisplay(3, "R3:"), new RegisterDisplay(4, "R4:"),
-            new RegisterDisplay(5, "R5:"), new RegisterDisplay(6, "R6: (SP)"), new RegisterDisplay(7, "R7: (PC)"), };
+        registerDisplays = new RegisterDisplay[Cpu.REGISTER_COUNT];
+        for (int i = 0; i < Cpu.REGISTER_COUNT; ++i) {
+            final String label = ApplicationProperties.getProperty(String.format("R%d.label", i));
+            final String title = ApplicationProperties.getProperty(String.format("R%d.newValueTitle", i));
+            final String message = ApplicationProperties.getProperty(String.format("R%d.newValueMessage", i));
+            registerDisplays[i] = new RegisterDisplay(i, label, title, message);
+        }
 
         final TitledBorder border = (TitledBorder) registerDisplays[7].getBorder();
         border.setTitleColor(new Color(0, 96, 0));

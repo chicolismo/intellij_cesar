@@ -1,5 +1,7 @@
 package cesar.gui.windows;
 
+import static cesar.ApplicationProperties.getProperty;
+
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.InvocationTargetException;
@@ -18,20 +20,22 @@ import cesar.utils.Defaults;
 public class MenuBar extends JMenuBar {
     private static final long serialVersionUID = -7618206299229330211L;
 
-    private final static boolean APPLE = Defaults.isApple();
-
+    private final static boolean IS_APPLE;
     private final static int CTRL_KEY;
+
     static {
         int ctrlKey;
         try {
-            final Method m = Toolkit.class.getMethod("getMenuShortcutKeyMask");
+            final Method m = Toolkit.class.getMethod("getMenuShortcutKeyMaskEx");
             ctrlKey = (int) m.invoke(Toolkit.getDefaultToolkit());
         }
         catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             ctrlKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
         }
         CTRL_KEY = ctrlKey;
+        IS_APPLE = Defaults.isApple();
     }
+
     public final JMenu fileMenu;
     public final JMenu editMenu;
     public final JMenu viewMenu;
@@ -60,26 +64,26 @@ public class MenuBar extends JMenuBar {
         // ==============================================================================================================
         // Arquivo
         // ==============================================================================================================
-        fileMenu = new JMenu("Arquivo");
-        fileMenu.setToolTipText("Operações com arquivo");
+        fileMenu = new JMenu(getProperty("FileMenu.label"));
+        fileMenu.setToolTipText(getProperty("FileMenu.tooltip"));
 
-        fileLoad = new JMenuItem("Carregar...", KeyEvent.VK_C);
+        fileLoad = new JMenuItem(getProperty("FileMenu.Load.label"), KeyEvent.VK_C);
         fileLoad.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, CTRL_KEY));
-        fileLoad.setToolTipText("Carrega um arquivo da memória");
+        fileLoad.setToolTipText(getProperty("FileMenu.Load.tooltip"));
 
-        fileLoadPartially = new JMenuItem("Carga parcial...", KeyEvent.VK_P);
+        fileLoadPartially = new JMenuItem(getProperty("FileMenu.LoadPartially.label"), KeyEvent.VK_P);
         fileLoadPartially.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, CTRL_KEY));
-        fileLoadPartially.setToolTipText("Carrega parcialmente um arquivo");
+        fileLoadPartially.setToolTipText(getProperty("FileMenu.LoadPartially.tooltip"));
 
-        fileSave = new JMenuItem("Salvar...", KeyEvent.VK_S);
+        fileSave = new JMenuItem(getProperty("FileMenu.Save.label"), KeyEvent.VK_S);
         fileSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, CTRL_KEY));
-        fileSave.setToolTipText("Salva a memória em um arquivo .MEM");
+        fileSave.setToolTipText(getProperty("FileMenu.Save.tooltip"));
 
-        fileSaveText = new JMenuItem("Salvar texto...", KeyEvent.VK_T);
+        fileSaveText = new JMenuItem(getProperty("FileMenu.SaveText.label"), KeyEvent.VK_T);
         fileSaveText.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, CTRL_KEY));
-        fileSaveText.setToolTipText("Salva a memória em um arquivo texto");
+        fileSaveText.setToolTipText(getProperty("FileMenu.SaveText.tooltip"));
 
-        fileExit = new JMenuItem("Sair", KeyEvent.VK_R);
+        fileExit = new JMenuItem(getProperty("FileMenu.Exit.label"), KeyEvent.VK_R);
 
         fileMenu.add(fileLoad);
         fileMenu.add(fileLoadPartially);
@@ -91,24 +95,24 @@ public class MenuBar extends JMenuBar {
         // ==============================================================================================================
         // Editar
         // ==============================================================================================================
-        editMenu = new JMenu("Editar");
-        editMenu.setToolTipText("Modo de edição, Ir Para..., Zerar memória, etc");
+        editMenu = new JMenu(getProperty("EditMenu.label"));
+        editMenu.setToolTipText(getProperty("EditMenu.tooltip"));
 
-        editGoto = new JMenuItem("Ir Para...");
+        editGoto = new JMenuItem(getProperty("EditMenu.Goto.label"));
         editGoto.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, CTRL_KEY));
-        editGoto.setToolTipText("Vai para uma posição da memória");
+        editGoto.setToolTipText(getProperty("EditMenu.Goto.tooltip"));
 
-        editZeroMemory = new JMenuItem("Zerar memória...");
+        editZeroMemory = new JMenuItem(getProperty("EditMenu.ZeroMemory.label"));
         editZeroMemory.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, CTRL_KEY));
-        editZeroMemory.setToolTipText("Zera uma região da memória");
+        editZeroMemory.setToolTipText(getProperty("EditMenu.ZeroMemory.tooltip"));
 
-        editCopyMemory = new JMenuItem("Copiar memória...");
-        editCopyMemory.setToolTipText("Copia uma região da memória");
+        editCopyMemory = new JMenuItem(getProperty("EditMenu.CopyMemory.label"));
+        editCopyMemory.setToolTipText(getProperty("EditMenu.CopyMemory.tooltip"));
 
-        editDecimal = new JRadioButtonMenuItem("Decimal");
+        editDecimal = new JRadioButtonMenuItem(getProperty("EditMenu.Decimal.label"));
         editDecimal.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, CTRL_KEY));
-        editHexadecimal = new JRadioButtonMenuItem("Hexadecimal");
-        editHexadecimal.setAccelerator(KeyStroke.getKeyStroke(APPLE ? KeyEvent.VK_X : KeyEvent.VK_H, CTRL_KEY));
+        editHexadecimal = new JRadioButtonMenuItem(getProperty("EditMenu.Hexadecimal.label"));
+        editHexadecimal.setAccelerator(KeyStroke.getKeyStroke(IS_APPLE ? KeyEvent.VK_X : KeyEvent.VK_H, CTRL_KEY));
         final ButtonGroup group = new ButtonGroup();
         group.add(editDecimal);
         group.add(editHexadecimal);
@@ -124,18 +128,18 @@ public class MenuBar extends JMenuBar {
         // ==============================================================================================================
         // Visualizar
         // ==============================================================================================================
-        viewMenu = new JMenu("Visualizar");
-        viewMenu.setToolTipText("Exibe / oculta janelas");
+        viewMenu = new JMenu(getProperty("ViewMenu.label"));
+        viewMenu.setToolTipText(getProperty("ViewMenu.tooltip"));
 
-        viewProgram = new JCheckBoxMenuItem("Memória - Programa");
-        viewProgram.setAccelerator(KeyStroke.getKeyStroke(APPLE ? KeyEvent.VK_F9 : KeyEvent.VK_F11, 0));
-        viewProgram.setToolTipText("Exibe / oculta janela de memória do programa");
+        viewProgram = new JCheckBoxMenuItem(getProperty("ViewMenu.Program.label"));
+        viewProgram.setAccelerator(KeyStroke.getKeyStroke(IS_APPLE ? KeyEvent.VK_F9 : KeyEvent.VK_F11, 0));
+        viewProgram.setToolTipText(getProperty("ViewMenu.Program.tooltip"));
 
-        viewData = new JCheckBoxMenuItem("Memória - Dados");
+        viewData = new JCheckBoxMenuItem(getProperty("ViewMenu.Data.label"));
         viewData.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
-        viewData.setToolTipText("Exibe / oculta janela de memória dos dados");
+        viewData.setToolTipText(getProperty("ViewMenu.Data.tooltip"));
 
-        viewDisplay = new JCheckBoxMenuItem("Saída");
+        viewDisplay = new JCheckBoxMenuItem(getProperty("ViewMenu.Display.label"));
 
         viewMenu.add(viewProgram);
         viewMenu.add(viewData);
@@ -144,14 +148,14 @@ public class MenuBar extends JMenuBar {
         // ==============================================================================================================
         // Executar
         // ==============================================================================================================
-        execMenu = new JMenu("Executar");
+        execMenu = new JMenu(getProperty("ExecMenu.label"));
 
         // ==============================================================================================================
         // Ajuda
         // ==============================================================================================================
-        helpMenu = new JMenu("?");
+        helpMenu = new JMenu(getProperty("HelpMenu.label"));
 
-        helpAbout = new JMenuItem("Sobre....", KeyEvent.VK_S);
+        helpAbout = new JMenuItem(getProperty("HelpMenu.About.label"), KeyEvent.VK_S);
 
         helpMenu.add(helpAbout);
 

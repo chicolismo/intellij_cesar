@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import cesar.utils.Base;
@@ -16,11 +17,20 @@ public class RegisterDisplay extends JPanel {
 
     private final DigitalDisplay digitalDisplay;
     private final BinaryDisplay binaryDisplay;
+
+    private final String newValueTitle;
+    private final String newValueMessage;
+
     private final int registerNumber;
     private Base currentBase;
 
-    public RegisterDisplay(final int registerNumber, final String label) {
+    public RegisterDisplay(final int registerNumber, final String label, final String newValueTitle,
+            final String newValueMessage) {
         super(true);
+
+        this.newValueTitle = newValueTitle;
+        this.newValueMessage = newValueMessage;
+
         currentBase = Base.DECIMAL;
         this.registerNumber = registerNumber;
         digitalDisplay = new DigitalDisplay();
@@ -39,6 +49,11 @@ public class RegisterDisplay extends JPanel {
 
         doLayout();
         setMinimumSize(getPreferredSize());
+    }
+
+    public String showNewValueDialog(final String currentValue) {
+        return (String) JOptionPane.showInputDialog(this, newValueMessage, newValueTitle, JOptionPane.PLAIN_MESSAGE,
+                null, null, currentValue);
     }
 
     public int getNumber() {

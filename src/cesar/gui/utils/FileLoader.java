@@ -10,6 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
+import cesar.ApplicationProperties;
 import cesar.hardware.Cpu;
 import cesar.utils.Base;
 
@@ -41,7 +42,7 @@ public class FileLoader {
     private static final int MIN_ADDRESS = 0;
     private static final int MAX_ADDRESS = Cpu.MEMORY_SIZE - 1;
 
-    private static final String ERROR_MESSAGE_FORMAT = "ERRO: Posição de memória inválida (%s)";
+    private static final String ERROR_MESSAGE_FORMAT = ApplicationProperties.getProperty("FileLoader.errorFormat");
 
     private static boolean isValidAddress(final int address) {
         return address >= MIN_ADDRESS && address <= MAX_ADDRESS;

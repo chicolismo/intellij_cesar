@@ -1,5 +1,7 @@
 package cesar.gui.dialogs;
 
+import static cesar.ApplicationProperties.getProperty;
+
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -28,6 +30,27 @@ public class SaveTextDialog extends JDialog {
     private static final int MIN_VALUE = 0;
     private static final int MAX_VALUE = Cpu.MEMORY_SIZE - 1;
 
+    private static final String TITLE = getProperty("SaveText.title");
+    private static final String FILTER_DESCRIPTION = getProperty("SaveText.FileFilter.description");
+    private static final String FILTER_EXTENSIONS = getProperty("SaveText.FileFilter.extensions");
+    private static final String OK_TEXT = getProperty("SaveText.OkButton.text");
+    private static final String CANCEL_TEXT = getProperty("SaveText.CancelButton.text");
+    private static final String PROGRAM_REGION_TITLE = getProperty("SaveText.ProgramRegion.title");
+    private static final String PROGRAM_REGION_START_ADDRESS_TEXT = getProperty(
+            "SaveText.ProgramRegion.StartAddress.text");
+    private static final String PROGRAM_REGION_START_ADDRESS_ERROR = getProperty(
+            "SaveText.ProgramRegion.StartAddress.errorMessage");
+    private static final String PROGRAM_REGION_END_ADDRESS_TEXT = getProperty("SaveText.ProgramRegion.EndAddress.text");
+    private static final String PROGRAM_REGION_END_ADDRESS_ERROR = getProperty(
+            "SaveText.ProgramRegion.EndAddress.errorMessage");
+    private static final String DATA_REGION_TITLE = getProperty("SaveText.DataRegion.title");
+    private static final String DATA_REGION_START_ADDRESS_TEXT = getProperty("SaveText.DataRegion.StartAddress.text");
+    private static final String DATA_REGION_START_ADDRESS_ERROR = getProperty(
+            "SaveText.DataRegion.StartAddress.errorMessage");
+    private static final String DATA_REGION_END_ADDRESS_TEXT = getProperty("SaveText.DataRegion.EndAddress.text");
+    private static final String DATA_REGION_END_ADDRESS_ERROR = getProperty(
+            "SaveText.DataRegion.EndAddress.errorMessage");
+
     private final JTextField startProgramAddressField;
     private final JTextField endProgramAddressField;
     private final JTextField startDataAddressField;
@@ -48,13 +71,13 @@ public class SaveTextDialog extends JDialog {
     private File outputFile;
 
     public SaveTextDialog(final JFrame parent) {
-        super(parent, "Salvar texto", true);
+        super(parent, TITLE, true);
 
         fileChooser = new JFileChooser();
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos texto (*.txt)", "txt"));
+        fileChooser.setFileFilter(new FileNameExtensionFilter(FILTER_DESCRIPTION, FILTER_EXTENSIONS));
 
-        okButton = new JButton("Ok");
-        cancelButton = new JButton("Cancelar");
+        okButton = new JButton(OK_TEXT);
+        cancelButton = new JButton(CANCEL_TEXT);
         statusBar = new JLabel("");
         statusBar.setMinimumSize(statusBar.getPreferredSize());
 
@@ -109,48 +132,48 @@ public class SaveTextDialog extends JDialog {
         try {
             startProgramAddress = Integer.parseInt(startProgramAddressField.getText(), 10);
             if (startProgramAddress < MIN_VALUE || startProgramAddress > MAX_VALUE) {
-                setText("Erro: Endereço inicial do programa incorreto.");
+                setText(PROGRAM_REGION_START_ADDRESS_ERROR);
                 return;
             }
         }
         catch (final NumberFormatException e) {
-            setText("Erro: Endereço inicial do programa incorreto.");
+            setText(PROGRAM_REGION_START_ADDRESS_ERROR);
             return;
         }
 
         try {
             endProgramAddress = Integer.parseInt(endProgramAddressField.getText(), 10);
             if (endProgramAddress < 0 || endProgramAddress > MAX_VALUE) {
-                setText("Erro: Endereço final do programa incorreto.");
+                setText(PROGRAM_REGION_END_ADDRESS_ERROR);
                 return;
             }
         }
         catch (final NumberFormatException e) {
-            setText("Erro: Endereço final do programa incorreto.");
+            setText(PROGRAM_REGION_END_ADDRESS_ERROR);
             return;
         }
 
         try {
             startDataAddress = Integer.parseInt(startDataAddressField.getText(), 10);
             if (startDataAddress < MIN_VALUE || startDataAddress > MAX_VALUE) {
-                setText("Erro: Endereço inicial dos dados incorreto.");
+                setText(DATA_REGION_START_ADDRESS_ERROR);
                 return;
             }
         }
         catch (final NumberFormatException e) {
-            setText("Erro: Endereço inicial dos dados incorreto.");
+            setText(DATA_REGION_START_ADDRESS_ERROR);
             return;
         }
 
         try {
             endDataAddress = Integer.parseInt(endDataAddressField.getText(), 10);
             if (endDataAddress < MIN_VALUE || endDataAddress > MAX_VALUE) {
-                setText("Erro: Endereço final dos dados incorreto.");
+                setText(DATA_REGION_END_ADDRESS_ERROR);
                 return;
             }
         }
         catch (final NumberFormatException e) {
-            setText("Erro: Endereço final dos dados incorreto.");
+            setText(DATA_REGION_END_ADDRESS_ERROR);
             return;
         }
 
@@ -166,18 +189,18 @@ public class SaveTextDialog extends JDialog {
 
         final GridLayout programGrid = new GridLayout(2, 2, 5, 5);
         programPanel.setLayout(programGrid);
-        programPanel.setBorder(BorderFactory.createTitledBorder("Região do programa"));
-        programPanel.add(new JLabel("Endereço inicial"));
+        programPanel.setBorder(BorderFactory.createTitledBorder(PROGRAM_REGION_TITLE));
+        programPanel.add(new JLabel(PROGRAM_REGION_START_ADDRESS_TEXT));
         programPanel.add(startProgramAddressField);
-        programPanel.add(new JLabel("Endereço final"));
+        programPanel.add(new JLabel(PROGRAM_REGION_END_ADDRESS_TEXT));
         programPanel.add(endProgramAddressField);
 
         final GridLayout dataGrid = new GridLayout(2, 2, 5, 5);
         dataPanel.setLayout(dataGrid);
-        dataPanel.setBorder(BorderFactory.createTitledBorder("Região de dados"));
-        dataPanel.add(new JLabel("Endereço inicial"));
+        dataPanel.setBorder(BorderFactory.createTitledBorder(DATA_REGION_TITLE));
+        dataPanel.add(new JLabel(DATA_REGION_START_ADDRESS_TEXT));
         dataPanel.add(startDataAddressField);
-        dataPanel.add(new JLabel("Endereço final"));
+        dataPanel.add(new JLabel(DATA_REGION_END_ADDRESS_TEXT));
         dataPanel.add(endDataAddressField);
 
         buttonPanel.setLayout(new GridLayout(2, 1, 5, 5));

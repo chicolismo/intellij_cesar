@@ -12,6 +12,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
+import cesar.ApplicationProperties;
 import cesar.gui.tables.Table;
 import cesar.gui.tables.TableModel;
 import cesar.hardware.Cpu;
@@ -19,7 +20,7 @@ import cesar.utils.Base;
 
 public abstract class SideWindow<TableType extends Table, TableModelType extends TableModel> extends JDialog {
     public static final long serialVersionUID = 3602114587032491724L;
-    public static final String LABEL_FORMAT = "[%s]";
+    public static final String LABEL_FORMAT = ApplicationProperties.getProperty("SideWindow.labelFormat");
 
     protected static GridBagLayout getGridLayout(final double[] rowWeights, final double[] colWeights) {
         final GridBagLayout grid = new GridBagLayout();
@@ -39,11 +40,12 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
     public SideWindow(final MainWindow parent, final String title, final Cpu cpu) {
         super(parent, title, false);
         setFocusable(true);
+        setModalityType(ModalityType.MODELESS);
         setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
         initTable(cpu);
         setCurrentAddress(0);
         setCurrentValue(0);
-        addressLabel = new JLabel("[0]");
+        addressLabel = new JLabel(String.format(LABEL_FORMAT, "0"));
         valueField = new JTextField(6);
         valueField.setMinimumSize(valueField.getPreferredSize());
     }

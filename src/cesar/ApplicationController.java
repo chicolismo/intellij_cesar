@@ -1,5 +1,6 @@
 package cesar;
 
+import static cesar.ApplicationProperties.getProperty;
 import static cesar.utils.Integers.clamp;
 
 import java.awt.Component;
@@ -49,22 +50,21 @@ import cesar.utils.Bytes;
 import cesar.utils.Components;
 import cesar.utils.Shorts;
 
+
 public class ApplicationController {
     private static final int MINIMUM_ADDRESS = 0;
     private static final int MAXIMUM_ADDRESS = Cpu.MEMORY_SIZE - 1;
 
-    private static final String GOTO_DIALOG_MESSAGE = "Digite a posição de memória a ir:";
-    private static final String GOTO_DIALOG_TITLE = "Ir Para";
+    private static final String GOTO_DIALOG_TITLE = getProperty("Goto.title");
+    private static final String GOTO_DIALOG_MESSAGE = getProperty("Goto.message");
 
-    private static final String ZERO_MEMORY_DIALOG_TITLE = "Zerar memória";
-    private static final String ZERO_MEMORY_DIALOG_START_MESSAGE = "Digite o endereço inicial";
-    private static final String ZERO_MEMORY_DIALOG_END_MESSAGE = "Digite o endereço final";
+    private static final String ZERO_MEMORY_TITLE = getProperty("ZeroMemory.title");
+    private static final String ZERO_MEMORY_START_MESSAGE = getProperty("ZeroMemory.startMessage");
+    private static final String ZERO_MEMORY_END_MESSAGE = getProperty("ZeroMemory.endMessage");
 
-    private static final String NEW_REGISTER_VALUE_DIALOG_FORMAT = "Digite um valor %s para o registrador %d";
-    private static final String NEW_REGISTER_VALUE_ERROR_FORMAT = "ERRO: Valor inválido (%s)";
+    private static final String NEW_REGISTER_VALUE_ERROR_FORMAT = getProperty("NewRegisterValue.errorFormat");
 
     private static final String MEMORY_ERROR_FORMAT = "ERRO: Posição da memória inválida (%s)";
-
 
     private final MainWindow window;
     private final Cpu cpu;
@@ -238,10 +238,8 @@ public class ApplicationController {
 
     private void showNewRegisterValueDialog(final RegisterDisplay registerDisplay, final int registerNumber) {
         final int radix = currentBase.toInt();
-        final String message = String.format(NEW_REGISTER_VALUE_DIALOG_FORMAT, currentBase.toString(), registerNumber);
         final String currentValue = Integer.toString(cpu.getRegister(registerNumber), radix);
-
-        final String input = JOptionPane.showInputDialog(registerDisplay, message, currentValue);
+        final String input = registerDisplay.showNewValueDialog(currentValue);
 
         if (input != null) {
             try {
@@ -572,7 +570,7 @@ public class ApplicationController {
         int radix = currentBase.toInt();
         String userInput = null;
         try {
-            userInput = getUserInput(window, ZERO_MEMORY_DIALOG_START_MESSAGE, ZERO_MEMORY_DIALOG_TITLE,
+            userInput = getUserInput(window, ZERO_MEMORY_START_MESSAGE, ZERO_MEMORY_TITLE,
                     Integer.toString(MINIMUM_ADDRESS, radix));
 
             if (userInput == null) {
@@ -585,7 +583,7 @@ public class ApplicationController {
                 return;
             }
 
-            userInput = getUserInput(window, ZERO_MEMORY_DIALOG_END_MESSAGE, ZERO_MEMORY_DIALOG_TITLE,
+            userInput = getUserInput(window, ZERO_MEMORY_END_MESSAGE, ZERO_MEMORY_TITLE,
                     Integer.toString(MAXIMUM_ADDRESS, radix));
 
             final int endAddress = Integer.parseInt(userInput, radix);

@@ -1,5 +1,8 @@
 package cesar.gui.windows;
 
+import static cesar.ApplicationProperties.getProperty;
+
+import java.awt.Dialog.ModalExclusionType;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -29,6 +32,18 @@ public class MainWindow extends JFrame {
         }
     }
 
+    private static final int WINDOW_GAP;
+    static {
+        int gap;
+        try {
+            gap = Integer.parseInt(getProperty("MainWindow.windowGap"), 10);
+        }
+        catch (NumberFormatException e) {
+            gap = 6;
+        }
+        WINDOW_GAP = gap;
+    }
+
     private final int windowWidth;
     private final int windowHeight;
 
@@ -45,10 +60,11 @@ public class MainWindow extends JFrame {
     private final StatusBar statusBar;
 
     public MainWindow() {
-        super("Cesar");
+        super(getProperty("MainWindow.title"));
         setIconImage(
-                Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource("/cesar/gui/assets/computer.png")));
+                Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource(getProperty("MainWindow.iconPath"))));
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
         setFocusable(true);
         setAutoRequestFocus(true);
         setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
@@ -73,7 +89,6 @@ public class MainWindow extends JFrame {
         buttonPanel.setAlignmentY(BOTTOM_ALIGNMENT);
 
         statusBar = new StatusBar();
-        statusBar.setText("Pronto");
         statusBar.setMinimumSize(statusBar.getPreferredSize());
 
         add(new MainPanel(conditionPanel, buttonPanel, executionPanel, registerPanel, instructionPanel));
@@ -136,16 +151,15 @@ public class MainWindow extends JFrame {
     }
 
     private void updateSubWindowsPositions() {
-        final int gap = 6;
         final Point pos = getLocation();
         final Dimension programWindowSize = programWindow.getSize();
         final Dimension programWindowPreferredSize = programWindow.getPreferredSize();
         final Dimension dataWindowPreferredSize = dataWindow.getPreferredSize();
-        programWindow.setLocation(pos.x - programWindowSize.width - gap, pos.y);
-        dataWindow.setLocation(pos.x + windowWidth + gap, pos.y);
+        programWindow.setLocation(pos.x - programWindowSize.width - WINDOW_GAP, pos.y);
+        dataWindow.setLocation(pos.x + windowWidth + WINDOW_GAP, pos.y);
         programWindow.setSize(programWindowPreferredSize.width, windowHeight);
         dataWindow.setSize(dataWindowPreferredSize.width, windowHeight);
-        textWindow.setLocation(pos.x - programWindowSize.width - gap, pos.y + windowHeight + gap);
+        textWindow.setLocation(pos.x - programWindowSize.width - WINDOW_GAP, pos.y + windowHeight + WINDOW_GAP);
         requestFocus();
     }
 }
