@@ -1,23 +1,35 @@
 package cesar;
 
-import javax.swing.*;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.swing.JOptionPane;
+
 public class Properties {
-    private static final java.util.Properties properties;
-    private final static String filename = "/cesar/config.properties";
+    private static final java.util.Properties PROPERTIES;
+    private final static String CONFIG_PATH = "/cesar/config.properties";
 
     static {
-        InputStream stream = Properties.class.getResourceAsStream(filename);
-        properties = new java.util.Properties();
+        InputStream stream = Properties.class.getResourceAsStream(CONFIG_PATH);
+        PROPERTIES = new java.util.Properties();
         try {
-            properties.load(stream);
+            PROPERTIES.load(stream);
+
+            // TODO: Encontrar um jeito de refatorar isto...
+            FileWriter writer = new FileWriter(new File("./keys.txt"));
+            for (Object key : PROPERTIES.keySet()) {
+                writer.write((String) key);
+                writer.write(System.lineSeparator());
+            }
+            writer.close();
+
         }
         catch (IOException e) {
-            JOptionPane.showMessageDialog(null,
-                    String.format("Não foi possível ler arquivo de configuração %s", filename));
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                    String.format("Não foi possível ler arquivo de configuração %s", CONFIG_PATH));
             System.exit(1);
         }
     }
@@ -25,7 +37,14 @@ public class Properties {
     private Properties() {
     }
 
-    public static String getProperty(final String propertyName) {
-        return properties.getProperty(propertyName);
+    public static String getProperty(final String key) {
+        final String property = PROPERTIES.getProperty(key);
+        if (property == null) {
+            JOptionPane.showMessageDialog(null, "Erro ao tentar ler a propriedade " + key, "Propriedade inválida",
+                    JOptionPane.ERROR_MESSAGE);
+
+            System.exit(1);
+        }
+        return property;
     }
 }

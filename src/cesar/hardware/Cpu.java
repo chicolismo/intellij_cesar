@@ -1,5 +1,8 @@
 package cesar.hardware;
 
+import static cesar.utils.Integers.clamp;
+import static cesar.utils.Integers.clampToShort;
+
 import cesar.utils.Shorts;
 
 public class Cpu {
@@ -13,9 +16,13 @@ public class Cpu {
         }
     }
 
+    enum CpuReturnInstruction {
+        RTS, RTI
+    }
+
     enum CpuInstruction {
-        NOP, CCC, SCC, CONDITIONAL_BRANCH, JMP, SOB, JSR, RTS, ONE_OPERAND_INSTRUCTION, MOV, ADD, SUB, CMP, AND, OR,
-        HLT;
+        NOP, CCC, SCC, CONDITIONAL_BRANCH, JMP, SOB, JSR, RETURN_INSTRUCTION, ONE_OPERAND_INSTRUCTION, MOV, ADD, SUB,
+        CMP, AND, OR, HLT;
 
         private static final CpuInstruction[] array = CpuInstruction.values();
 
@@ -23,6 +30,7 @@ public class Cpu {
             return array[index];
         }
     }
+
 
     enum CpuOneOperandInstruction {
         CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC;
@@ -34,22 +42,22 @@ public class Cpu {
         }
     }
 
+
     public enum ExecutionResult {
         HALT, INVALID_INSTRUCTION, NOOP, OK, BREAK_POINT
     }
+
 
     public static final int REGISTER_COUNT = 8;
     public static final int MEMORY_SIZE = 1 << 16;
     public static final int KEYBOARD_STATE_ADDRESS = 65498;
     public static final int LAST_CHAR_ADDRESS = 65499;
     public static final int BEGIN_DISPLAY_ADDRESS = 65500;
-
     public static final int END_DISPLAY_ADDRESS = 65535;
-
     public static final int DATA_START_ADDRESS = 1024;
     public static final int PC = 7;
     public static final int SP = 6;
-    private static final byte ZERO_BYTE = 0;
+    public static final byte ZERO_BYTE = (byte) 0;
 
     public static boolean isIOAddress(final int address) {
         return address >= KEYBOARD_STATE_ADDRESS && address <= END_DISPLAY_ADDRESS;
@@ -76,7 +84,6 @@ public class Cpu {
         registers = new short[REGISTER_COUNT];
         memory = new byte[MEMORY_SIZE];
         mnemonics = new String[MEMORY_SIZE];
-        updateMnemonics();
         breakPoint = (short) 0xFFFF;
         conditionRegister = new ConditionRegister();
         memoryAccessCount = 0;
@@ -84,6 +91,7 @@ public class Cpu {
         lastChangedAddress = 0;
         readInstruction = "0";
         readMnemonic = Instruction.NOP.toString();
+        updateMnemonics();
     }
 
     private void executeConditionalInstruction(final CpuConditionalInstruction instruction, final byte offset) {
@@ -229,9 +237,9 @@ public class Cpu {
             case SOB: {
                 final byte offset = fetchNextByte();
                 final int rrr = firstByte & 0b0000_0111;
-                registers[rrr] = (short) (0xFFFF & registers[rrr] - 1);
+                registers[rrr] = clampToShort(registers[rrr] - 1);
                 if (registers[rrr] != 0) {
-                    registers[PC] = (short) (0xFFFF & registers[PC] - offset);
+                    registers[PC] = clampToShort(registers[PC] - offset);
                 }
                 return ExecutionResult.OK;
             }
@@ -248,14 +256,20 @@ public class Cpu {
                 final int subAddress = getAddress(mode, rrr);
                 push(registers[reg]);
                 registers[reg] = registers[PC];
-                registers[PC] = (short) subAddress;
+                registers[PC] = clampToShort(subAddress);
                 return ExecutionResult.OK;
             }
 
-            case RTS: {
-                final int rrr = firstByte & 0b0000_0111;
-                registers[PC] = registers[rrr];
-                registers[rrr] = pop();
+            case RETURN_INSTRUCTION: {
+                if (firstByte == ((byte) 0b0111_1000)) {
+                    // TODO: TRATAR RTI
+                }
+                else {
+                    // RTS
+                    final int rrr = firstByte & 0b0000_0111;
+                    registers[PC] = registers[rrr];
+                    registers[rrr] = pop();
+                }
                 return ExecutionResult.OK;
             }
 
@@ -303,7 +317,7 @@ public class Cpu {
                 break;
 
             case NOT:
-                result = (short) (0xFFFF & ~value);
+                result = clampToShort(~value);
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.setCarry(true);
@@ -311,7 +325,7 @@ public class Cpu {
                 break;
 
             case INC:
-                result = (short) (0xFFFF & value + 1);
+                result = clampToShort(value + 1);
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.testCarry(value, result, ConditionRegister.CarryOperation.PLUS);
@@ -319,19 +333,19 @@ public class Cpu {
                 break;
 
             case DEC:
-                result = (short) (0xFFFF & value - 1);
+                result = clampToShort(value - 1);
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.testCarry(value, result, ConditionRegister.CarryOperation.MINUS);
-                conditionRegister.testOverflow(value, (short) (0xFFFF & value - 1), result);
+                conditionRegister.testOverflow(value, clampToShort(value - 1), result);
                 break;
 
             case NEG:
-                result = (short) (0xFFFF & -value);
+                result = clampToShort(-value);
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.testCarry(value, result, ConditionRegister.CarryOperation.MINUS);
-                conditionRegister.testOverflow(value, (short) (0xFFFF & -value), result);
+                conditionRegister.testOverflow(value, clampToShort(-value), result);
                 break;
 
             case TST:
@@ -344,7 +358,7 @@ public class Cpu {
 
             case ROR: {
                 final int lsb = (value & 0x0001) << 0xF;
-                result = (short) (lsb | (0xFFFF & value) >> 1);
+                result = (short) (lsb | clamp(value) >> 1);
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.setCarry(lsb == 0x8000);
@@ -354,7 +368,7 @@ public class Cpu {
 
             case ROL: {
                 final int msb = (value & 0x8000) >> 0xF;
-                result = (short) ((0xFFFF & value) << 1 | msb);
+                result = (short) (clamp(value) << 1 | msb);
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.setCarry(msb == 1);
@@ -440,7 +454,7 @@ public class Cpu {
                 break;
 
             case ADD:
-                result = (short) (0xFFFF & dst + src);
+                result = clampToShort(dst + src);
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.testOverflow(dst, src, result);
@@ -448,7 +462,7 @@ public class Cpu {
                 break;
 
             case SUB:
-                result = (short) (0xFFFF & dst - src);
+                result = clampToShort(dst - src);
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.testOverflow(dst, src, result);
@@ -456,7 +470,7 @@ public class Cpu {
                 break;
 
             case CMP:
-                result = (short) (0xFFFF & src - dst);
+                result = clampToShort(src - dst);
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.testOverflow(src, dst, result);
@@ -464,14 +478,14 @@ public class Cpu {
                 break;
 
             case AND:
-                result = (short) (0xFFFF & dst & src);
+                result = clampToShort(dst & src);
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.setOverflow(false);
                 break;
 
             case OR:
-                result = (short) (0xFFFF & (dst | src));
+                result = clampToShort(dst | src);
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.setOverflow(false);
@@ -520,7 +534,7 @@ public class Cpu {
             case INDEXED: {
                 final short word = readWord(registers[PC]);
                 registers[PC] = (short) (registers[PC] + 2);
-                address = 0xFFFF & registers[registerNumber] + word;
+                address = clamp(registers[registerNumber] + word);
                 break;
             }
 
@@ -545,7 +559,7 @@ public class Cpu {
             case INDEXED_INDIRECT: {
                 final short nextWord = readWord(registers[PC]);
                 registers[PC] = (short) (registers[PC] + 2);
-                final int firstAddress = 0xFFFF & nextWord + registers[registerNumber];
+                final int firstAddress = clamp(nextWord + registers[registerNumber]);
                 address = Shorts.toUnsignedInt(readWord(firstAddress));
                 break;
             }
@@ -555,7 +569,7 @@ public class Cpu {
     }
 
     public byte getByte(final int address) {
-        return memory[0xFFFF & address];
+        return memory[clamp(address)];
     }
 
     public int getLastChangedAddress() {
@@ -575,7 +589,7 @@ public class Cpu {
     }
 
     public String getMnemonic(final int address) {
-        return mnemonics[0xFFFF & address];
+        return mnemonics[clamp(address)];
     }
 
     public String[] getMnemonics() {
@@ -605,7 +619,7 @@ public class Cpu {
         return readMnemonic;
     }
 
-    public short getRegister(final int registerNumber) {
+    public short getRegisterValue(final int registerNumber) {
         return registers[registerNumber];
     }
 
@@ -642,7 +656,7 @@ public class Cpu {
 
     private byte readByte(final int address) {
         ++memoryAccessCount;
-        return memory[0xFFFF & address];
+        return memory[clamp(address)];
     }
 
     private short readWord(final int address) {
@@ -658,7 +672,7 @@ public class Cpu {
     }
 
     public void setBreakPoint(final int bp) {
-        breakPoint = (short) (0xFFFF & bp);
+        breakPoint = clampToShort(bp);
     }
 
     public void setBreakPoint(final short bp) {
@@ -666,7 +680,8 @@ public class Cpu {
     }
 
     public void setByte(final int address, final byte value) {
-        memory[0xFFFF & address] = value;
+        memory[clamp(address)] = value;
+        memoryChanged = true;
         lastChangedMnemonic = Mnemonic.updateMnemonics(this, address);
     }
 
@@ -684,10 +699,10 @@ public class Cpu {
     }
 
     public void setMnemonic(final int address, final String value) {
-        mnemonics[0xFFFF & address] = value;
+        mnemonics[clamp(address)] = value;
     }
 
-    public void setRegister(final int registerNumber, final short value) {
+    public void setRegisterValue(final int registerNumber, final short value) {
         registers[registerNumber] = value;
     }
 
@@ -696,17 +711,18 @@ public class Cpu {
         // O valor do último byte digitado só é alterado quando o endereço do estado do
         // teclado for 0 (ZERO).
         // (que indica que está esperando uma tecla).
-
-        // if (readByte(KEYBOARD_STATE_ADDRESS) == ZERO_BYTE) {
-        setByte(KEYBOARD_STATE_ADDRESS, (byte) 0x80);
-        setByte(LAST_CHAR_ADDRESS, keyValue);
-        // }
+        if (readByte(KEYBOARD_STATE_ADDRESS) == ZERO_BYTE) {
+            setByte(KEYBOARD_STATE_ADDRESS, (byte) 0x80);
+            setByte(LAST_CHAR_ADDRESS, keyValue);
+            memoryChanged = true;
+            lastChangedAddress = LAST_CHAR_ADDRESS;
+        }
     }
 
 
     private void writeByte(final int address, final byte value) {
         ++memoryAccessCount;
-        memory[0xFFFF & address] = value;
+        memory[clamp(address)] = value;
     }
 
 

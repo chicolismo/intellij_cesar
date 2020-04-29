@@ -1,5 +1,7 @@
 package cesar.utils;
 
+import cesar.Properties;
+
 import java.awt.Color;
 import java.awt.Font;
 
@@ -9,23 +11,30 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
 public class Defaults {
-    public static final Font DEFAULT_FONT;
+    public static final Font PANEL_FONT;
     public static final Color ARROW_COLOR;
 
     public static final boolean APPLE = System.getProperty("os.name").equals("Mac OS X");
 
     static {
-        DEFAULT_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 12);
+        PANEL_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 12);
 
-        if (System.getProperty("os.name").equals("Mac OS X")) {
-            ARROW_COLOR = new Color(0, 96, 0);
+        int rgb;
+        try {
+            if (APPLE) {
+                rgb = Integer.parseInt(Properties.getProperty("ProgramWindow.pcArrowMacColor"));
+            }
+            else {
+                rgb = Integer.parseInt(Properties.getProperty("ProgramWindow.pcArrowWinColor"));
+            }
         }
-        else {
-            ARROW_COLOR = Color.GREEN;
+        catch (final NumberFormatException e) {
+            rgb = 0x009600;
         }
+        ARROW_COLOR = new Color(rgb);
     }
 
-    public static Border createEmptyBorder() {
+    public static Border getEmptyBorder() {
         return createEmptyBorder(4);
     }
 
@@ -35,7 +44,7 @@ public class Defaults {
 
     public static JLabel createLabel(final String title) {
         final JLabel label = new JLabel(title);
-        label.setFont(DEFAULT_FONT);
+        label.setFont(PANEL_FONT);
         return label;
     }
 
@@ -46,7 +55,7 @@ public class Defaults {
     public static Border createTitledBorder(final String title, final int align) {
         final TitledBorder border = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), title, align,
                 TitledBorder.CENTER);
-        border.setTitleFont(DEFAULT_FONT);
+        border.setTitleFont(PANEL_FONT);
         return border;
     }
 

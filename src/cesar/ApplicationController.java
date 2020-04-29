@@ -1,54 +1,28 @@
 package cesar;
 
-import static cesar.Properties.getProperty;
-import static cesar.utils.Integers.clamp;
-
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.Arrays;
-
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-
 import cesar.gui.dialogs.SaveTextDialog;
 import cesar.gui.displays.RegisterDisplay;
-import cesar.gui.panels.ButtonPanel;
-import cesar.gui.panels.ConditionPanel;
-import cesar.gui.panels.ExecutionPanel;
-import cesar.gui.panels.InstructionPanel;
-import cesar.gui.panels.RegisterPanel;
-import cesar.gui.panels.StatusBar;
-import cesar.gui.tables.DataTable;
-import cesar.gui.tables.DataTableModel;
-import cesar.gui.tables.ProgramTable;
-import cesar.gui.tables.ProgramTableModel;
-import cesar.gui.tables.Table;
-import cesar.gui.tables.TableModel;
+import cesar.gui.panels.MenuBar;
+import cesar.gui.panels.*;
+import cesar.gui.tables.*;
 import cesar.gui.utils.FileLoader;
 import cesar.gui.utils.FileLoader.FileLoaderException;
-import cesar.gui.windows.DataWindow;
-import cesar.gui.windows.MainWindow;
-import cesar.gui.windows.MenuBar;
-import cesar.gui.windows.ProgramWindow;
-import cesar.gui.windows.SideWindow;
-import cesar.gui.windows.TextWindow;
+import cesar.gui.utils.FileSaver;
+import cesar.gui.windows.*;
 import cesar.hardware.Cpu;
 import cesar.hardware.Cpu.ExecutionResult;
 import cesar.utils.Base;
 import cesar.utils.Bytes;
 import cesar.utils.Components;
 import cesar.utils.Shorts;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.Arrays;
+
+import static cesar.Properties.getProperty;
+import static cesar.utils.Integers.clamp;
 
 
 public class ApplicationController {
@@ -64,11 +38,12 @@ public class ApplicationController {
 
     private static final String NEW_REGISTER_VALUE_ERROR_FORMAT = getProperty("NewRegisterValue.errorFormat");
 
-    private static final String MEMORY_ERROR_FORMAT = "ERRO: Posição da memória inválida (%s)";
+    private static final String INVALID_MEMORY_POSITION_ERROR_FORMAT = getProperty("Memory.invalidPositionErrorFormat");
 
     private final MainWindow window;
     private final Cpu cpu;
     private final FileLoader fileLoader;
+    private final FileSaver fileSaver;
     private final SaveTextDialog saveTextDialog;
 
     private final RegisterPanel registerPanel;
@@ -77,6 +52,8 @@ public class ApplicationController {
     private final InstructionPanel instructionPanel;
 
     private final ButtonPanel buttonPanel;
+    private final JToggleButton runButton;
+    private final JButton nextButton;
     private final MenuBar menuBar;
     private final StatusBar statusBar;
 
@@ -92,15 +69,17 @@ public class ApplicationController {
 
     private Base currentBase;
 
+    private int instructionCount = 0;
     private boolean running;
 
-    public ApplicationController() {
-        window = new MainWindow();
+    public ApplicationController(final MainWindow window) {
+        this.window = window;
         cpu = window.getCpu();
         menuBar = (MenuBar) window.getJMenuBar();
         statusBar = window.getStatusBar();
 
         fileLoader = new FileLoader(window);
+        fileSaver = new FileSaver(window);
         saveTextDialog = new SaveTextDialog(window);
 
         registerPanel = window.getRegisterPanel();
@@ -108,6 +87,9 @@ public class ApplicationController {
         buttonPanel = window.getButtonPanel();
         executionPanel = window.getExecutionPanel();
         instructionPanel = window.getInstructionPanel();
+
+        runButton = buttonPanel.btnRun;
+        nextButton = buttonPanel.btnNext;
 
         programWindow = window.getProgramWindow();
         programTable = programWindow.getTable();
@@ -120,15 +102,17 @@ public class ApplicationController {
         textWindow = window.getTextWindow();
 
         running = false;
-
-        setBase(Base.DECIMAL);
-        setEventListeners();
-        dataTable.scrollToRow(Cpu.DATA_START_ADDRESS, true);
-        updateInterface();
-
     }
 
     public void run() {
+        setBase(Base.DECIMAL);
+        menuBar.viewProgram.setState(true);
+        menuBar.viewData.setState(true);
+        menuBar.viewDisplay.setState(true);
+        menuBar.execUpdateRegisters.setState(true);
+        setEventListeners();
+        dataTable.scrollToRow(Cpu.DATA_START_ADDRESS, true);
+        updateInterface();
         buttonPanel.btnDec.doClick();
         window.setLocationRelativeTo(null);
         Components.centerComponent(window);
@@ -146,6 +130,14 @@ public class ApplicationController {
     private synchronized boolean isRunning() {
         return running;
     }
+
+    private synchronized boolean isUpdateRegistersEnabled() {
+        return menuBar.execUpdateRegisters.getState();
+    }
+    //
+    //    private synchronized void setUpdateRegistersEnabled(final boolean value) {
+    //        menuBar.execUpdateRegisters.setState(value);
+    //    }
 
     private synchronized void stopRunning() {
         running = false;
@@ -170,29 +162,34 @@ public class ApplicationController {
         statusBar.setText(result.toString());
 
         switch (result) {
-            case HALT:
-                stopRunning();
-                buttonPanel.btnRun.setSelected(false);
             case NOOP:
             case OK:
-                updateDisplays();
-                executionPanel.incrementInstructions();
-                if (cpu.hasMemoryChanged()) {
-                    final int start = cpu.getLastChangedAddress();
-                    final int end = cpu.getLastChangedMnemonic();
-                    programTableModel.fireTableRowsUpdated(start, end);
-                    dataTableModel.fireTableRowsUpdated(start, start + 1);
-                    textWindow.getDisplay().repaint();
+                ++instructionCount;
+                if (isUpdateRegistersEnabled()) {
+                    updateAfterInstruction();
                 }
-                updateProgramCounterRow();
                 break;
 
+            case HALT:
             case BREAK_POINT:
-
             case INVALID_INSTRUCTION:
-                stopRunning();
+                if (isRunning() && runButton.isSelected()) {
+                    runButton.doClick();
+                }
                 break;
         }
+    }
+
+    private void updateAfterInstruction() {
+        updateDisplays();
+        if (cpu.hasMemoryChanged()) {
+            final int start = cpu.getLastChangedAddress();
+            final int end = cpu.getLastChangedMnemonic();
+            programTableModel.fireTableRowsUpdated(start, end);
+            dataTableModel.fireTableRowsUpdated(start, start + 1);
+            textWindow.getDisplay().repaint();
+        }
+        updateProgramCounterRow();
     }
 
     private void updateProgramCounterRow() {
@@ -206,12 +203,13 @@ public class ApplicationController {
 
     private void updateDisplays() {
         for (int i = 0; i < Cpu.REGISTER_COUNT; ++i) {
-            registerPanel.getDisplay(i).setValue(cpu.getRegister(i));
+            registerPanel.getDisplay(i).setValue(cpu.getRegisterValue(i));
         }
         conditionPanel.setNegative(cpu.isNegative());
         conditionPanel.setZero(cpu.isZero());
         conditionPanel.setOverflow(cpu.isOverflow());
         conditionPanel.setCarry(cpu.isCarry());
+        executionPanel.setInstructionCount(instructionCount);
         executionPanel.setMemoryAccessCount(cpu.getMemoryAccessCount());
         instructionPanel.setRiText(cpu.getReadInstruction());
         instructionPanel.setMnemonicText(cpu.getReadMnemonic());
@@ -236,16 +234,17 @@ public class ApplicationController {
         }
     }
 
-    private void showNewRegisterValueDialog(final RegisterDisplay registerDisplay, final int registerNumber) {
+    private void showNewRegisterValueDialog(final RegisterDisplay registerDisplay) {
         final int radix = currentBase.toInt();
-        final String currentValue = Integer.toString(cpu.getRegister(registerNumber), radix);
+        final int registerNumber = registerDisplay.getNumber();
+        final String currentValue = Integer.toString(Shorts.toUnsignedInt(cpu.getRegisterValue(registerNumber)), radix);
         final String input = registerDisplay.showNewValueDialog(currentValue);
 
         if (input != null) {
             try {
                 final int newValue = Integer.parseInt(input, radix);
                 if (Shorts.isValidShort(newValue)) {
-                    cpu.setRegister(registerNumber, Shorts.fromInt(newValue));
+                    cpu.setRegisterValue(registerNumber, Shorts.fromInt(newValue));
                     updateInterface();
                 }
                 else {
@@ -259,6 +258,13 @@ public class ApplicationController {
     }
 
     private void setEventListeners() {
+        window.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(final WindowEvent e) {
+                exitProgram();
+            }
+        });
+
         setButtonEvents();
         setKeyListenerEvents();
         setSideWindowEvents();
@@ -267,18 +273,20 @@ public class ApplicationController {
     }
 
     private void setButtonEvents() {
-        buttonPanel.btnNext.addActionListener(new ActionListener() {
+        nextButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent event) {
                 executeNextInstruction();
             }
         });
 
-        buttonPanel.btnRun.addActionListener(new ActionListener() {
+        runButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent event) {
-                if (buttonPanel.btnRun.isSelected() && !isRunning()) {
-                    startRunning();
+                if (runButton.isSelected()) {
+                    if (!isRunning()) {
+                        startRunning();
+                    }
                 }
                 else {
                     stopRunning();
@@ -321,8 +329,10 @@ public class ApplicationController {
             public void keyTyped(final KeyEvent event) {
                 menuBar.dispatchEvent(event);
                 cpu.setTypedKey((byte) event.getKeyChar());
-                programTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
-                dataTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
+                if (cpu.hasMemoryChanged()) {
+                    programTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
+                    dataTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
+                }
                 window.requestFocus();
             }
         };
@@ -337,27 +347,13 @@ public class ApplicationController {
         for (final SideWindow<?, ?> sideWindow : new SideWindow<?, ?>[] { programWindow, dataWindow }) {
             final Table table = sideWindow.getTable();
             final TableModel tableModel = (TableModel) table.getModel();
-            final JLabel addressLabel = sideWindow.getAddressLabel();
             final JTextField valueField = sideWindow.getValueField();
 
             table.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseReleased(final MouseEvent event) {
                     if (table.getSelectedRow() >= 0) {
-                        final int row = table.getSelectedRow();
-                        final String address = tableModel.getAddressAsString(row);
-                        final String value = tableModel.getValueAsString(row);
-                        addressLabel.setText(String.format(SideWindow.LABEL_FORMAT, address));
-                        valueField.setText(value);
-                        valueField.requestFocus();
-                        valueField.selectAll();
-
-                        final int radix = Base.toInt(tableModel.getBase());
-                        final int currentAddress = Integer.parseInt(address, radix);
-                        final int currentValue = Integer.parseInt(value, radix);
-
-                        sideWindow.setCurrentAddress(currentAddress);
-                        sideWindow.setCurrentValue(currentValue);
+                        sideWindow.clickOnRow(table.getSelectedRow());
                     }
                 }
             });
@@ -402,7 +398,7 @@ public class ApplicationController {
             public void mouseClicked(final MouseEvent event) {
                 final int selectedRow;
                 if (event.getClickCount() == 2 && (selectedRow = programTable.getSelectedRow()) != -1) {
-                    cpu.setRegister(7, Shorts.fromInt(selectedRow));
+                    cpu.setRegisterValue(7, Shorts.fromInt(selectedRow));
                     updateInterface();
                 }
             }
@@ -415,7 +411,7 @@ public class ApplicationController {
             public void mouseClicked(final MouseEvent event) {
                 if (event.getClickCount() == 2) {
                     final RegisterDisplay display = (RegisterDisplay) event.getSource();
-                    showNewRegisterValueDialog(display, display.getNumber());
+                    showNewRegisterValueDialog(display);
                 }
             }
         };
@@ -426,8 +422,10 @@ public class ApplicationController {
     }
 
     private void setMenuEvents() {
-        final Component[][] pairs = new Component[][] { { programWindow, menuBar.viewProgram },
-            { dataWindow, menuBar.viewData }, { textWindow, menuBar.viewDisplay } };
+        final Component[][] pairs = new Component[][] {
+                { programWindow, menuBar.viewProgram }, { dataWindow, menuBar.viewData },
+                { textWindow, menuBar.viewDisplay }
+        };
 
         for (final Component[] pair : pairs) {
             final JDialog sideWindow = (JDialog) pair[0];
@@ -463,6 +461,13 @@ public class ApplicationController {
             }
         });
 
+        menuBar.fileSave.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                saveFile();
+            }
+        });
+
         menuBar.fileSaveText.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent event) {
@@ -473,8 +478,7 @@ public class ApplicationController {
         menuBar.fileExit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent actionEvent) {
-                // TODO: Testar se o arquivo aberto foi alterado.
-                System.exit(0);
+                exitProgram();
             }
         });
 
@@ -495,7 +499,7 @@ public class ApplicationController {
         menuBar.editCopyMemory.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent event) {
-//                copyMemory();
+                //                copyMemory();
             }
         });
 
@@ -510,6 +514,31 @@ public class ApplicationController {
             @Override
             public void actionPerformed(final ActionEvent event) {
                 buttonPanel.btnHex.doClick();
+            }
+        });
+
+        menuBar.execUpdateRegisters.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (menuBar.execUpdateRegisters.getState()) {
+                    updateAfterInstruction();
+                }
+            }
+        });
+
+        menuBar.execChangeProgramCounter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                showNewRegisterValueDialog(registerPanel.getDisplay(Cpu.PC));
+            }
+        });
+
+        menuBar.execZeroProgramCounter.addActionListener(new ActionListener() {
+            // TODO: Também tem que zerar o IE.
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                cpu.setRegisterValue(Cpu.PC, Cpu.ZERO_BYTE);
+                updateInterface();
             }
         });
     }
@@ -543,8 +572,33 @@ public class ApplicationController {
         }
     }
 
+    private void saveFile() {
+        fileSaver.saveFile(cpu.getMemory());
+    }
+
     private void saveAsText() {
         saveTextDialog.saveText(cpu, currentBase);
+    }
+
+    private void exitProgram() {
+        if (cpu.hasMemoryChanged()) {
+            final int choice = JOptionPane.showConfirmDialog(window,
+                    "O conteúdo da memória mudou, deseja salvar o arquivo?");
+            if (choice == JOptionPane.OK_OPTION) {
+                if (fileSaver.saveFile(cpu.getMemory())) {
+                    window.dispose();
+                    System.exit(0);
+                }
+                else {
+                    return;
+                }
+            }
+            else if (choice == JOptionPane.CANCEL_OPTION) {
+                return;
+            }
+        }
+        window.dispose();
+        System.exit(0);
     }
 
     private void goTo() {
@@ -558,11 +612,11 @@ public class ApplicationController {
                 programWindow.clickOnRow(address);
             }
             else {
-                statusBar.setTempMessage(String.format(MEMORY_ERROR_FORMAT, input));
+                statusBar.setTempMessage(String.format(INVALID_MEMORY_POSITION_ERROR_FORMAT, input));
             }
         }
         catch (final NumberFormatException event) {
-            statusBar.setTempMessage(String.format(MEMORY_ERROR_FORMAT, input));
+            statusBar.setTempMessage(String.format(INVALID_MEMORY_POSITION_ERROR_FORMAT, input));
         }
     }
 
@@ -579,7 +633,7 @@ public class ApplicationController {
 
             final int startAddress = Integer.parseInt(userInput, radix);
             if (!isValidMemoryAddress(startAddress)) {
-                statusBar.setTempMessage(String.format(MEMORY_ERROR_FORMAT, userInput));
+                statusBar.setTempMessage(String.format(INVALID_MEMORY_POSITION_ERROR_FORMAT, userInput));
                 return;
             }
 
@@ -588,7 +642,7 @@ public class ApplicationController {
 
             final int endAddress = Integer.parseInt(userInput, radix);
             if (!isValidMemoryAddress(endAddress) || endAddress < startAddress) {
-                statusBar.setTempMessage(String.format(MEMORY_ERROR_FORMAT, userInput));
+                statusBar.setTempMessage(String.format(INVALID_MEMORY_POSITION_ERROR_FORMAT, userInput));
                 return;
             }
 
@@ -598,7 +652,7 @@ public class ApplicationController {
             updateInterface();
         }
         catch (final NumberFormatException event) {
-            statusBar.setTempMessage(String.format(MEMORY_ERROR_FORMAT, userInput));
+            statusBar.setTempMessage(String.format(INVALID_MEMORY_POSITION_ERROR_FORMAT, userInput));
         }
     }
 }

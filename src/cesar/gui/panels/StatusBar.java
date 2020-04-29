@@ -11,16 +11,18 @@ import cesar.utils.Defaults;
 
 public class StatusBar extends JPanel {
     private static final long serialVersionUID = 1408669317780545642L;
+    private static final String INITIAL_VALUE = Properties.getProperty("StatusBar.initialValue");
 
     private final JLabel label;
 
     public StatusBar() {
         super(true);
-        label = new JLabel(Properties.getProperty("StatusBar.inicialValue"));
-        label.setFont(Defaults.DEFAULT_FONT);
+        label = new JLabel(INITIAL_VALUE);
+        label.setFont(Defaults.PANEL_FONT);
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         this.add(label);
         this.add(Box.createHorizontalGlue());
+        setMinimumSize(getPreferredSize());
         setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
     }
 

@@ -18,6 +18,7 @@ import cesar.gui.panels.ConditionPanel;
 import cesar.gui.panels.ExecutionPanel;
 import cesar.gui.panels.InstructionPanel;
 import cesar.gui.panels.MainPanel;
+import cesar.gui.panels.MenuBar;
 import cesar.gui.panels.RegisterPanel;
 import cesar.gui.panels.StatusBar;
 import cesar.hardware.Cpu;
@@ -48,7 +49,6 @@ public class MainWindow extends JFrame {
     private final int windowHeight;
 
     private final Cpu cpu;
-    private final MenuBar menuBar;
     private final ProgramWindow programWindow;
     private final DataWindow dataWindow;
     private final TextWindow textWindow;
@@ -63,18 +63,15 @@ public class MainWindow extends JFrame {
         super(getProperty("MainWindow.title"));
         setIconImage(
                 Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource(getProperty("MainWindow.iconPath"))));
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        setAutoRequestFocus(true);
         setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
         setFocusable(true);
-        setAutoRequestFocus(true);
-        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
         cpu = new Cpu();
         programWindow = new ProgramWindow(this, cpu);
         dataWindow = new DataWindow(this, cpu);
         textWindow = new TextWindow(this, cpu);
-        menuBar = new MenuBar();
-        setJMenuBar(menuBar);
 
         registerPanel = new RegisterPanel();
         executionPanel = new ExecutionPanel();
@@ -89,25 +86,21 @@ public class MainWindow extends JFrame {
         buttonPanel.setAlignmentY(BOTTOM_ALIGNMENT);
 
         statusBar = new StatusBar();
-        statusBar.setMinimumSize(statusBar.getPreferredSize());
 
+        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
         add(new MainPanel(conditionPanel, buttonPanel, executionPanel, registerPanel, instructionPanel));
         add(statusBar);
+        setJMenuBar(new MenuBar());
         pack();
 
         windowWidth = getWidth();
         windowHeight = getHeight();
         setResizable(false);
 
-        menuBar.viewProgram.setState(true);
-        menuBar.viewData.setState(true);
-        menuBar.viewDisplay.setState(true);
-
         programWindow.setSize(programWindow.getPreferredSize());
         dataWindow.setSize(dataWindow.getPreferredSize());
-        updateSubWindowsPositions();
-
         addComponentListener(new MainWindowComponentAdapter());
+        updateSubWindowsPositions();
     }
 
     public Cpu getCpu() {

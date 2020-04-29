@@ -12,7 +12,6 @@ import cesar.Properties;
 import cesar.gui.tables.ProgramTable;
 import cesar.gui.tables.ProgramTableModel;
 import cesar.hardware.Cpu;
-import cesar.utils.Base;
 
 public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
     public static final long serialVersionUID = 8452878222228144644L;
@@ -26,22 +25,6 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
         initLayout();
     }
 
-    public void clickOnRow(final int row) {
-        table.setRowSelectionInterval(row, row);
-        table.scrollToRow(row);
-        final String address = model.getAddressAsString(row);
-        final String value = model.getValueAsString(row);
-        addressLabel.setText(String.format(SideWindow.LABEL_FORMAT, address));
-        valueField.setText(value);
-        valueField.requestFocus();
-        valueField.selectAll();
-        final int radix = Base.toInt(model.getBase());
-        final int currentAddress = Integer.parseInt(address, radix);
-        final int currentValue = Integer.parseInt(value, radix);
-        setCurrentAddress(currentAddress);
-        setCurrentValue(currentValue);
-    }
-
     public JTextField getBreakPointField() {
         return bpField;
     }
@@ -52,7 +35,7 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
 
         final JLabel bpLabel = new JLabel(Properties.getProperty("ProgramWindow.BreakPoint.text"));
         try {
-            final int rgb = Integer.parseInt(Properties.getProperty("ProgramWindow.BreakPoint.color"), 16);
+            final int rgb = Integer.parseInt(Properties.getProperty("ProgramWindow.breakPointColor"), 16);
             bpLabel.setForeground(new Color(rgb));
         }
         catch (final NumberFormatException e) {

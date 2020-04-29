@@ -70,7 +70,7 @@ public class InstructionPanel extends JPanel {
         add(mnemonicText, c_3);
 
         final Border outer = Defaults.createTitledBorder("Instrução:");
-        final Border border = new CompoundBorder(outer, Defaults.createEmptyBorder());
+        final Border border = new CompoundBorder(outer, Defaults.getEmptyBorder());
         setBorder(border);
     }
 

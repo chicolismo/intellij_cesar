@@ -50,16 +50,8 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         valueField.setMinimumSize(valueField.getPreferredSize());
     }
 
-    public JLabel getAddressLabel() {
-        return addressLabel;
-    }
-
     public int getCurrentAddress() {
         return currentAddress;
-    }
-
-    public int getCurrentValue() {
-        return currentValue;
     }
 
     public TableType getTable() {
@@ -98,5 +90,21 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
 
     public void setCurrentValue(final int value) {
         currentValue = value;
+    }
+
+    public void clickOnRow(final int row) {
+        table.setRowSelectionInterval(row, row);
+        table.scrollToRow(row);
+        final String address = model.getAddressAsString(row);
+        final String value = model.getValueAsString(row);
+        addressLabel.setText(String.format(SideWindow.LABEL_FORMAT, address));
+        valueField.setText(value);
+        valueField.requestFocus();
+        valueField.selectAll();
+        final int radix = Base.toInt(model.getBase());
+        final int currentAddress = Integer.parseInt(address, radix);
+        final int currentValue = Integer.parseInt(value, radix);
+        setCurrentAddress(currentAddress);
+        setCurrentValue(currentValue);
     }
 }

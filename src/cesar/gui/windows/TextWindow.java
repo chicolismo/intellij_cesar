@@ -2,6 +2,7 @@ package cesar.gui.windows;
 
 import javax.swing.JDialog;
 
+import cesar.Properties;
 import cesar.gui.displays.TextDisplay;
 import cesar.hardware.Cpu;
 
@@ -11,7 +12,7 @@ public class TextWindow extends JDialog {
     private final TextDisplay display;
 
     public TextWindow(final MainWindow parent, final Cpu cpu) {
-        super(parent, "Visor");
+        super(parent, Properties.getProperty("TextWindow.title"));
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         setFocusable(true);
         display = new TextDisplay(cpu);

@@ -1,55 +1,47 @@
 package cesar.gui.dialogs;
 
-import static cesar.Properties.getProperty;
+import cesar.Properties;
+import cesar.hardware.Cpu;
+import cesar.hardware.TextConverter;
+import cesar.utils.Base;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import cesar.hardware.Cpu;
-import cesar.hardware.TextConverter;
-import cesar.utils.Base;
-
 public class SaveTextDialog extends JDialog {
     private static final long serialVersionUID = 476591876321607487L;
     private static final int MIN_VALUE = 0;
     private static final int MAX_VALUE = Cpu.MEMORY_SIZE - 1;
 
-    private static final String TITLE = getProperty("SaveText.title");
-    private static final String FILTER_DESCRIPTION = getProperty("SaveText.FileFilter.description");
-    private static final String FILTER_EXTENSIONS = getProperty("SaveText.FileFilter.extensions");
-    private static final String OK_TEXT = getProperty("SaveText.OkButton.text");
-    private static final String CANCEL_TEXT = getProperty("SaveText.CancelButton.text");
-    private static final String PROGRAM_REGION_TITLE = getProperty("SaveText.ProgramRegion.title");
-    private static final String PROGRAM_REGION_START_ADDRESS_TEXT = getProperty(
-            "SaveText.ProgramRegion.StartAddress.text");
-    private static final String PROGRAM_REGION_START_ADDRESS_ERROR = getProperty(
-            "SaveText.ProgramRegion.StartAddress.errorMessage");
-    private static final String PROGRAM_REGION_END_ADDRESS_TEXT = getProperty("SaveText.ProgramRegion.EndAddress.text");
-    private static final String PROGRAM_REGION_END_ADDRESS_ERROR = getProperty(
-            "SaveText.ProgramRegion.EndAddress.errorMessage");
-    private static final String DATA_REGION_TITLE = getProperty("SaveText.DataRegion.title");
-    private static final String DATA_REGION_START_ADDRESS_TEXT = getProperty("SaveText.DataRegion.StartAddress.text");
-    private static final String DATA_REGION_START_ADDRESS_ERROR = getProperty(
-            "SaveText.DataRegion.StartAddress.errorMessage");
-    private static final String DATA_REGION_END_ADDRESS_TEXT = getProperty("SaveText.DataRegion.EndAddress.text");
-    private static final String DATA_REGION_END_ADDRESS_ERROR = getProperty(
-            "SaveText.DataRegion.EndAddress.errorMessage");
+    private static final String TITLE = Properties.getProperty("SaveText.title");
+    private static final String FILTER_DESCRIPTION = Properties.getProperty("SaveText.fileFilterDescription");
+    private static final String FILTER_EXTENSIONS = Properties.getProperty("SaveText.fileFilterExtensions");
+    private static final String OK_TEXT = Properties.getProperty("SaveText.okButtonText");
+    private static final String CANCEL_TEXT = Properties.getProperty("SaveText.cancelButtonText");
+    private static final String PROGRAM_REGION_TITLE = Properties.getProperty("SaveText.programRegionTitle");
+    private static final String PROGRAM_REGION_START_ADDRESS_TEXT = Properties.getProperty(
+            "SaveText.programRegionStartAddressText");
+    private static final String PROGRAM_REGION_START_ADDRESS_ERROR = Properties.getProperty(
+            "SaveText.programRegionStartAddressErrorMessage");
+    private static final String PROGRAM_REGION_END_ADDRESS_TEXT = Properties.getProperty(
+            "SaveText.programRegionEndAddressText");
+    private static final String PROGRAM_REGION_END_ADDRESS_ERROR = Properties.getProperty(
+            "SaveText.programRegionEndAddressErrorMessage");
+    private static final String DATA_REGION_TITLE = Properties.getProperty("SaveText.dataRegionTitle");
+    private static final String DATA_REGION_START_ADDRESS_TEXT = Properties.getProperty(
+            "SaveText.dataRegionStartAddressText");
+    private static final String DATA_REGION_START_ADDRESS_ERROR = Properties.getProperty(
+            "SaveText.dataRegionStartAddressErrorMessage");
+    private static final String DATA_REGION_END_ADDRESS_TEXT = Properties.getProperty(
+            "SaveText.dataRegionEndAddressText");
+    private static final String DATA_REGION_END_ADDRESS_ERROR = Properties.getProperty(
+            "SaveText.dataRegionEndAddressErrorMessage");
 
     private final JTextField startProgramAddressField;
     private final JTextField endProgramAddressField;

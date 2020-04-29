@@ -1,5 +1,7 @@
 package cesar.gui.panels;
 
+import static cesar.Properties.getProperty;
+
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
@@ -17,33 +19,43 @@ import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.TitledBorder;
 
-import cesar.Properties;
 import cesar.gui.displays.RegisterDisplay;
 import cesar.hardware.Cpu;
 import cesar.utils.Base;
 
 public class RegisterPanel extends JPanel {
     private static final long serialVersionUID = 2962079321929645473L;
-    private static final BufferedImage COMPUTER_ICON;
-    private static final BufferedImage WEBER_ICON;
+
+    private static final String IS_LABEL = getProperty("IS.label");
+    private static final String[][] REGISTER_STRINGS = new String[][] {
+        { getProperty("R0.label"), getProperty("R0.newValueTitle"), getProperty("R0.newValueMessage") },
+        { getProperty("R1.label"), getProperty("R1.newValueTitle"), getProperty("R1.newValueMessage") },
+        { getProperty("R2.label"), getProperty("R2.newValueTitle"), getProperty("R2.newValueMessage") },
+        { getProperty("R3.label"), getProperty("R3.newValueTitle"), getProperty("R3.newValueMessage") },
+        { getProperty("R4.label"), getProperty("R4.newValueTitle"), getProperty("R4.newValueMessage") },
+        { getProperty("R5.label"), getProperty("R5.newValueTitle"), getProperty("R5.newValueMessage") },
+        { getProperty("R6.label"), getProperty("R6.newValueTitle"), getProperty("R6.newValueMessage") },
+        { getProperty("R7.label"), getProperty("R7.newValueTitle"), getProperty("R7.newValueMessage") } };
+
+    private static final ImageIcon COMPUTER_ICON;
+    private static final ImageIcon ALTERNATIVE_ICON;
+    private static final Color PC_LABEL_COLOR = new Color(0, 96, 0);
 
     static {
         BufferedImage computerIcon = null;
-        BufferedImage weberIcon = null;
+        BufferedImage alternativeIcon = null;
         try {
             computerIcon = ImageIO.read(RegisterPanel.class.getResourceAsStream("/cesar/gui/assets/computer.png"));
-            weberIcon = ImageIO.read(RegisterPanel.class.getResourceAsStream("/cesar/gui/assets/weber.png"));
+            alternativeIcon = ImageIO.read(RegisterPanel.class.getResourceAsStream("/cesar/gui/assets/weber.png"));
         }
         catch (final IOException e) {
             System.err.println("Erro ao ler o ícone do computador");
             System.exit(1);
         }
-        COMPUTER_ICON = computerIcon;
-        WEBER_ICON = weberIcon;
+        COMPUTER_ICON = new ImageIcon(computerIcon);
+        ALTERNATIVE_ICON = new ImageIcon(alternativeIcon);
     }
 
-    private final ImageIcon computerIcon;
-    private final ImageIcon weberIcon;
     private final RegisterDisplay[] registerDisplays;
     private final LedPanel interruptionPanel;
     private boolean isComputerShowing;
@@ -51,26 +63,20 @@ public class RegisterPanel extends JPanel {
     public RegisterPanel() {
         super(true);
 
-        registerDisplays = new RegisterDisplay[Cpu.REGISTER_COUNT];
-        for (int i = 0; i < Cpu.REGISTER_COUNT; ++i) {
-            final String label = Properties.getProperty(String.format("R%d.label", i));
-            final String title = Properties.getProperty(String.format("R%d.newValueTitle", i));
-            final String message = Properties.getProperty(String.format("R%d.newValueMessage", i));
-            registerDisplays[i] = new RegisterDisplay(i, label, title, message);
-        }
-
-        final TitledBorder border = (TitledBorder) registerDisplays[7].getBorder();
-        border.setTitleColor(new Color(0, 96, 0));
-
-        interruptionPanel = new LedPanel("IS");
-
-        computerIcon = new ImageIcon(COMPUTER_ICON);
-        weberIcon = new ImageIcon(WEBER_ICON);
-
-        initLayout();
-
         isComputerShowing = true;
 
+        interruptionPanel = new LedPanel(IS_LABEL);
+
+        registerDisplays = new RegisterDisplay[Cpu.REGISTER_COUNT];
+
+        for (int i = 0; i < Cpu.REGISTER_COUNT; ++i) {
+            final String[] strings = REGISTER_STRINGS[i];
+            registerDisplays[i] = new RegisterDisplay(i, strings[0], strings[1], strings[2]);
+        }
+
+        ((TitledBorder) registerDisplays[Cpu.PC].getBorder()).setTitleColor(PC_LABEL_COLOR);
+
+        initLayout();
         doLayout();
     }
 
@@ -83,7 +89,7 @@ public class RegisterPanel extends JPanel {
     }
 
     private void initLayout() {
-        final JLabel computerLabel = new JLabel(computerIcon);
+        final JLabel computerLabel = new JLabel(COMPUTER_ICON);
         computerLabel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 3, 3, 3),
                 BorderFactory.createBevelBorder(BevelBorder.RAISED)));
 
@@ -101,8 +107,8 @@ public class RegisterPanel extends JPanel {
                 .addComponent(computerLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE));
         centerPanel.setLayout(groupLayout);
 
-        final GridLayout grid = new GridLayout(3, 3);
-        setLayout(grid);
+        setLayout(new GridLayout(3, 3, 1, 1));
+
         add(registerDisplays[0]);
         add(registerDisplays[1]);
         add(registerDisplays[2]);
@@ -117,7 +123,7 @@ public class RegisterPanel extends JPanel {
             @Override
             public void mouseClicked(final MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    computerLabel.setIcon(isComputerShowing ? weberIcon : computerIcon);
+                    computerLabel.setIcon(isComputerShowing ? ALTERNATIVE_ICON : COMPUTER_ICON);
                     isComputerShowing = !isComputerShowing;
                 }
             }

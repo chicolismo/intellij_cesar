@@ -5,8 +5,8 @@ import java.util.EnumSet;
 import java.util.HashMap;
 
 public enum Instruction {
-    NOP, CCC, SCC, BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS, JMP, SOB, JSR, RTS, CLR,
-    NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC, MOV, ADD, SUB, CMP, AND, OR, HLT;
+    NOP, CCC, SCC, BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS, JMP, SOB, JSR, RTS, RTI,
+    CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC, MOV, ADD, SUB, CMP, AND, OR, HLT;
 
 
     private static final HashMap<Integer, Instruction> INSTRUCTION_MAP;
@@ -22,39 +22,44 @@ public enum Instruction {
         INSTRUCTION_MAP.put(0b0001, CCC);
         INSTRUCTION_MAP.put(0b0010, SCC);
         // Desvio condicional
-        INSTRUCTION_MAP.put(0b00110000, BR);
-        INSTRUCTION_MAP.put(0b00110001, BNE);
-        INSTRUCTION_MAP.put(0b00110010, BEQ);
-        INSTRUCTION_MAP.put(0b00110011, BPL);
-        INSTRUCTION_MAP.put(0b00110100, BMI);
-        INSTRUCTION_MAP.put(0b00110101, BVC);
-        INSTRUCTION_MAP.put(0b00110110, BVS);
-        INSTRUCTION_MAP.put(0b00110111, BCC);
-        INSTRUCTION_MAP.put(0b00111000, BCS);
-        INSTRUCTION_MAP.put(0b00111001, BGE);
-        INSTRUCTION_MAP.put(0b00111010, BLT);
-        INSTRUCTION_MAP.put(0b00111011, BGT);
-        INSTRUCTION_MAP.put(0b00111100, BLE);
-        INSTRUCTION_MAP.put(0b00111101, BHI);
-        INSTRUCTION_MAP.put(0b00111110, BLS);
+        INSTRUCTION_MAP.put(0b0011_0000, BR);
+        INSTRUCTION_MAP.put(0b0011_0001, BNE);
+        INSTRUCTION_MAP.put(0b0011_0010, BEQ);
+        INSTRUCTION_MAP.put(0b0011_0011, BPL);
+        INSTRUCTION_MAP.put(0b0011_0100, BMI);
+        INSTRUCTION_MAP.put(0b0011_0101, BVC);
+        INSTRUCTION_MAP.put(0b0011_0110, BVS);
+        INSTRUCTION_MAP.put(0b0011_0111, BCC);
+        INSTRUCTION_MAP.put(0b0011_1000, BCS);
+        INSTRUCTION_MAP.put(0b0011_1001, BGE);
+        INSTRUCTION_MAP.put(0b0011_1010, BLT);
+        INSTRUCTION_MAP.put(0b0011_1011, BGT);
+        INSTRUCTION_MAP.put(0b0011_1100, BLE);
+        INSTRUCTION_MAP.put(0b0011_1101, BHI);
+        INSTRUCTION_MAP.put(0b0011_1110, BLS);
         // Outras
         INSTRUCTION_MAP.put(0b0100, JMP);
         INSTRUCTION_MAP.put(0b0101, SOB);
         INSTRUCTION_MAP.put(0b0110, JSR);
         INSTRUCTION_MAP.put(0b0111, RTS);
+
+        // TODO: Verificar se está correto
+        // RTI
+        INSTRUCTION_MAP.put(0b0111_1000, RTI);
+
         // Instruções de um operando
-        INSTRUCTION_MAP.put(0b10000000, CLR);
-        INSTRUCTION_MAP.put(0b10000001, NOT);
-        INSTRUCTION_MAP.put(0b10000010, INC);
-        INSTRUCTION_MAP.put(0b10000011, DEC);
-        INSTRUCTION_MAP.put(0b10000100, NEG);
-        INSTRUCTION_MAP.put(0b10000101, TST);
-        INSTRUCTION_MAP.put(0b10000110, ROR);
-        INSTRUCTION_MAP.put(0b10000111, ROL);
-        INSTRUCTION_MAP.put(0b10001000, ASR);
-        INSTRUCTION_MAP.put(0b10001001, ASL);
-        INSTRUCTION_MAP.put(0b10001010, ADC);
-        INSTRUCTION_MAP.put(0b10001011, SBC);
+        INSTRUCTION_MAP.put(0b1000_0000, CLR);
+        INSTRUCTION_MAP.put(0b1000_0001, NOT);
+        INSTRUCTION_MAP.put(0b1000_0010, INC);
+        INSTRUCTION_MAP.put(0b1000_0011, DEC);
+        INSTRUCTION_MAP.put(0b1000_0100, NEG);
+        INSTRUCTION_MAP.put(0b1000_0101, TST);
+        INSTRUCTION_MAP.put(0b1000_0110, ROR);
+        INSTRUCTION_MAP.put(0b1000_0111, ROL);
+        INSTRUCTION_MAP.put(0b1000_1000, ASR);
+        INSTRUCTION_MAP.put(0b1000_1001, ASL);
+        INSTRUCTION_MAP.put(0b1000_1010, ADC);
+        INSTRUCTION_MAP.put(0b1000_1011, SBC);
         // Instruções de dois operandos
         INSTRUCTION_MAP.put(0b1001, MOV);
         INSTRUCTION_MAP.put(0b1010, ADD);
@@ -82,6 +87,7 @@ public enum Instruction {
         FORMAT.put(SOB, "SOB R%d, %d"); // registrador, ddd
         FORMAT.put(JSR, "JSR R%d, %s"); // registrador, modo
         FORMAT.put(RTS, "RTS R%d"); // registrador
+        FORMAT.put(RTI, "RTI"); //
         for (final Instruction instruction : Instruction.ONE_OP_INSTRUCTIONS) {
             FORMAT.put(instruction, instruction.toString() + " %s"); // modo
         }

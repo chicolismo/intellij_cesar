@@ -1,18 +1,19 @@
 package cesar.gui.panels;
 
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 
 public class MainPanel extends JPanel {
     private static final long serialVersionUID = -6154605833067699966L;
 
-    private static final Border BORDER = new CompoundBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1),
-            BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+    private static final Border BORDER = new CompoundBorder(
+            new CompoundBorder(new EmptyBorder(1, 1, 1, 1), new BevelBorder(BevelBorder.LOWERED)),
+            new EmptyBorder(3, 3, 3, 3));
 
     public MainPanel(final ConditionPanel conditionPanel, final ButtonPanel buttonPanel,
             final ExecutionPanel executionPanel, final RegisterPanel registerPanel,
