@@ -5,7 +5,6 @@ import cesar.utils.Base;
 import cesar.utils.Defaults;
 import cesar.utils.FileUtils;
 import com.sun.istack.internal.Nullable;
-import org.apache.commons.io.FilenameUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -198,7 +197,7 @@ public class FileLoader {
                     result = true;
                 }
                 else {
-                    final String extension = FilenameUtils.getExtension(file.getName());
+                    final String extension = FileUtils.getExtension(file.getName());
                     // Apenas arquivos com a extensão ".mem" e o tamanho de 64kb são exibidos no diálogo.
                     result = VALID_EXTENSIONS.contains(extension) && CESAR_FILE_SIZE == (int) file.length();
                 }

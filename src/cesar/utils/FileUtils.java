@@ -8,4 +8,13 @@ public class FileUtils {
     public static String[] splitExtensions(final String extensions) {
         return SPLIT_EXTENSIONS_PATTERN.split(extensions);
     }
+
+    public static String getExtension(String fileName) {
+        int index = fileName.lastIndexOf('.');
+        String extension = "";
+        if (index + 1 < fileName.length()) {
+            extension = fileName.substring(index + 1);
+        }
+        return extension;
+    }
 }

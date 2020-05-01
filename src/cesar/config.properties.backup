@@ -34,7 +34,7 @@ StatusBar.initialValue=Pronto
 #===============================================================================
 ExecutionPanel.title=Execu¿¿o:
 ExecutionPanel.accessLabel=Acessos:
-ExecutionPanel.instructionLabel=Instru¿¿es:
+ExecutionPanel.instructionLabel=Instruções:
 #===============================================================================
 # ButtonPanel
 #===============================================================================

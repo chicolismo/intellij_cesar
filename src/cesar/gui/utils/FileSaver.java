@@ -3,8 +3,6 @@ package cesar.gui.utils;
 import cesar.Properties;
 import cesar.utils.FileUtils;
 import com.sun.istack.internal.Nullable;
-import org.apache.commons.io.FilenameUtils;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -84,7 +82,7 @@ public class FileSaver {
     @Nullable
     private static String getFilePath(final File file) {
         final String result;
-        final String extension = FilenameUtils.getExtension(file.getName());
+        final String extension = FileUtils.getExtension(file.getName());
         if (VALID_EXTENSIONS_SET.contains(extension)) {
             result = file.getAbsolutePath();
         }
