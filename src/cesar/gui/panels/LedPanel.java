@@ -1,13 +1,10 @@
 package cesar.gui.panels;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
-
 import cesar.gui.displays.LedDisplay;
 import cesar.utils.Defaults;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
 
 public class LedPanel extends JPanel {
     private static final long serialVersionUID = 1339366132381996962L;

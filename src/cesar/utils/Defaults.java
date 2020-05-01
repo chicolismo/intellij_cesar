@@ -1,27 +1,25 @@
 package cesar.utils;
 
-import java.awt.Color;
-import java.awt.Font;
+import cesar.Properties;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
-
-import cesar.Properties;
+import java.awt.*;
 
 public class Defaults {
     public static final Font PANEL_FONT;
     public static final Color ARROW_COLOR;
+    public static final Base DEFAULT_BASE = Base.DECIMAL;
 
-    public static final boolean APPLE = System.getProperty("os.name").equals("Mac OS X");
+    public static final boolean IS_APPLE = System.getProperty("os.name").equals("Mac OS X");
 
     static {
         PANEL_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 12);
 
         int rgb;
         try {
-            if (APPLE) {
+            if (IS_APPLE) {
                 rgb = Integer.parseInt(Properties.getProperty("ProgramWindow.pcArrowMacColor"));
             }
             else {
@@ -35,10 +33,6 @@ public class Defaults {
     }
 
     private Defaults() {
-    }
-
-    public static Border createEmptyBorder(final int padding) {
-        return BorderFactory.createEmptyBorder(padding, padding, padding, padding);
     }
 
     public static JLabel createLabel(final String title) {
@@ -58,11 +52,11 @@ public class Defaults {
         return border;
     }
 
-    public static Border getEmptyBorder() {
+    public static Border createEmptyBorder() {
         return createEmptyBorder(4);
     }
 
-    public static boolean isApple() {
-        return APPLE;
+    public static Border createEmptyBorder(final int padding) {
+        return BorderFactory.createEmptyBorder(padding, padding, padding, padding);
     }
 }

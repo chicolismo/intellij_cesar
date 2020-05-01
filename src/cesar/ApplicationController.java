@@ -1,61 +1,33 @@
 package cesar;
 
-import static cesar.Properties.getProperty;
-import static cesar.utils.Integers.clamp;
-
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import javax.swing.JToggleButton;
-
 import cesar.gui.dialogs.GotoDialog;
 import cesar.gui.dialogs.RegisterValueDialog;
 import cesar.gui.dialogs.RegisterValueDialog.RegisterValueDialogException;
 import cesar.gui.dialogs.SaveTextDialog;
 import cesar.gui.dialogs.ZeroMemoryDialog;
 import cesar.gui.displays.RegisterDisplay;
-import cesar.gui.panels.ButtonPanel;
-import cesar.gui.panels.ConditionPanel;
-import cesar.gui.panels.ExecutionPanel;
-import cesar.gui.panels.InstructionPanel;
 import cesar.gui.panels.MenuBar;
-import cesar.gui.panels.RegisterPanel;
-import cesar.gui.panels.StatusBar;
-import cesar.gui.tables.DataTable;
-import cesar.gui.tables.DataTableModel;
-import cesar.gui.tables.ProgramTable;
-import cesar.gui.tables.ProgramTableModel;
-import cesar.gui.tables.Table;
-import cesar.gui.tables.TableModel;
+import cesar.gui.panels.*;
+import cesar.gui.tables.*;
 import cesar.gui.utils.Components;
 import cesar.gui.utils.FileLoader;
 import cesar.gui.utils.FileLoader.FileLoaderException;
 import cesar.gui.utils.FileSaver;
-import cesar.gui.windows.DataWindow;
-import cesar.gui.windows.MainWindow;
-import cesar.gui.windows.ProgramWindow;
-import cesar.gui.windows.SideWindow;
-import cesar.gui.windows.TextWindow;
+import cesar.gui.windows.*;
 import cesar.hardware.Cpu;
 import cesar.hardware.Cpu.ExecutionResult;
 import cesar.utils.Base;
 import cesar.utils.Bytes;
+import cesar.utils.Defaults;
 import cesar.utils.Shorts;
+import javafx.geometry.Side;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+import static cesar.Properties.getProperty;
+import static cesar.utils.Integers.clamp;
 
 
 public final class ApplicationController {
@@ -69,7 +41,6 @@ public final class ApplicationController {
     private final SaveTextDialog saveTextDialog;
     private final GotoDialog gotoDialog;
     private final ZeroMemoryDialog zeroMemoryDialog;
-    private final RegisterValueDialog registerValueDialog;
     private final RegisterPanel registerPanel;
     private final ConditionPanel conditionPanel;
 
@@ -108,7 +79,6 @@ public final class ApplicationController {
         saveTextDialog = new SaveTextDialog(window, cpu);
         gotoDialog = new GotoDialog(window);
         zeroMemoryDialog = new ZeroMemoryDialog(window, Cpu.FIRST_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
-        registerValueDialog = new RegisterValueDialog();
 
         programWindow = window.getProgramWindow();
         programTable = programWindow.getTable();
@@ -135,7 +105,7 @@ public final class ApplicationController {
     }
 
     public void run() {
-        setBase(Base.DECIMAL);
+        setBase(Defaults.DEFAULT_BASE);
 
         menuBar.viewProgram.setState(true);
         menuBar.viewData.setState(true);
@@ -143,7 +113,6 @@ public final class ApplicationController {
         menuBar.execUpdateRegisters.setState(true);
 
         setEventListeners();
-        dataTable.scrollToRow(Cpu.DATA_START_ADDRESS, true);
         decimalButton.doClick();
         updateInterface();
 
@@ -152,6 +121,7 @@ public final class ApplicationController {
         window.setVisible(true);
         programWindow.setVisible(true);
         dataWindow.setVisible(true);
+        dataTable.scrollToRow(Cpu.DATA_START_ADDRESS, true);
         textWindow.setVisible(true);
         window.requestFocus();
     }
@@ -171,7 +141,6 @@ public final class ApplicationController {
 
             case HALT:
             case BREAK_POINT:
-            case INVALID_INSTRUCTION:
                 if (isRunning() && runButton.isSelected()) {
                     runButton.doClick();
                 }
@@ -180,24 +149,21 @@ public final class ApplicationController {
     }
 
     private void exitProgram() {
+        boolean finished = true;
         if (cpu.hasMemoryChanged()) {
             final int choice = JOptionPane.showConfirmDialog(window,
                     "O conteúdo da memória mudou, deseja salvar o arquivo?");
             if (choice == JOptionPane.OK_OPTION) {
-                if (fileSaver.saveFile(cpu.getMemory())) {
-                    window.dispose();
-                    System.exit(0);
-                }
-                else {
-                    return;
-                }
+                finished = fileSaver.saveFile(cpu.getMemory());
             }
             else if (choice == JOptionPane.CANCEL_OPTION) {
-                return;
+                finished = false;
             }
         }
-        window.dispose();
-        System.exit(0);
+        if (finished) {
+            window.dispose();
+            System.exit(0);
+        }
     }
 
     private void goTo() {
@@ -242,7 +208,7 @@ public final class ApplicationController {
 
     private void loadFilePartially() {
         try {
-            if (fileLoader.loadFilePartially(cpu, currentBase)) {
+            if (fileLoader.loadFilePartially(cpu)) {
                 updateInterface();
             }
         }
@@ -266,6 +232,7 @@ public final class ApplicationController {
             zeroMemoryDialog.setBase(newBase);
             programWindow.setBase(newBase);
             dataWindow.setBase(newBase);
+            fileLoader.setBase(newBase);
             registerPanel.setBase(newBase);
         }
     }
@@ -327,6 +294,17 @@ public final class ApplicationController {
     private void setKeyListenerEvents() {
         final KeyListener keyListener = new KeyListener() {
             @Override
+            public void keyTyped(final KeyEvent event) {
+                menuBar.dispatchEvent(event);
+                cpu.setTypedKey((byte) event.getKeyChar());
+                if (cpu.hasMemoryChanged()) {
+                    programTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
+                    dataTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
+                }
+                window.requestFocus();
+            }
+
+            @Override
             public void keyPressed(final KeyEvent event) {
                 menuBar.dispatchEvent(event);
                 window.requestFocus();
@@ -337,17 +315,6 @@ public final class ApplicationController {
                 menuBar.dispatchEvent(event);
                 window.requestFocus();
             }
-
-            @Override
-            public void keyTyped(final KeyEvent event) {
-                menuBar.dispatchEvent(event);
-                cpu.setTypedKey((byte) event.getKeyChar());
-                if (cpu.hasMemoryChanged()) {
-                    programTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
-                    dataTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
-                }
-                window.requestFocus();
-            }
         };
 
         window.addKeyListener(keyListener);
@@ -356,28 +323,20 @@ public final class ApplicationController {
         textWindow.addKeyListener(keyListener);
     }
 
+    @SuppressWarnings("ObjectAllocationInLoop")
     private void setMenuEvents() {
-        final Component[][] pairs = new Component[][] { { programWindow, menuBar.viewProgram },
-            { dataWindow, menuBar.viewData }, { textWindow, menuBar.viewDisplay } };
+        final Component[][] pairs = new Component[][] {
+                { programWindow, menuBar.viewProgram }, { dataWindow, menuBar.viewData },
+                { textWindow, menuBar.viewDisplay }
+        };
 
         for (final Component[] pair : pairs) {
             final JDialog sideWindow = (JDialog) pair[0];
             final JCheckBoxMenuItem checkBox = (JCheckBoxMenuItem) pair[1];
 
-            sideWindow.addComponentListener(new ComponentAdapter() {
-                @Override
-                public void componentHidden(final ComponentEvent event) {
-                    super.componentHidden(event);
-                    checkBox.setState(false);
-                }
-            });
+            sideWindow.addComponentListener(new SideWindowComponentAdapter(checkBox));
 
-            checkBox.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(final ActionEvent actionEvent) {
-                    sideWindow.setVisible(checkBox.getState());
-                }
-            });
+            checkBox.addActionListener(new CheckBoxMenuItemComponentAdapter(sideWindow, checkBox));
         }
 
         menuBar.fileLoad.addActionListener(new ActionListener() {
@@ -432,7 +391,7 @@ public final class ApplicationController {
         menuBar.editCopyMemory.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent event) {
-                // copyMemory();
+                copyMemory();
             }
         });
 
@@ -490,71 +449,35 @@ public final class ApplicationController {
         });
     }
 
+    @SuppressWarnings("EmptyMethod")
+    private void copyMemory() {
+        // TODO: Implementar
+    }
+
     private void setRegisterDisplayEvents() {
-        final MouseListener registerPanelMouseListener = new MouseAdapter() {
+        final MouseAdapter mouseAdapter = new MouseAdapter() {
             @Override
             public void mouseClicked(final MouseEvent event) {
                 if (event.getClickCount() == 2) {
-                    final RegisterDisplay display = (RegisterDisplay) event.getSource();
-                    showNewRegisterValueDialog(display);
+                    showNewRegisterValueDialog((RegisterDisplay) event.getSource());
                 }
             }
         };
 
         for (final RegisterDisplay display : registerPanel.getDisplays()) {
-            display.addMouseListener(registerPanelMouseListener);
+            display.addMouseListener(mouseAdapter);
         }
     }
 
+    @SuppressWarnings("ObjectAllocationInLoop")
     private void setSideWindowEvents() {
-        for (final SideWindow<?, ?> sideWindow : new SideWindow<?, ?>[] { programWindow, dataWindow }) {
-            final Table table = sideWindow.getTable();
-            final TableModel tableModel = (TableModel) table.getModel();
-            final JTextField valueField = sideWindow.getValueField();
+        programTable.addMouseListener(new TableMouseAdapter(programTable, programWindow));
+        programWindow.getValueField().addActionListener(new ValueFieldActionListener(programWindow));
+        programWindow.getValueField().addKeyListener(new ValueFieldKeyAdapter(programWindow));
 
-            table.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseReleased(final MouseEvent event) {
-                    if (table.getSelectedRow() >= 0) {
-                        sideWindow.clickOnRow(table.getSelectedRow());
-                    }
-                }
-            });
-
-            valueField.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(final ActionEvent actionEvent) {
-                    final int radix = Base.toInt(tableModel.getBase());
-                    final String value = valueField.getText();
-                    final int newValue;
-                    try {
-                        newValue = Integer.parseInt(value, radix);
-                    }
-                    catch (final NumberFormatException exception) {
-                        // Se o valor digitado for inválido, ignorar o ENTER
-                        return;
-                    }
-                    if (Bytes.isValidByte(newValue)) {
-                        sideWindow.setCurrentValue(newValue);
-                        int currentAddress = sideWindow.getCurrentAddress();
-                        cpu.setByte(currentAddress, (byte) (0xFF & newValue));
-                        programTableModel.fireTableDataChanged();
-                        dataTableModel.fireTableDataChanged();
-                        if (Cpu.isIOAddress(currentAddress)) {
-                            textWindow.getDisplay().repaint();
-                        }
-                        // Seleciona a próxima linha
-                        currentAddress = clamp(currentAddress + 1);
-                        table.setRowSelectionInterval(currentAddress, currentAddress);
-                        valueField.setText(tableModel.getValueAsString(currentAddress));
-                        table.scrollToRow(currentAddress);
-                        valueField.requestFocus();
-                        valueField.selectAll();
-                        sideWindow.setCurrentAddress(currentAddress);
-                    }
-                }
-            });
-        }
+        dataTable.addMouseListener(new TableMouseAdapter(dataTable, dataWindow));
+        dataWindow.getValueField().addActionListener(new ValueFieldActionListener(dataWindow));
+        dataWindow.getValueField().addKeyListener(new ValueFieldKeyAdapter(dataWindow));
 
         programTable.addMouseListener(new MouseAdapter() {
             @Override
@@ -572,7 +495,7 @@ public final class ApplicationController {
         try {
             final int registerNumber = registerDisplay.getNumber();
             final short currentValue = cpu.getRegisterValue(registerNumber);
-            final short newValue = registerValueDialog.showDialog(registerDisplay, currentValue);
+            final short newValue = RegisterValueDialog.showDialog(registerDisplay, currentValue);
             if (newValue != currentValue) {
                 cpu.setRegisterValue(registerNumber, newValue);
                 updateInterface();
@@ -673,6 +596,121 @@ public final class ApplicationController {
         }
         catch (final NumberFormatException event) {
             statusBar.setTempMessage(String.format(INVALID_MEMORY_POSITION_ERROR_FORMAT, input));
+        }
+    }
+
+
+    private static class SideWindowComponentAdapter extends ComponentAdapter {
+        private final JCheckBoxMenuItem checkBox;
+
+        public SideWindowComponentAdapter(final JCheckBoxMenuItem checkBox) {
+            this.checkBox = checkBox;
+        }
+
+        @Override
+        public void componentHidden(final ComponentEvent event) {
+            super.componentHidden(event);
+            checkBox.setState(false);
+        }
+    }
+
+
+    private static class CheckBoxMenuItemComponentAdapter implements ActionListener {
+        private final JDialog sideWindow;
+        private final JCheckBoxMenuItem checkBox;
+
+        public CheckBoxMenuItemComponentAdapter(final JDialog sideWindow, final JCheckBoxMenuItem checkBox) {
+            this.sideWindow = sideWindow;
+            this.checkBox = checkBox;
+        }
+
+        @Override
+        public void actionPerformed(final ActionEvent actionEvent) {
+            sideWindow.setVisible(checkBox.getState());
+        }
+    }
+
+
+    private static class TableMouseAdapter extends MouseAdapter {
+        private final Table table;
+        private final SideWindow<?, ?> sideWindow;
+
+        public TableMouseAdapter(final Table table, final SideWindow<?, ?> sideWindow) {
+            this.table = table;
+            this.sideWindow = sideWindow;
+        }
+
+        @Override
+        public void mouseReleased(final MouseEvent event) {
+            if (table.getSelectedRow() >= 0) {
+                sideWindow.clickOnRow(table.getSelectedRow());
+            }
+        }
+    }
+
+    private static class ValueFieldKeyAdapter extends KeyAdapter {
+        private final SideWindow<?, ?> sideWindow;
+
+        public ValueFieldKeyAdapter(final SideWindow<?, ?> sideWindow) {
+            this.sideWindow = sideWindow;
+        }
+
+        @Override
+        public void keyPressed(final KeyEvent event) {
+            // TODO: Testar se o valor atual é inserido na tabela quando uma seta é apertada.
+
+            final int keyCode = event.getKeyCode();
+            if (keyCode == KeyEvent.VK_UP) {
+                sideWindow.clickOnRow(Math.max(Cpu.FIRST_ADDRESS, sideWindow.getCurrentAddress() - 1));
+            }
+            else if (keyCode == KeyEvent.VK_DOWN) {
+                sideWindow.clickOnRow(Math.min(Cpu.LAST_ADDRESS, sideWindow.getCurrentAddress() + 1));
+            }
+            else {
+                super.keyReleased(event);
+            }
+        }
+    }
+
+    private class ValueFieldActionListener implements ActionListener {
+        private final SideWindow<?, ?> sideWindow;
+        private final Table table;
+        private final TableModel tableModel;
+
+        public ValueFieldActionListener(final SideWindow<?, ?> sideWindow) {
+            this.sideWindow = sideWindow;
+            this.table = sideWindow.getTable();
+            this.tableModel = (TableModel) table.getModel();
+        }
+
+        @Override
+        public void actionPerformed(final ActionEvent actionEvent) {
+            final JTextField valueField = (JTextField) actionEvent.getSource();
+            final int radix = currentBase.toInt();
+            final String value = valueField.getText();
+            try {
+                final int newValue = Integer.parseInt(value, radix);
+                if (Bytes.isValidByte(newValue)) {
+                    sideWindow.setCurrentValue(newValue);
+                    int address = sideWindow.getCurrentAddress();
+                    cpu.setByte(address, Bytes.fromInt(newValue));
+                    dataTableModel.fireTableDataChanged();
+                    programTableModel.fireTableDataChanged();
+                    if (Cpu.isIOAddress(address)) {
+                        textWindow.getDisplay().repaint();
+                    }
+                    // Seleciona a próxima linha
+                    address = clamp(address + 1);
+                    table.setRowSelectionInterval(address, address);
+                    valueField.setText(tableModel.getValueAsString(address));
+                    table.scrollToRow(address);
+                    valueField.requestFocus();
+                    valueField.selectAll();
+                    sideWindow.setCurrentAddress(address);
+                }
+            }
+            catch (final NumberFormatException ignored) {
+            }
         }
     }
 }

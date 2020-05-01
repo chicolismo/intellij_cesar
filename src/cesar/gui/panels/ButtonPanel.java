@@ -1,21 +1,13 @@
 package cesar.gui.panels;
 
-import java.awt.Insets;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.swing.AbstractButton;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
-
 import cesar.Properties;
 import cesar.utils.Defaults;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public class ButtonPanel extends JPanel {
     private static final long serialVersionUID = -1509965084306287422L;
@@ -53,7 +45,7 @@ public class ButtonPanel extends JPanel {
         runButton = new JToggleButton(RUN_ICON);
         nextButton = new JButton(NEXT_ICON);
 
-        if (Defaults.isApple()) {
+        if (Defaults.IS_APPLE) {
             decimalButton.putClientProperty("JButton.buttonType", "segmented");
             decimalButton.putClientProperty("JComponent.sizeVariant", "small");
             decimalButton.putClientProperty("JButton.segmentPosition", "first");
@@ -63,6 +55,29 @@ public class ButtonPanel extends JPanel {
         }
 
         initLayout();
+    }
+
+    private void initLayout() {
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setAlignmentY(BOTTOM_ALIGNMENT);
+
+        for (final AbstractButton button : new AbstractButton[] {
+                decimalButton, hexadecimalButton, runButton, nextButton
+        }) {
+            button.setMargin(BUTTON_INSETS);
+            button.setAlignmentY(CENTER_ALIGNMENT);
+            button.setFocusable(false);
+        }
+
+        final ButtonGroup changeBaseGroup = new ButtonGroup();
+        changeBaseGroup.add(decimalButton);
+        changeBaseGroup.add(hexadecimalButton);
+
+        add(decimalButton);
+        add(hexadecimalButton);
+        add(Box.createHorizontalGlue());
+        add(runButton);
+        add(nextButton);
     }
 
     public JToggleButton getDecimalButton() {
@@ -79,27 +94,5 @@ public class ButtonPanel extends JPanel {
 
     public JToggleButton getRunButton() {
         return runButton;
-    }
-
-    private void initLayout() {
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-        setAlignmentY(BOTTOM_ALIGNMENT);
-
-        for (final AbstractButton button : new AbstractButton[] { decimalButton, hexadecimalButton, runButton,
-            nextButton }) {
-            button.setMargin(BUTTON_INSETS);
-            button.setAlignmentY(CENTER_ALIGNMENT);
-            button.setFocusable(false);
-        }
-
-        final ButtonGroup changeBaseGroup = new ButtonGroup();
-        changeBaseGroup.add(decimalButton);
-        changeBaseGroup.add(hexadecimalButton);
-
-        add(decimalButton);
-        add(hexadecimalButton);
-        add(Box.createHorizontalGlue());
-        add(runButton);
-        add(nextButton);
     }
 }

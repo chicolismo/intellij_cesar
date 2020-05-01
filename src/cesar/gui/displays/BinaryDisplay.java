@@ -1,12 +1,10 @@
 package cesar.gui.displays;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.swing.JPanel;
 
 public class BinaryDisplay extends JPanel {
     private static final long serialVersionUID = -5490249529061282417L;
@@ -23,10 +21,10 @@ public class BinaryDisplay extends JPanel {
     static {
         displayImages = new BufferedImage[2];
         try {
-            displayImages[0] = ImageIO
-                    .read(BinaryDisplay.class.getResourceAsStream("/cesar/gui/assets/mini_led_0.png"));
-            displayImages[1] = ImageIO
-                    .read(BinaryDisplay.class.getResourceAsStream("/cesar/gui/assets/mini_led_1.png"));
+            displayImages[0] = ImageIO.read(
+                    BinaryDisplay.class.getResourceAsStream("/cesar/gui/assets/mini_led_0.png"));
+            displayImages[1] = ImageIO.read(
+                    BinaryDisplay.class.getResourceAsStream("/cesar/gui/assets/mini_led_1.png"));
         }
         catch (final IOException e) {
             System.err.println("Erro ao carregar os mini leds");

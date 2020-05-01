@@ -1,10 +1,9 @@
 package cesar.gui.dialogs;
 
-import java.awt.Component;
-
-import javax.swing.JOptionPane;
-
 import cesar.Properties;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class GotoDialog {
     private static final String GOTO_DIALOG_TITLE = Properties.getProperty("Goto.title");

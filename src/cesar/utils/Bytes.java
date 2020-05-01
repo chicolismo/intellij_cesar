@@ -14,4 +14,8 @@ public class Bytes {
     public static int toUnsignedInt(final byte b) {
         return MAX_VALUE & b;
     }
+
+    public static byte fromInt(final int value) {
+        return (byte) (MAX_VALUE & value);
+    }
 }

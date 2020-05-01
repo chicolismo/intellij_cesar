@@ -1,16 +1,13 @@
 package cesar.gui.panels;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-
 import cesar.Properties;
 import cesar.gui.displays.DigitalDisplay;
 import cesar.utils.Defaults;
+
+import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import java.awt.*;
 
 public class ExecutionPanel extends JPanel {
     private static final long serialVersionUID = 8981667379501321204L;
@@ -62,7 +59,7 @@ public class ExecutionPanel extends JPanel {
         add(instructionCountDisplay, c_3);
 
         final Border outer = Defaults.createTitledBorder(TITLE);
-        final Border inner = Defaults.getEmptyBorder();
+        final Border inner = Defaults.createEmptyBorder();
         setBorder(new CompoundBorder(outer, inner));
     }
 

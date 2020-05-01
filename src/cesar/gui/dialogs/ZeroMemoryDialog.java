@@ -1,11 +1,10 @@
 package cesar.gui.dialogs;
 
-import java.awt.Component;
-
-import javax.swing.JOptionPane;
-
 import cesar.Properties;
 import cesar.utils.Base;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class ZeroMemoryDialog {
     private static final String ZERO_MEMORY_TITLE = Properties.getProperty("ZeroMemory.title");
@@ -25,25 +24,22 @@ public class ZeroMemoryDialog {
         currentBase = Base.DECIMAL;
     }
 
-    private static String getUserInput(final Component parent, final String message, final String title,
-            final String initialValue) {
-        return (String) JOptionPane.showInputDialog(parent, message, title, JOptionPane.PLAIN_MESSAGE, null, null,
-                initialValue);
-    }
-
     public void setBase(final Base base) {
         currentBase = base;
     }
 
     public String showEndAddressDialog() {
         final int radix = currentBase.toInt();
-        return getUserInput(parent, ZERO_MEMORY_END_MESSAGE, ZERO_MEMORY_TITLE,
-                Integer.toString(maximumAddress, radix));
+        return getUserInput(parent, ZERO_MEMORY_END_MESSAGE, Integer.toString(maximumAddress, radix));
+    }
+
+    private static String getUserInput(final Component parent, final String message, final String initialValue) {
+        return (String) JOptionPane.showInputDialog(parent, message, ZeroMemoryDialog.ZERO_MEMORY_TITLE,
+                JOptionPane.PLAIN_MESSAGE, null, null, initialValue);
     }
 
     public String showStartAddressDialog() {
         final int radix = currentBase.toInt();
-        return getUserInput(parent, ZERO_MEMORY_START_MESSAGE, ZERO_MEMORY_TITLE,
-                Integer.toString(minimumAddress, radix));
+        return getUserInput(parent, ZERO_MEMORY_START_MESSAGE, Integer.toString(minimumAddress, radix));
     }
 }

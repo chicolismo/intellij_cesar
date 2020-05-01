@@ -1,22 +1,14 @@
 package cesar.gui.windows;
 
-import java.awt.Dimension;
-import java.awt.GridBagLayout;
-
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.WindowConstants;
-
 import cesar.Properties;
 import cesar.gui.tables.Table;
 import cesar.gui.tables.TableModel;
 import cesar.hardware.Cpu;
 import cesar.utils.Base;
+import cesar.utils.Defaults;
+
+import javax.swing.*;
+import java.awt.*;
 
 public abstract class SideWindow<TableType extends Table, TableModelType extends TableModel> extends JDialog {
     public static final long serialVersionUID = 3602114587032491724L;
@@ -29,6 +21,7 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
     protected int currentValue;
     protected TableType table;
     protected TableModelType model;
+    private Base currentBase;
 
     public SideWindow(final MainWindow parent, final String title, final Cpu cpu) {
         super(parent, title, false);
@@ -41,6 +34,13 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         addressLabel = new JLabel(String.format(LABEL_FORMAT, "0"));
         valueField = new JTextField(6);
         valueField.setMinimumSize(valueField.getPreferredSize());
+        currentBase = Defaults.DEFAULT_BASE;
+    }
+
+    abstract protected void initTable(final Cpu cpu);
+
+    public void setCurrentValue(final int value) {
+        currentValue = value;
     }
 
     protected static GridBagLayout getGridLayout(final double[] rowWeights, final double[] colWeights) {
@@ -59,7 +59,7 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         valueField.setText(value);
         valueField.requestFocus();
         valueField.selectAll();
-        final int radix = Base.toInt(model.getBase());
+        final int radix = currentBase.toInt();
         final int currentAddress = Integer.parseInt(address, radix);
         final int currentValue = Integer.parseInt(value, radix);
         setCurrentAddress(currentAddress);
@@ -68,6 +68,10 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
 
     public int getCurrentAddress() {
         return currentAddress;
+    }
+
+    public void setCurrentAddress(final int address) {
+        currentAddress = address;
     }
 
     public TableType getTable() {
@@ -79,18 +83,11 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
     }
 
     public void setBase(final Base base) {
-        final int radix = Base.toInt(base);
+        currentBase = base;
         model.setBase(base);
+        final int radix = base.toInt();
         addressLabel.setText(String.format(LABEL_FORMAT, Integer.toString(currentAddress, radix)));
         valueField.setText(Integer.toString(currentValue, radix));
-    }
-
-    public void setCurrentAddress(final int address) {
-        currentAddress = address;
-    }
-
-    public void setCurrentValue(final int value) {
-        currentValue = value;
     }
 
     protected void initLayout() {
@@ -105,6 +102,4 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         scrollPane.setPreferredSize(scrollPaneSize);
         contentPane.add(scrollPane);
     }
-
-    abstract protected void initTable(final Cpu cpu);
 }

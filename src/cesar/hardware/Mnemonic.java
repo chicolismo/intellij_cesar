@@ -14,12 +14,11 @@ public class Mnemonic {
         return updateMnemonics(cpu, startAt, false);
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public static int updateMnemonics(final Cpu cpu, final int startAt, final boolean forceAllRows) {
         int currentRow = Math.max(0, startAt);
 
-        /*
-         * Só avança no (R7)+ ou nos casos de ddd(Rx) ou (ddd(Rx))
-         */
+        // Só avança no (r7)+ ou nos casos de ddd(rx) ou (ddd(rx))
         while (currentRow < Cpu.MEMORY_SIZE) {
             // Termina quando chegar no final ou quando o mnemônico produzido para um
             // determinado índice for igual ao do arranjo de mnemônicos.
@@ -32,6 +31,7 @@ public class Mnemonic {
             switch (instruction) {
                 case NOP:
                 case HLT:
+                case RTI:
                     mnemonic = format;
                     break;
 
@@ -116,7 +116,6 @@ public class Mnemonic {
                     mnemonic = String.format(format, rrr);
                     break;
                 }
-
                 case CLR:
                 case NOT:
                 case INC:

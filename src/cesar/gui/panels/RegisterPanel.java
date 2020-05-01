@@ -1,41 +1,36 @@
 package cesar.gui.panels;
 
-import static cesar.Properties.getProperty;
+import cesar.gui.displays.RegisterDisplay;
+import cesar.hardware.Cpu;
+import cesar.utils.Base;
 
-import java.awt.Color;
-import java.awt.GridLayout;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.TitledBorder;
-
-import cesar.gui.displays.RegisterDisplay;
-import cesar.hardware.Cpu;
-import cesar.utils.Base;
+import static cesar.Properties.getProperty;
 
 public class RegisterPanel extends JPanel {
     private static final long serialVersionUID = 2962079321929645473L;
 
     private static final String IS_LABEL = getProperty("IS.label");
     private static final String[][] REGISTER_STRINGS = new String[][] {
-        { getProperty("R0.label"), getProperty("R0.newValueTitle"), getProperty("R0.newValueMessage") },
-        { getProperty("R1.label"), getProperty("R1.newValueTitle"), getProperty("R1.newValueMessage") },
-        { getProperty("R2.label"), getProperty("R2.newValueTitle"), getProperty("R2.newValueMessage") },
-        { getProperty("R3.label"), getProperty("R3.newValueTitle"), getProperty("R3.newValueMessage") },
-        { getProperty("R4.label"), getProperty("R4.newValueTitle"), getProperty("R4.newValueMessage") },
-        { getProperty("R5.label"), getProperty("R5.newValueTitle"), getProperty("R5.newValueMessage") },
-        { getProperty("R6.label"), getProperty("R6.newValueTitle"), getProperty("R6.newValueMessage") },
-        { getProperty("R7.label"), getProperty("R7.newValueTitle"), getProperty("R7.newValueMessage") } };
+            { getProperty("R0.label"), getProperty("R0.newValueTitle"), getProperty("R0.newValueMessage") },
+            { getProperty("R1.label"), getProperty("R1.newValueTitle"), getProperty("R1.newValueMessage") },
+            { getProperty("R2.label"), getProperty("R2.newValueTitle"), getProperty("R2.newValueMessage") },
+            { getProperty("R3.label"), getProperty("R3.newValueTitle"), getProperty("R3.newValueMessage") },
+            { getProperty("R4.label"), getProperty("R4.newValueTitle"), getProperty("R4.newValueMessage") },
+            { getProperty("R5.label"), getProperty("R5.newValueTitle"), getProperty("R5.newValueMessage") },
+            { getProperty("R6.label"), getProperty("R6.newValueTitle"), getProperty("R6.newValueMessage") },
+            { getProperty("R7.label"), getProperty("R7.newValueTitle"), getProperty("R7.newValueMessage") }
+    };
 
     private static final ImageIcon COMPUTER_ICON;
     private static final ImageIcon ALTERNATIVE_ICON;
@@ -71,6 +66,7 @@ public class RegisterPanel extends JPanel {
 
         for (int i = 0; i < Cpu.REGISTER_COUNT; ++i) {
             final String[] strings = REGISTER_STRINGS[i];
+            //noinspection ObjectAllocationInLoop
             registerDisplays[i] = new RegisterDisplay(i, strings[0], strings[1], strings[2]);
         }
 
@@ -80,20 +76,6 @@ public class RegisterPanel extends JPanel {
         doLayout();
     }
 
-    public RegisterDisplay getDisplay(final int i) {
-        return registerDisplays[i];
-    }
-
-    public RegisterDisplay[] getDisplays() {
-        return registerDisplays;
-    }
-
-    public void setBase(final Base base) {
-        for (final RegisterDisplay display : registerDisplays) {
-            display.setBase(base);
-        }
-    }
-
     private void initLayout() {
         final JLabel computerLabel = new JLabel(COMPUTER_ICON);
         computerLabel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 3, 3, 3),
@@ -101,16 +83,15 @@ public class RegisterPanel extends JPanel {
 
         final JPanel centerPanel = new JPanel();
         final GroupLayout groupLayout = new GroupLayout(centerPanel);
-        groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-                .addGroup(groupLayout.createSequentialGroup()
-                        .addComponent(computerLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE,
-                                Short.MAX_VALUE)
-                        .addComponent(interruptionPanel, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)));
+        groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.TRAILING).addGroup(
+                groupLayout.createSequentialGroup().addComponent(computerLabel, GroupLayout.DEFAULT_SIZE,
+                        GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).addComponent(interruptionPanel,
+                        GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)));
 
-        groupLayout.setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-                .addComponent(interruptionPanel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE,
-                        GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                .addComponent(computerLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE));
+        groupLayout.setVerticalGroup(
+                groupLayout.createParallelGroup(Alignment.LEADING).addComponent(interruptionPanel, Alignment.TRAILING,
+                        GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE).addComponent(
+                        computerLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE));
         centerPanel.setLayout(groupLayout);
 
         setLayout(new GridLayout(3, 3, 1, 1));
@@ -134,5 +115,19 @@ public class RegisterPanel extends JPanel {
                 }
             }
         });
+    }
+
+    public RegisterDisplay getDisplay(final int i) {
+        return registerDisplays[i];
+    }
+
+    public RegisterDisplay[] getDisplays() {
+        return registerDisplays;
+    }
+
+    public void setBase(final Base base) {
+        for (final RegisterDisplay display : registerDisplays) {
+            display.setBase(base);
+        }
     }
 }

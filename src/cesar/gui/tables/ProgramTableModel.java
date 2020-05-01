@@ -19,10 +19,6 @@ public class ProgramTableModel extends TableModel {
         return (String) getValueAt(row, 1);
     }
 
-    public int getProgramCounterRow() {
-        return programCounterRow;
-    }
-
     @Override
     public String getValueAsString(final int row) {
         return (String) getValueAt(row, 2);
@@ -43,14 +39,18 @@ public class ProgramTableModel extends TableModel {
         }
     }
 
+    private String getProgramCounterRowAsString(final int row) {
+        return row == getProgramCounterRow() ? ARROW : "";
+    }
+
+    public int getProgramCounterRow() {
+        return programCounterRow;
+    }
+
     public void setProgramCounterRow(final int programCounter) {
         final int oldValue = programCounterRow;
         programCounterRow = programCounter;
         fireTableRowsUpdated(oldValue, oldValue);
         fireTableRowsUpdated(programCounterRow, programCounterRow);
-    }
-
-    private String getProgramCounterRowAsString(final int row) {
-        return row == getProgramCounterRow() ? ARROW : "";
     }
 }

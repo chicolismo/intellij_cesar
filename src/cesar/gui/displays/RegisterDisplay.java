@@ -1,15 +1,11 @@
 package cesar.gui.displays;
 
-import java.awt.Dimension;
-
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-
 import cesar.utils.Base;
 import cesar.utils.Defaults;
 import cesar.utils.Shorts;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class RegisterDisplay extends JPanel {
     private static final long serialVersionUID = 7050289063551512021L;
@@ -54,6 +50,14 @@ public class RegisterDisplay extends JPanel {
         return currentBase;
     }
 
+    public void setBase(final Base newBase) {
+        if (currentBase != newBase) {
+            currentBase = newBase;
+            digitalDisplay.setBase(newBase);
+            digitalDisplay.repaint();
+        }
+    }
+
     public String getMessage() {
         return newValueMessage;
     }
@@ -64,14 +68,6 @@ public class RegisterDisplay extends JPanel {
 
     public String getTitle() {
         return newValueTitle;
-    }
-
-    public void setBase(final Base newBase) {
-        if (currentBase != newBase) {
-            currentBase = newBase;
-            digitalDisplay.setBase(newBase);
-            digitalDisplay.repaint();
-        }
     }
 
     public void setValue(final short value) {

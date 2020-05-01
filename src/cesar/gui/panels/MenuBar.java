@@ -1,30 +1,23 @@
 package cesar.gui.panels;
 
-import java.awt.Toolkit;
+import cesar.Properties;
+import cesar.utils.Defaults;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.KeyStroke;
-
-import cesar.Properties;
-import cesar.utils.Defaults;
-
 public class MenuBar extends JMenuBar {
     private static final long serialVersionUID = -7618206299229330211L;
 
-    private final static boolean IS_APPLE;
     private final static int CTRL_KEY;
 
     static {
         int ctrlKey;
         try {
+            //noinspection JavaReflectionMemberAccess
             final Method m = Toolkit.class.getMethod("getMenuShortcutKeyMaskEx");
 
             ctrlKey = (int) m.invoke(Toolkit.getDefaultToolkit());
@@ -33,7 +26,6 @@ public class MenuBar extends JMenuBar {
             ctrlKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
         }
         CTRL_KEY = ctrlKey;
-        IS_APPLE = Defaults.isApple();
     }
 
     public final JMenu fileMenu;
@@ -71,6 +63,8 @@ public class MenuBar extends JMenuBar {
     public final JMenuItem helpAbout;
 
     public MenuBar() {
+        final boolean isApple = Defaults.IS_APPLE;
+
         // ==============================================================================================================
         // Arquivo
         // ==============================================================================================================
@@ -125,7 +119,7 @@ public class MenuBar extends JMenuBar {
 
         editHexadecimal = new JRadioButtonMenuItem(getString("EditMenu.hexadecimalLabel"));
         editHexadecimal.setToolTipText(getString("EditMenu.hexadecimalTooltip"));
-        editHexadecimal.setAccelerator(KeyStroke.getKeyStroke(IS_APPLE ? KeyEvent.VK_X : KeyEvent.VK_H, CTRL_KEY));
+        editHexadecimal.setAccelerator(KeyStroke.getKeyStroke(isApple ? KeyEvent.VK_X : KeyEvent.VK_H, CTRL_KEY));
 
         final ButtonGroup group = new ButtonGroup();
         group.add(editDecimal);
@@ -146,7 +140,7 @@ public class MenuBar extends JMenuBar {
         viewMenu.setToolTipText(getString("ViewMenu.tooltip"));
 
         viewProgram = new JCheckBoxMenuItem(getString("ViewMenu.programLabel"));
-        viewProgram.setAccelerator(KeyStroke.getKeyStroke(IS_APPLE ? KeyEvent.VK_F9 : KeyEvent.VK_F11, 0));
+        viewProgram.setAccelerator(KeyStroke.getKeyStroke(isApple ? KeyEvent.VK_F9 : KeyEvent.VK_F11, 0));
         viewProgram.setToolTipText(getString("ViewMenu.programTooltip"));
 
         viewData = new JCheckBoxMenuItem(getString("ViewMenu.dataLabel"));
@@ -167,11 +161,11 @@ public class MenuBar extends JMenuBar {
 
         execRun = new JMenuItem(getString("ExecMenu.runLabel"));
         execRun.setToolTipText(getString("ExecMenu.runTooltip"));
-        execRun.setAccelerator(KeyStroke.getKeyStroke(IS_APPLE ? KeyEvent.VK_F8 : KeyEvent.VK_F9, 0));
+        execRun.setAccelerator(KeyStroke.getKeyStroke(isApple ? KeyEvent.VK_F8 : KeyEvent.VK_F9, 0));
 
         execNext = new JMenuItem(getString("ExecMenu.nextLabel"));
         execNext.setToolTipText(getString("ExecMenu.nextTooltip"));
-        execNext.setAccelerator(KeyStroke.getKeyStroke(IS_APPLE ? KeyEvent.VK_F7 : KeyEvent.VK_F8, 0));
+        execNext.setAccelerator(KeyStroke.getKeyStroke(isApple ? KeyEvent.VK_F7 : KeyEvent.VK_F8, 0));
 
         execChangeProgramCounter = new JMenuItem(getString("ExecMenu.changeProgramCounterLabel"));
         execChangeProgramCounter.setToolTipText(getString("ExecMenu.changeProgramCounterTooltip"));
@@ -228,7 +222,7 @@ public class MenuBar extends JMenuBar {
         add(helpMenu);
     }
 
-    private String getString(final String key) {
+    private static String getString(final String key) {
         return Properties.getProperty(key);
     }
 }

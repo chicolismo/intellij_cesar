@@ -1,5 +1,8 @@
 package cesar.utils.textual;
 
+import cesar.hardware.Cpu;
+import cesar.utils.Base;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -7,15 +10,12 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import cesar.hardware.Cpu;
-import cesar.utils.Base;
-
 /**
  * Converte o conteúdo da memória do CPU em um arquivo de texto.
- *
+ * <p>
  * Os endereços definidos como sendo do programa são representados com seus
  * devidos mnemônicos, juntamente com os bytes correspondentes da instrução.
- *
+ * <p>
  * Os endereços dos dados apenas contém o valor do byte daquele endereço.
  *
  * @author chico
