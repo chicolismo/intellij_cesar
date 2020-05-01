@@ -1,7 +1,5 @@
 package cesar.utils;
 
-import cesar.Properties;
-
 import java.awt.Color;
 import java.awt.Font;
 
@@ -9,6 +7,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+
+import cesar.Properties;
 
 public class Defaults {
     public static final Font PANEL_FONT;
@@ -34,8 +34,7 @@ public class Defaults {
         ARROW_COLOR = new Color(rgb);
     }
 
-    public static Border getEmptyBorder() {
-        return createEmptyBorder(4);
+    private Defaults() {
     }
 
     public static Border createEmptyBorder(final int padding) {
@@ -59,10 +58,11 @@ public class Defaults {
         return border;
     }
 
-    public static boolean isApple() {
-        return APPLE;
+    public static Border getEmptyBorder() {
+        return createEmptyBorder(4);
     }
 
-    private Defaults() {
+    public static boolean isApple() {
+        return APPLE;
     }
 }

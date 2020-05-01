@@ -88,6 +88,12 @@ public class RegisterPanel extends JPanel {
         return registerDisplays;
     }
 
+    public void setBase(final Base base) {
+        for (final RegisterDisplay display : registerDisplays) {
+            display.setBase(base);
+        }
+    }
+
     private void initLayout() {
         final JLabel computerLabel = new JLabel(COMPUTER_ICON);
         computerLabel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 3, 3, 3),
@@ -128,11 +134,5 @@ public class RegisterPanel extends JPanel {
                 }
             }
         });
-    }
-
-    public void setBase(final Base base) {
-        for (final RegisterDisplay display : registerDisplays) {
-            display.setBase(base);
-        }
     }
 }

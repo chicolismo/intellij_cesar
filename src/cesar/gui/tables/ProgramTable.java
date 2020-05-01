@@ -4,13 +4,16 @@ import java.awt.Component;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 import cesar.utils.Defaults;
 
 public class ProgramTable extends Table {
     private static final long serialVersionUID = -8843361396327035069L;
+    private static final int[] COLUMN_WIDTHS = new int[] { 35, 62, 55, 135 };
 
     public ProgramTable(final ProgramTableModel model) {
         super(model);
@@ -24,7 +27,7 @@ public class ProgramTable extends Table {
                 final JLabel c = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
                         col);
                 c.setForeground(Defaults.ARROW_COLOR);
-                c.setHorizontalAlignment(JLabel.CENTER);
+                c.setHorizontalAlignment(SwingConstants.CENTER);
                 c.setBorder(Defaults.createEmptyBorder(0));
                 return c;
             }
@@ -33,11 +36,12 @@ public class ProgramTable extends Table {
 
     @Override
     void initColumnWidths() {
-        final int[] COLUMN_WIDTHS = new int[] { 35, 62, 55, 135 };
+        final TableColumnModel columnModel = getColumnModel();
         for (int i = 0; i < COLUMN_WIDTHS.length; ++i) {
-            final TableColumn column = getColumnModel().getColumn(i);
+            final TableColumn column = columnModel.getColumn(i);
             column.setMaxWidth(COLUMN_WIDTHS[i]);
             column.setMinWidth(COLUMN_WIDTHS[i]);
+            column.setResizable(false);
         }
     }
 }

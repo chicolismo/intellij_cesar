@@ -34,10 +34,6 @@ public class StatusBar extends JPanel {
         return label.getText();
     }
 
-    public void setText(final String text) {
-        label.setText(text);
-    }
-
     /**
      * Escreve uma mensagem temporária na barra de status.
      *
@@ -61,5 +57,9 @@ public class StatusBar extends JPanel {
             }
         });
         tempThread.start();
+    }
+
+    public void setText(final String text) {
+        label.setText(text);
     }
 }

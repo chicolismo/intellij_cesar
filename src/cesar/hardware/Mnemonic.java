@@ -10,15 +10,6 @@ public class Mnemonic {
     private static final String CARRY = "C";
     private static final String EMPTY_STRING = "";
 
-    private static String conditionToString(final byte opCode) {
-        final int lsb = opCode & 0x0F;
-        final String n = (lsb & 0b1000) > 0 ? NEGATIVE : EMPTY_STRING;
-        final String z = (lsb & 0b0100) > 0 ? ZERO : EMPTY_STRING;
-        final String v = (lsb & 0b0010) > 0 ? OVERFLOW : EMPTY_STRING;
-        final String c = (lsb & 0b0001) > 0 ? CARRY : EMPTY_STRING;
-        return n + z + v + c;
-    }
-
     public static int updateMnemonics(final Cpu cpu, final int startAt) {
         return updateMnemonics(cpu, startAt, false);
     }
@@ -239,5 +230,14 @@ public class Mnemonic {
             currentRow += rowIncrement;
         }
         return currentRow;
+    }
+
+    private static String conditionToString(final byte opCode) {
+        final int lsb = opCode & 0x0F;
+        final String n = (lsb & 0b1000) > 0 ? NEGATIVE : EMPTY_STRING;
+        final String z = (lsb & 0b0100) > 0 ? ZERO : EMPTY_STRING;
+        final String v = (lsb & 0b0010) > 0 ? OVERFLOW : EMPTY_STRING;
+        final String c = (lsb & 0b0001) > 0 ? CARRY : EMPTY_STRING;
+        return n + z + v + c;
     }
 }

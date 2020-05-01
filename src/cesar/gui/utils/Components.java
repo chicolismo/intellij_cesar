@@ -1,4 +1,4 @@
-package cesar.utils;
+package cesar.gui.utils;
 
 import java.awt.Component;
 import java.awt.Dimension;

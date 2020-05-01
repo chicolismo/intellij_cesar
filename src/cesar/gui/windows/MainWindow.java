@@ -24,8 +24,6 @@ import cesar.gui.panels.StatusBar;
 import cesar.hardware.Cpu;
 
 public class MainWindow extends JFrame {
-    public static final long serialVersionUID = -4182598865843186332L;
-
     private final class MainWindowComponentAdapter extends ComponentAdapter {
         @Override
         public void componentMoved(final ComponentEvent event) {
@@ -33,13 +31,15 @@ public class MainWindow extends JFrame {
         }
     }
 
+    public static final long serialVersionUID = -4182598865843186332L;
+
     private static final int WINDOW_GAP;
     static {
         int gap;
         try {
             gap = Integer.parseInt(getProperty("MainWindow.windowGap"), 10);
         }
-        catch (NumberFormatException e) {
+        catch (final NumberFormatException e) {
             gap = 6;
         }
         WINDOW_GAP = gap;
@@ -103,16 +103,20 @@ public class MainWindow extends JFrame {
         updateSubWindowsPositions();
     }
 
-    public Cpu getCpu() {
-        return cpu;
-    }
-
-    public RegisterPanel getRegisterPanel() {
-        return registerPanel;
+    public ButtonPanel getButtonPanel() {
+        return buttonPanel;
     }
 
     public ConditionPanel getConditionPanel() {
         return conditionPanel;
+    }
+
+    public Cpu getCpu() {
+        return cpu;
+    }
+
+    public DataWindow getDataWindow() {
+        return dataWindow;
     }
 
     public ExecutionPanel getExecutionPanel() {
@@ -123,24 +127,20 @@ public class MainWindow extends JFrame {
         return instructionPanel;
     }
 
-    public ButtonPanel getButtonPanel() {
-        return buttonPanel;
-    }
-
     public ProgramWindow getProgramWindow() {
         return programWindow;
     }
 
-    public DataWindow getDataWindow() {
-        return dataWindow;
-    }
-
-    public TextWindow getTextWindow() {
-        return textWindow;
+    public RegisterPanel getRegisterPanel() {
+        return registerPanel;
     }
 
     public StatusBar getStatusBar() {
         return statusBar;
+    }
+
+    public TextWindow getTextWindow() {
+        return textWindow;
     }
 
     private void updateSubWindowsPositions() {

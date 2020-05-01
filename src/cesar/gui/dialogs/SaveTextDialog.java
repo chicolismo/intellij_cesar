@@ -1,23 +1,32 @@
 package cesar.gui.dialogs;
 
-import cesar.Properties;
-import cesar.hardware.Cpu;
-import cesar.hardware.TextConverter;
-import cesar.utils.Base;
-
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import cesar.Properties;
+import cesar.hardware.Cpu;
+import cesar.utils.Base;
+import cesar.utils.Integers;
+import cesar.utils.textual.TextConverter;
+
 public class SaveTextDialog extends JDialog {
     private static final long serialVersionUID = 476591876321607487L;
-    private static final int MIN_VALUE = 0;
-    private static final int MAX_VALUE = Cpu.MEMORY_SIZE - 1;
 
     private static final String TITLE = Properties.getProperty("SaveText.title");
     private static final String FILTER_DESCRIPTION = Properties.getProperty("SaveText.fileFilterDescription");
@@ -25,23 +34,28 @@ public class SaveTextDialog extends JDialog {
     private static final String OK_TEXT = Properties.getProperty("SaveText.okButtonText");
     private static final String CANCEL_TEXT = Properties.getProperty("SaveText.cancelButtonText");
     private static final String PROGRAM_REGION_TITLE = Properties.getProperty("SaveText.programRegionTitle");
-    private static final String PROGRAM_REGION_START_ADDRESS_TEXT = Properties.getProperty(
-            "SaveText.programRegionStartAddressText");
-    private static final String PROGRAM_REGION_START_ADDRESS_ERROR = Properties.getProperty(
-            "SaveText.programRegionStartAddressErrorMessage");
-    private static final String PROGRAM_REGION_END_ADDRESS_TEXT = Properties.getProperty(
-            "SaveText.programRegionEndAddressText");
-    private static final String PROGRAM_REGION_END_ADDRESS_ERROR = Properties.getProperty(
-            "SaveText.programRegionEndAddressErrorMessage");
+    private static final String PROGRAM_REGION_START_ADDRESS_TEXT = Properties
+            .getProperty("SaveText.programRegionStartAddressText");
+    private static final String PROGRAM_REGION_START_ADDRESS_ERROR = Properties
+            .getProperty("SaveText.programRegionStartAddressErrorMessage");
+    private static final String PROGRAM_REGION_END_ADDRESS_TEXT = Properties
+            .getProperty("SaveText.programRegionEndAddressText");
+    private static final String PROGRAM_REGION_END_ADDRESS_ERROR = Properties
+            .getProperty("SaveText.programRegionEndAddressErrorMessage");
     private static final String DATA_REGION_TITLE = Properties.getProperty("SaveText.dataRegionTitle");
-    private static final String DATA_REGION_START_ADDRESS_TEXT = Properties.getProperty(
-            "SaveText.dataRegionStartAddressText");
-    private static final String DATA_REGION_START_ADDRESS_ERROR = Properties.getProperty(
-            "SaveText.dataRegionStartAddressErrorMessage");
-    private static final String DATA_REGION_END_ADDRESS_TEXT = Properties.getProperty(
-            "SaveText.dataRegionEndAddressText");
-    private static final String DATA_REGION_END_ADDRESS_ERROR = Properties.getProperty(
-            "SaveText.dataRegionEndAddressErrorMessage");
+    private static final String DATA_REGION_START_ADDRESS_TEXT = Properties
+            .getProperty("SaveText.dataRegionStartAddressText");
+    private static final String DATA_REGION_START_ADDRESS_ERROR = Properties
+            .getProperty("SaveText.dataRegionStartAddressErrorMessage");
+    private static final String DATA_REGION_END_ADDRESS_TEXT = Properties
+            .getProperty("SaveText.dataRegionEndAddressText");
+    private static final String DATA_REGION_END_ADDRESS_ERROR = Properties
+            .getProperty("SaveText.dataRegionEndAddressErrorMessage");
+
+    private static final int START_PROGRAM_ADDRESS = Cpu.FIRST_ADDRESS;
+    private static final int END_PROGRAM_ADDRESS = Cpu.DATA_START_ADDRESS - 1;
+    private static final int START_DATA_ADDRESS = 65_000;
+    private static final int END_DATA_ADDRESS = Cpu.LAST_ADDRESS;
 
     private final JTextField startProgramAddressField;
     private final JTextField endProgramAddressField;
@@ -50,36 +64,33 @@ public class SaveTextDialog extends JDialog {
 
     private final JLabel statusBar;
 
-    private int startProgramAddress;
-    private int endProgramAddress;
-    private int startDataAddress;
-    private int endDataAddress;
+    private final int[] addresses;
     private final JFileChooser fileChooser;
     private final JButton okButton;
     private final JButton cancelButton;
-    private boolean valuesOk;
-    private Cpu cpu;
-    private Base base;
+    private final Cpu cpu;
+    private Base currentBase;
     private File outputFile;
 
-    public SaveTextDialog(final JFrame parent) {
+    public SaveTextDialog(final JFrame parent, final Cpu cpu) {
         super(parent, TITLE, true);
-
+        this.cpu = cpu;
         fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new FileNameExtensionFilter(FILTER_DESCRIPTION, FILTER_EXTENSIONS));
-
+        currentBase = Base.DECIMAL;
         okButton = new JButton(OK_TEXT);
         cancelButton = new JButton(CANCEL_TEXT);
         statusBar = new JLabel("");
         statusBar.setMinimumSize(statusBar.getPreferredSize());
 
+        addresses = new int[4];
+        setDefaultValues();
+
         startProgramAddressField = new JTextField(4);
         endProgramAddressField = new JTextField(4);
         startDataAddressField = new JTextField(4);
         endDataAddressField = new JTextField(4);
-        valuesOk = true;
 
-        setDefaultValues();
 
         setLayout(new BorderLayout(5, 8));
         add(createContentPane(), BorderLayout.CENTER);
@@ -87,89 +98,20 @@ public class SaveTextDialog extends JDialog {
         pack();
         setLocationRelativeTo(parent);
 
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentShown(final ComponentEvent e) {
-                setDefaultValues();
-                super.componentShown(e);
-            }
-        });
-
-        okButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                convertValues();
-                if (valuesOk && outputFile != null) {
-                    final TextConverter converter = new TextConverter(cpu, base);
-                    converter.writeToFile(outputFile, startProgramAddress, endProgramAddress, startDataAddress,
-                            endDataAddress);
-                    outputFile = null;
-                    setVisible(false);
-                }
-            }
-        });
-
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                outputFile = null;
-                setVisible(false);
-            }
-        });
+        initEvents();
     }
 
-    private void convertValues() {
-        valuesOk = false;
+    public void setBase(final Base newBase) {
+        currentBase = newBase;
+    }
 
-        try {
-            startProgramAddress = Integer.parseInt(startProgramAddressField.getText(), 10);
-            if (startProgramAddress < MIN_VALUE || startProgramAddress > MAX_VALUE) {
-                setText(PROGRAM_REGION_START_ADDRESS_ERROR);
-                return;
-            }
+    public void showDialog() {
+        if (fileChooser.showSaveDialog(getParent()) == JFileChooser.APPROVE_OPTION) {
+            outputFile = fileChooser.getSelectedFile();
+            setDefaultValues();
+            updateFields();
+            setVisible(true);
         }
-        catch (final NumberFormatException e) {
-            setText(PROGRAM_REGION_START_ADDRESS_ERROR);
-            return;
-        }
-
-        try {
-            endProgramAddress = Integer.parseInt(endProgramAddressField.getText(), 10);
-            if (endProgramAddress < 0 || endProgramAddress > MAX_VALUE) {
-                setText(PROGRAM_REGION_END_ADDRESS_ERROR);
-                return;
-            }
-        }
-        catch (final NumberFormatException e) {
-            setText(PROGRAM_REGION_END_ADDRESS_ERROR);
-            return;
-        }
-
-        try {
-            startDataAddress = Integer.parseInt(startDataAddressField.getText(), 10);
-            if (startDataAddress < MIN_VALUE || startDataAddress > MAX_VALUE) {
-                setText(DATA_REGION_START_ADDRESS_ERROR);
-                return;
-            }
-        }
-        catch (final NumberFormatException e) {
-            setText(DATA_REGION_START_ADDRESS_ERROR);
-            return;
-        }
-
-        try {
-            endDataAddress = Integer.parseInt(endDataAddressField.getText(), 10);
-            if (endDataAddress < MIN_VALUE || endDataAddress > MAX_VALUE) {
-                setText(DATA_REGION_END_ADDRESS_ERROR);
-                return;
-            }
-        }
-        catch (final NumberFormatException e) {
-            setText(DATA_REGION_END_ADDRESS_ERROR);
-            return;
-        }
-
-        valuesOk = true;
     }
 
     private JPanel createContentPane() {
@@ -206,28 +148,112 @@ public class SaveTextDialog extends JDialog {
         return panel;
     }
 
-    public void saveText(final Cpu cpu, final Base base) {
-        if (fileChooser.showSaveDialog(getParent()) == JFileChooser.APPROVE_OPTION) {
-            this.cpu = cpu;
-            this.base = base;
-            outputFile = fileChooser.getSelectedFile();
-            setVisible(true);
-        }
+    private int[] getAddresses() {
+        return addresses;
+    }
+
+    private void initEvents() {
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentShown(final ComponentEvent e) {
+                setDefaultValues();
+                super.componentShown(e);
+            }
+        });
+
+        okButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                tryWriteToFile();
+            }
+        });
+
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                outputFile = null;
+                setVisible(false);
+            }
+        });
     }
 
     private void setDefaultValues() {
-        startProgramAddress = MIN_VALUE;
-        endProgramAddress = 1_023;
-        startDataAddress = 65_000;
-        endDataAddress = MAX_VALUE;
-        startProgramAddressField.setText(Integer.toString(startProgramAddress, 10));
-        endProgramAddressField.setText(Integer.toString(endProgramAddress, 10));
-        startDataAddressField.setText(Integer.toString(startDataAddress, 10));
-        endDataAddressField.setText(Integer.toString(endDataAddress, 10));
+        addresses[0] = START_PROGRAM_ADDRESS;
+        addresses[1] = END_PROGRAM_ADDRESS;
+        addresses[2] = START_DATA_ADDRESS;
+        addresses[3] = END_DATA_ADDRESS;
     }
 
     private void setText(final String message) {
         statusBar.setText(message);
     }
 
+    private void tryWriteToFile() {
+        if (outputFile != null && updateValues()) {
+            TextConverter.writeToFile(cpu, currentBase, outputFile, getAddresses());
+            outputFile = null;
+            setVisible(false);
+        }
+    }
+
+    private void updateFields() {
+        final int radix = currentBase.toInt();
+        startProgramAddressField.setText(Integer.toString(addresses[0], radix));
+        endProgramAddressField.setText(Integer.toString(addresses[1], radix));
+        startDataAddressField.setText(Integer.toString(addresses[2], radix));
+        endDataAddressField.setText(Integer.toString(addresses[3], radix));
+    }
+
+    private boolean updateValues() {
+        final int radix = currentBase.toInt();
+        try {
+            addresses[0] = Integer.parseInt(startProgramAddressField.getText(), radix);
+            if (!Integers.isInInterval(addresses[0], Cpu.FIRST_ADDRESS, Cpu.LAST_ADDRESS)) {
+                setText(PROGRAM_REGION_START_ADDRESS_ERROR);
+                return false;
+            }
+        }
+        catch (final NumberFormatException e) {
+            setText(PROGRAM_REGION_START_ADDRESS_ERROR);
+            return false;
+        }
+
+        try {
+            addresses[1] = Integer.parseInt(endProgramAddressField.getText(), radix);
+            if (!Integers.isInInterval(addresses[1], Cpu.FIRST_ADDRESS, Cpu.LAST_ADDRESS)) {
+                setText(PROGRAM_REGION_END_ADDRESS_ERROR);
+                return false;
+            }
+        }
+        catch (final NumberFormatException e) {
+            setText(PROGRAM_REGION_END_ADDRESS_ERROR);
+            return false;
+        }
+
+        try {
+            addresses[2] = Integer.parseInt(startDataAddressField.getText(), radix);
+            if (!Integers.isInInterval(addresses[2], Cpu.FIRST_ADDRESS, Cpu.LAST_ADDRESS)) {
+                setText(DATA_REGION_START_ADDRESS_ERROR);
+                return false;
+            }
+        }
+        catch (final NumberFormatException e) {
+            setText(DATA_REGION_START_ADDRESS_ERROR);
+            return false;
+        }
+
+        try {
+            addresses[3] = Integer.parseInt(endDataAddressField.getText(), radix);
+            if (!Integers.isInInterval(addresses[3], Cpu.FIRST_ADDRESS, Cpu.LAST_ADDRESS)) {
+                setText(DATA_REGION_END_ADDRESS_ERROR);
+                return false;
+            }
+        }
+        catch (final NumberFormatException e) {
+            setText(DATA_REGION_END_ADDRESS_ERROR);
+            return false;
+        }
+
+        return true;
+    }
 }

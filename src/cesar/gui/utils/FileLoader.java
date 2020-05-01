@@ -6,17 +6,30 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.commons.io.FilenameUtils;
+
 import cesar.hardware.Cpu;
 import cesar.utils.Base;
+import cesar.utils.FileUtils;
 
 public class FileLoader {
+    public static class FileLoaderException extends Exception {
+        private static final long serialVersionUID = 6949583264037362079L;
+
+        public FileLoaderException(final String message) {
+            super(message);
+        }
+    }
+
     private static class AddressDialog {
         private final String message;
         private final String initialValue;
@@ -32,17 +45,12 @@ public class FileLoader {
         }
     }
 
-    public static class FileLoaderException extends Exception {
-        private static final long serialVersionUID = 6949583264037362079L;
+    private static final int CESAR_FILE_SIZE = 0x10004; // 65_540
+    private static final int BUFFER_SIZE = Cpu.MEMORY_SIZE; // 0x10000 ou 65_536
+    private static final int MIN_ADDRESS = Cpu.FIRST_ADDRESS;
+    private static final int MAX_ADDRESS = Cpu.LAST_ADDRESS;
 
-        public FileLoaderException(final String message) {
-            super(message);
-        }
-    }
-
-    private static final int CESAR_FILE_SIZE = 65_540;
-    private static final int MIN_ADDRESS = 0;
-    private static final int MAX_ADDRESS = Cpu.MEMORY_SIZE - 1;
+    private static final String WRONG_SIZE_MESSAGE = "Tamanho de arquivo incorreto";
 
     private static final String PARTIAL_LOAD_DIALOG_TITLE = getProperty("FileLoader.partialLoadDialogTitle");
     private static final String ERROR_MESSAGE_FORMAT = getProperty("FileLoader.errorFormat");
@@ -53,12 +61,10 @@ public class FileLoader {
 
     private static final String FILE_LOAD_DESCRIPTION = getProperty("FileLoader.fileFilterDescription");
     private static final String FILE_LOAD_EXTENSIONS = getProperty("FileLoader.fileFilterExtensions");
-    private static final HashSet<String> validExtensions = new HashSet<>();
+    private static final Set<String> VALID_EXTENSIONS = new HashSet<>();
 
     static {
-        for (final String str : FILE_LOAD_EXTENSIONS.split(",\\s*")) {
-            validExtensions.add(str);
-        }
+        VALID_EXTENSIONS.addAll(Arrays.asList(FileUtils.splitExtensions(FILE_LOAD_EXTENSIONS)));
     }
 
     private final JFileChooser fileChooser;
@@ -81,15 +87,8 @@ public class FileLoader {
                         return true;
                     }
                     else {
-                        final String fileName = file.getName().toLowerCase();
-                        final int index = fileName.lastIndexOf('.');
-                        if (index + 1 < fileName.length()) {
-                            String extension = fileName.substring(index + 1);
-                            return validExtensions.contains(extension) && CESAR_FILE_SIZE == (int) file.length();
-                        }
-                        else {
-                            return false;
-                        }
+                        final String extension = FilenameUtils.getExtension(file.getName());
+                        return VALID_EXTENSIONS.contains(extension) && CESAR_FILE_SIZE == (int) file.length();
                     }
                 }
                 return false;
@@ -103,8 +102,54 @@ public class FileLoader {
 
     }
 
+    private static boolean hasCorrectFileSize(final File file) {
+        return CESAR_FILE_SIZE == (int) file.length();
+    }
+
     private static boolean isValidAddress(final int address) {
-        return address >= MIN_ADDRESS && address <= MAX_ADDRESS;
+        return Cpu.isValidAddress(address);
+    }
+
+    private static byte[] readBytes(final File file) throws FileLoaderException {
+        try {
+            if (!hasCorrectFileSize(file)) {
+                throw new FileLoaderException(WRONG_SIZE_MESSAGE);
+            }
+            final BufferedInputStream stream = new BufferedInputStream(new FileInputStream(file));
+            final byte[] fileBytes = new byte[BUFFER_SIZE];
+            stream.skip(4); // Os quatro primeiros bytes são o cabeçalho do arquivo.
+            final int bytesRead = stream.read(fileBytes, 0, BUFFER_SIZE);
+            stream.close();
+            if (bytesRead != BUFFER_SIZE) {
+                throw new FileLoaderException("Não foi possível ler todos os bytes do arquivo");
+            }
+            return fileBytes;
+        }
+        catch (final IOException e) {
+            throw new FileLoaderException("Ocorreu um erro ao ler o arquivo.");
+        }
+    }
+
+    public boolean loadFile(final Cpu cpu) throws FileLoaderException {
+        final File file = showDialog();
+        if (file != null) {
+            cpu.setMemory(readBytes(file));
+            return true;
+        }
+        return false;
+    }
+
+
+    public boolean loadFilePartially(final Cpu cpu, final Base base) throws FileLoaderException {
+        final File file = showDialog();
+        if (file != null) {
+            final int[] addresses = getAddresses(base);
+            if (addresses != null) {
+                cpu.setMemory(readBytes(file), addresses[0], addresses[1], addresses[2]);
+                return true;
+            }
+        }
+        return false;
     }
 
     private int[] getAddresses(final Base base) throws FileLoaderException {
@@ -155,53 +200,10 @@ public class FileLoader {
         return addresses;
     }
 
-    private File getFile() {
-        File file = null;
+    private File showDialog() {
         if (fileChooser.showDialog(parent, null) == JFileChooser.APPROVE_OPTION) {
-            file = fileChooser.getSelectedFile();
+            return fileChooser.getSelectedFile();
         }
-        return file;
-    }
-
-    public boolean loadFile(final Cpu cpu) throws FileLoaderException {
-        final File file = getFile();
-        if (file != null) {
-            cpu.setMemory(readBytes(file));
-            return true;
-        }
-        return false;
-    }
-
-    public boolean loadFilePartially(final Cpu cpu, final Base base) throws FileLoaderException {
-        final File file = getFile();
-        if (file != null) {
-            final int[] addresses = getAddresses(base);
-            if (addresses != null) {
-                cpu.setMemory(readBytes(file), addresses[0], addresses[1], addresses[2]);
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    private static byte[] readBytes(final File file) throws FileLoaderException {
-        try {
-            final int fileSize = (int) file.length();
-            if (fileSize != CESAR_FILE_SIZE) {
-                throw new FileLoaderException("Tamanho do arquivo está incorreto");
-            }
-            final BufferedInputStream stream = new BufferedInputStream(new FileInputStream(file));
-            final byte[] fileBytes = new byte[fileSize];
-            final int bytesRead = stream.read(fileBytes, 0, fileSize);
-            stream.close();
-            if (bytesRead != fileSize) {
-                throw new FileLoaderException("Não foi possível ler todos os bytes do arquivo");
-            }
-            return fileBytes;
-        }
-        catch (final IOException e) {
-            throw new FileLoaderException("Ocorreu um erro ao ler o arquivo.");
-        }
+        return null;
     }
 }

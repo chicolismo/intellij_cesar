@@ -22,10 +22,10 @@ SaveText.dataRegionStartAddressText
 ProgramWindow.pcArrowWinColor
 ExecMenu.nextTooltip
 SaveText.dataRegionStartAddressErrorMessage
+FileLoader.fileFilterExtensions
 ViewMenu.displayLabel
 ExecMenu.zeroInterruptionCounterLabel
 FileMenu.saveTextTooltip
-FileLoader.fileFilterExtensions
 ZeroMemory.endMessage
 SaveText.programRegionEndAddressErrorMessage
 ZeroMemory.title
@@ -39,8 +39,10 @@ FileLoader.fileFilterDescription
 Goto.title
 R4.newValueMessage
 R5.newValueTitle
+RegisterValue.errorFormat
 FileMenu.loadPartiallyLabel
 SaveText.cancelButtonText
+ButtonPanel.decimalLabel
 R4.label
 MainWindow.iconPath
 R3.newValueTitle
@@ -57,11 +59,12 @@ Memory.invalidPositionErrorFormat
 EditMenu.hexadecimalLabel
 SaveText.programRegionTitle
 FileSaver.fileFilterExtensions
-NewRegisterValue.errorFormat
 ExecMenu.label
 EditMenu.zeroMemoryLabel
+FileSaver.overwriteDialogTitle
 IS.label
 EditMenu.gotoLabel
+ButtonPanel.hexadecimalLabel
 FileMenu.label
 R2.newValueMessage
 FileLoader.errorFormat
@@ -100,6 +103,7 @@ R4.newValueTitle
 SaveText.programRegionStartAddressText
 MainWindow.title
 SaveText.programRegionEndAddressText
+FileSaver.overwriteDialogMessage
 HelpMenu.aboutLabel
 ExecMenu.updateRegistersTooltip
 R1.label

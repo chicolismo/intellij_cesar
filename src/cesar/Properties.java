@@ -12,21 +12,21 @@ public class Properties {
     private final static String CONFIG_PATH = "/cesar/config.properties";
 
     static {
-        InputStream stream = Properties.class.getResourceAsStream(CONFIG_PATH);
+        final InputStream stream = Properties.class.getResourceAsStream(CONFIG_PATH);
         PROPERTIES = new java.util.Properties();
         try {
             PROPERTIES.load(stream);
 
             // TODO: Encontrar um jeito de refatorar isto...
-            FileWriter writer = new FileWriter(new File("./keys.txt"));
-            for (Object key : PROPERTIES.keySet()) {
+            final FileWriter writer = new FileWriter(new File("./keys.txt"));
+            for (final Object key : PROPERTIES.keySet()) {
                 writer.write((String) key);
                 writer.write(System.lineSeparator());
             }
             writer.close();
 
         }
-        catch (IOException e) {
+        catch (final IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null,
                     String.format("Não foi possível ler arquivo de configuração %s", CONFIG_PATH));

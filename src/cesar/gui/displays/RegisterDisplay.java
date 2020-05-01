@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import cesar.utils.Base;
@@ -51,13 +50,20 @@ public class RegisterDisplay extends JPanel {
         setMinimumSize(getPreferredSize());
     }
 
-    public String showNewValueDialog(final String currentValue) {
-        return (String) JOptionPane.showInputDialog(this, newValueMessage, newValueTitle, JOptionPane.PLAIN_MESSAGE,
-                null, null, currentValue);
+    public Base getBase() {
+        return currentBase;
+    }
+
+    public String getMessage() {
+        return newValueMessage;
     }
 
     public int getNumber() {
         return registerNumber;
+    }
+
+    public String getTitle() {
+        return newValueTitle;
     }
 
     public void setBase(final Base newBase) {

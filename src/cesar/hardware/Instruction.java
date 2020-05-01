@@ -101,12 +101,12 @@ public enum Instruction {
         if (INSTRUCTION_MAP.containsKey(key)) {
             return INSTRUCTION_MAP.get(key);
         }
-        else {
-            key = (0xF0 & key) >> 4;
-            if (INSTRUCTION_MAP.containsKey(key)) {
-                return INSTRUCTION_MAP.get(key);
-            }
+
+        key = (0xF0 & key) >> 4;
+        if (INSTRUCTION_MAP.containsKey(key)) {
+            return INSTRUCTION_MAP.get(key);
         }
+
         return NOP;
     }
 

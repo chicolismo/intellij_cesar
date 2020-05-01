@@ -21,6 +21,6 @@ public class DataTableModel extends TableModel {
 
     @Override
     public Object getValueAt(final int row, final int col) {
-        return col == 0 ? formatNumber(row) : formatNumber(cpu.getByte(row));
+        return col == 0 ? formatNumber(row) : formatNumber(getByte(row));
     }
 }

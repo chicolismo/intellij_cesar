@@ -27,8 +27,6 @@ public abstract class Table extends JTable {
         initColumnWidths();
     }
 
-    abstract void initColumnWidths();
-
     @Override
     public Component prepareRenderer(final TableCellRenderer renderer, final int row, final int column) {
         final JComponent c = (JComponent) super.prepareRenderer(renderer, row, column);
@@ -50,4 +48,6 @@ public abstract class Table extends JTable {
         }
         scrollRectToVisible(rect);
     }
+
+    abstract void initColumnWidths();
 }

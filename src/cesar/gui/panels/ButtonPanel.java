@@ -14,11 +14,17 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
+import cesar.Properties;
+import cesar.utils.Defaults;
+
 public class ButtonPanel extends JPanel {
     private static final long serialVersionUID = -1509965084306287422L;
 
-    private static final BufferedImage runIcon;
-    private static final BufferedImage nextIcon;
+    private static final Insets BUTTON_INSETS = new Insets(1, 1, 1, 1);
+    private static final String DECIMAL_LABEL = Properties.getProperty("ButtonPanel.decimalLabel");
+    private static final String HEXADECIMAL_LABEL = Properties.getProperty("ButtonPanel.hexadecimalLabel");
+    private static final ImageIcon RUN_ICON;
+    private static final ImageIcon NEXT_ICON;
 
     static {
         BufferedImage icon = null;
@@ -32,53 +38,68 @@ public class ButtonPanel extends JPanel {
             e.printStackTrace();
             System.exit(1);
         }
-        runIcon = icon;
-        nextIcon = next;
+        RUN_ICON = new ImageIcon(icon);
+        NEXT_ICON = new ImageIcon(next);
     }
 
-    public final JToggleButton btnDec;
-    public final JToggleButton btnHex;
-    public final JToggleButton btnRun;
-    public final JButton btnNext;
+    private final JToggleButton decimalButton;
+    private final JToggleButton hexadecimalButton;
+    private final JToggleButton runButton;
+    private final JButton nextButton;
 
     public ButtonPanel() {
-        btnDec = new JToggleButton("0..9");
-        btnHex = new JToggleButton("0..F");
-        btnRun = new JToggleButton(new ImageIcon(runIcon));
-        btnNext = new JButton(new ImageIcon(nextIcon));
+        decimalButton = new JToggleButton(DECIMAL_LABEL);
+        hexadecimalButton = new JToggleButton(HEXADECIMAL_LABEL);
+        runButton = new JToggleButton(RUN_ICON);
+        nextButton = new JButton(NEXT_ICON);
 
-        if (System.getProperty("os.name").equals("Mac OS X")) {
-            btnDec.putClientProperty("JButton.buttonType", "segmented");
-            btnDec.putClientProperty("JComponent.sizeVariant", "small");
-            btnDec.putClientProperty("JButton.segmentPosition", "first");
-            btnHex.putClientProperty("JButton.buttonType", "segmented");
-            btnHex.putClientProperty("JComponent.sizeVariant", "small");
-            btnHex.putClientProperty("JButton.segmentPosition", "last");
+        if (Defaults.isApple()) {
+            decimalButton.putClientProperty("JButton.buttonType", "segmented");
+            decimalButton.putClientProperty("JComponent.sizeVariant", "small");
+            decimalButton.putClientProperty("JButton.segmentPosition", "first");
+            hexadecimalButton.putClientProperty("JButton.buttonType", "segmented");
+            hexadecimalButton.putClientProperty("JComponent.sizeVariant", "small");
+            hexadecimalButton.putClientProperty("JButton.segmentPosition", "last");
         }
 
         initLayout();
+    }
+
+    public JToggleButton getDecimalButton() {
+        return decimalButton;
+    }
+
+    public JToggleButton getHexadecimalButton() {
+        return hexadecimalButton;
+    }
+
+    public JButton getNextButton() {
+        return nextButton;
+    }
+
+    public JToggleButton getRunButton() {
+        return runButton;
     }
 
     private void initLayout() {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         setAlignmentY(BOTTOM_ALIGNMENT);
 
-        final Insets margins = new Insets(1, 1, 1, 1);
-        final AbstractButton[] buttons = new AbstractButton[] { btnDec, btnHex, btnRun, btnNext };
-        for (final AbstractButton button : buttons) {
-            button.setMargin(margins);
+        for (final AbstractButton button : new AbstractButton[] { decimalButton, hexadecimalButton, runButton,
+            nextButton }) {
+            button.setMargin(BUTTON_INSETS);
             button.setAlignmentY(CENTER_ALIGNMENT);
             button.setFocusable(false);
         }
 
         final ButtonGroup changeBaseGroup = new ButtonGroup();
-        changeBaseGroup.add(btnDec);
-        changeBaseGroup.add(btnHex);
+        changeBaseGroup.add(decimalButton);
+        changeBaseGroup.add(hexadecimalButton);
 
-        add(btnDec);
-        add(btnHex);
+        add(decimalButton);
+        add(hexadecimalButton);
         add(Box.createHorizontalGlue());
-        add(btnRun);
-        add(btnNext);
+        add(runButton);
+        add(nextButton);
     }
 }

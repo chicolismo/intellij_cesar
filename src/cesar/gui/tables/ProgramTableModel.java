@@ -23,10 +23,6 @@ public class ProgramTableModel extends TableModel {
         return programCounterRow;
     }
 
-    private String getProgramCounterRowAsString(final int row) {
-        return row == getProgramCounterRow() ? ARROW : "";
-    }
-
     @Override
     public String getValueAsString(final int row) {
         return (String) getValueAt(row, 2);
@@ -40,10 +36,10 @@ public class ProgramTableModel extends TableModel {
             case 1:
                 return formatNumber(row);
             case 2:
-                return formatNumber(cpu.getByte(row));
+                return formatNumber(getByte(row));
             case 3:
             default:
-                return cpu.getMnemonic(row);
+                return getMnemonic(row);
         }
     }
 
@@ -52,5 +48,9 @@ public class ProgramTableModel extends TableModel {
         programCounterRow = programCounter;
         fireTableRowsUpdated(oldValue, oldValue);
         fireTableRowsUpdated(programCounterRow, programCounterRow);
+    }
+
+    private String getProgramCounterRowAsString(final int row) {
+        return row == getProgramCounterRow() ? ARROW : "";
     }
 }

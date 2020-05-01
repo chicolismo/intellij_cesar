@@ -34,6 +34,14 @@ public class InstructionPanel extends JPanel {
         initLayout();
     }
 
+    public void setMnemonicText(final String text) {
+        mnemonicText.setText(text);
+    }
+
+    public void setRiText(final String text) {
+        riText.setText(text);
+    }
+
     private void initLayout() {
         final JLabel riLabel = Defaults.createLabel("RI: ");
         final JLabel mnemonicLabel = Defaults.createLabel("Mnem: ");
@@ -72,13 +80,5 @@ public class InstructionPanel extends JPanel {
         final Border outer = Defaults.createTitledBorder("Instrução:");
         final Border border = new CompoundBorder(outer, Defaults.getEmptyBorder());
         setBorder(border);
-    }
-
-    public void setMnemonicText(final String text) {
-        mnemonicText.setText(text);
-    }
-
-    public void setRiText(final String text) {
-        riText.setText(text);
     }
 }
