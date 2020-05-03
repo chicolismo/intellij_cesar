@@ -1,13 +1,21 @@
 package cesar.gui.panels;
 
-import cesar.Properties;
-import cesar.utils.Defaults;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JToggleButton;
+
+import cesar.Properties;
+import cesar.utils.Defaults;
 
 public class ButtonPanel extends JPanel {
     private static final long serialVersionUID = -1509965084306287422L;
@@ -61,9 +69,8 @@ public class ButtonPanel extends JPanel {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         setAlignmentY(BOTTOM_ALIGNMENT);
 
-        for (final AbstractButton button : new AbstractButton[] {
-                decimalButton, hexadecimalButton, runButton, nextButton
-        }) {
+        for (final AbstractButton button : new AbstractButton[] { decimalButton, hexadecimalButton, runButton,
+            nextButton }) {
             button.setMargin(BUTTON_INSETS);
             button.setAlignmentY(CENTER_ALIGNMENT);
             button.setFocusable(false);

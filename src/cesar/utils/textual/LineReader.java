@@ -1,9 +1,9 @@
 package cesar.utils.textual;
 
-import cesar.hardware.Cpu;
-
 import java.util.ArrayList;
 import java.util.Objects;
+
+import cesar.hardware.Cpu;
 
 public class LineReader {
 
@@ -25,7 +25,7 @@ public class LineReader {
                     lines.add(line);
                     maxByteCount = Math.max(maxByteCount, line.getBytesSize());
                 }
-                //noinspection ObjectAllocationInLoop
+                // noinspection ObjectAllocationInLoop
                 line = new Line();
                 line.setAddress(i);
                 line.setString(mnemonic);

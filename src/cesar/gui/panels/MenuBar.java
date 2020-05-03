@@ -1,13 +1,20 @@
 package cesar.gui.panels;
 
-import cesar.Properties;
-import cesar.utils.Defaults;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.KeyStroke;
+
+import cesar.Properties;
+import cesar.utils.Defaults;
 
 public class MenuBar extends JMenuBar {
     private static final long serialVersionUID = -7618206299229330211L;
@@ -17,7 +24,7 @@ public class MenuBar extends JMenuBar {
     static {
         int ctrlKey;
         try {
-            //noinspection JavaReflectionMemberAccess
+            // noinspection JavaReflectionMemberAccess
             final Method m = Toolkit.class.getMethod("getMenuShortcutKeyMaskEx");
 
             ctrlKey = (int) m.invoke(Toolkit.getDefaultToolkit());

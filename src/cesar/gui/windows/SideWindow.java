@@ -1,14 +1,23 @@
 package cesar.gui.windows;
 
+import java.awt.Dimension;
+import java.awt.GridBagLayout;
+
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.WindowConstants;
+
 import cesar.Properties;
 import cesar.gui.tables.Table;
 import cesar.gui.tables.TableModel;
 import cesar.hardware.Cpu;
 import cesar.utils.Base;
 import cesar.utils.Defaults;
-
-import javax.swing.*;
-import java.awt.*;
 
 public abstract class SideWindow<TableType extends Table, TableModelType extends TableModel> extends JDialog {
     public static final long serialVersionUID = 3602114587032491724L;
@@ -37,18 +46,27 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         currentBase = Defaults.DEFAULT_BASE;
     }
 
-    abstract protected void initTable(final Cpu cpu);
-
-    public void setCurrentValue(final int value) {
-        currentValue = value;
-    }
-
     protected static GridBagLayout getGridLayout(final double[] rowWeights, final double[] colWeights) {
         final GridBagLayout grid = new GridBagLayout();
         grid.rowWeights = rowWeights;
         grid.columnWeights = colWeights;
         return grid;
     }
+
+    protected void initLayout() {
+        final JComponent contentPane = (JComponent) getContentPane();
+        contentPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
+
+        final JScrollPane scrollPane = new JScrollPane(table);
+        final Dimension tableSize = table.getPreferredSize();
+        final int scrollBarWidth = scrollPane.getVerticalScrollBar().getPreferredSize().width;
+        final Dimension scrollPaneSize = new Dimension(tableSize.width + scrollBarWidth, tableSize.height);
+        scrollPane.setPreferredSize(scrollPaneSize);
+        contentPane.add(scrollPane);
+    }
+
+    abstract protected void initTable(final Cpu cpu);
 
     public void clickOnRow(final int row) {
         table.setRowSelectionInterval(row, row);
@@ -70,10 +88,6 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         return currentAddress;
     }
 
-    public void setCurrentAddress(final int address) {
-        currentAddress = address;
-    }
-
     public TableType getTable() {
         return table;
     }
@@ -90,16 +104,11 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         valueField.setText(Integer.toString(currentValue, radix));
     }
 
-    protected void initLayout() {
-        final JComponent contentPane = (JComponent) getContentPane();
-        contentPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
+    public void setCurrentAddress(final int address) {
+        currentAddress = address;
+    }
 
-        final JScrollPane scrollPane = new JScrollPane(table);
-        final Dimension tableSize = table.getPreferredSize();
-        final int scrollBarWidth = scrollPane.getVerticalScrollBar().getPreferredSize().width;
-        final Dimension scrollPaneSize = new Dimension(tableSize.width + scrollBarWidth, tableSize.height);
-        scrollPane.setPreferredSize(scrollPaneSize);
-        contentPane.add(scrollPane);
+    public void setCurrentValue(final int value) {
+        currentValue = value;
     }
 }

@@ -1,6 +1,8 @@
 package cesar.gui.utils;
 
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 
 public class Components {
     private Components() {

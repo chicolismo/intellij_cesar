@@ -39,12 +39,12 @@ public final class Line {
         return address;
     }
 
-    public void setAddress(final int address) {
-        this.address = address;
-    }
-
     public int getBytesSize() {
         return bytes.size();
+    }
+
+    public void setAddress(final int address) {
+        this.address = address;
     }
 
     public void setString(final String mnemonic) {

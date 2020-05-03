@@ -1,14 +1,32 @@
 package cesar.gui.tables;
 
-import cesar.utils.Defaults;
+import java.awt.Component;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
-import java.awt.*;
+
+import cesar.utils.Defaults;
 
 public class ProgramTable extends Table {
+    private static class FirstColumnRenderer extends DefaultTableCellRenderer {
+        private static final long serialVersionUID = -1687928120154541133L;
+
+        @Override
+        public Component getTableCellRendererComponent(final JTable table, final Object value, final boolean isSelected,
+                final boolean hasFocus, final int row, final int col) {
+            final JLabel c = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+            c.setForeground(Defaults.ARROW_COLOR);
+            c.setHorizontalAlignment(SwingConstants.CENTER);
+            c.setBorder(Defaults.createEmptyBorder(0));
+            return c;
+        }
+    }
+
     private static final long serialVersionUID = -8843361396327035069L;
+
     private static final int[] COLUMN_WIDTHS = new int[] { 35, 62, 55, 135 };
 
     public ProgramTable(final ProgramTableModel model) {
@@ -25,19 +43,4 @@ public class ProgramTable extends Table {
             column.setResizable(false);
         }
     }
-
-    private static class FirstColumnRenderer extends DefaultTableCellRenderer {
-        private static final long serialVersionUID = -1687928120154541133L;
-
-        @Override
-        public Component getTableCellRendererComponent(final JTable table, final Object value, final boolean isSelected,
-                final boolean hasFocus, final int row, final int col) {
-            final JLabel c = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-            c.setForeground(Defaults.ARROW_COLOR);
-            c.setHorizontalAlignment(SwingConstants.CENTER);
-            c.setBorder(Defaults.createEmptyBorder(0));
-            return c;
-        }
-    }
 }
-

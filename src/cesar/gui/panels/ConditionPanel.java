@@ -1,6 +1,8 @@
 package cesar.gui.panels;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
 
 public class ConditionPanel extends JPanel {
     public static final long serialVersionUID = -595687570078206074L;

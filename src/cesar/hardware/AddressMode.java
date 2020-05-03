@@ -3,7 +3,8 @@ package cesar.hardware;
 import java.util.EnumMap;
 
 public enum AddressMode {
-    REGISTER, REGISTER_POST_INCREMENTED, REGISTER_PRE_DECREMENTED, INDEXED, REGISTER_INDIRECT, POST_INCREMENTED_INDIRECT, PRE_DECREMENTED_INDIRECT, INDEXED_INDIRECT;
+    REGISTER, REGISTER_POST_INCREMENTED, REGISTER_PRE_DECREMENTED, INDEXED, REGISTER_INDIRECT,
+    POST_INCREMENTED_INDIRECT, PRE_DECREMENTED_INDIRECT, INDEXED_INDIRECT;
 
     private static final AddressMode[] ARRAY = AddressMode.values();
 
@@ -20,7 +21,6 @@ public enum AddressMode {
         FORMAT.put(PRE_DECREMENTED_INDIRECT, "(-(R%d))");
         FORMAT.put(INDEXED_INDIRECT, "(%d(R%d))");
     }
-
 
     public static AddressMode fromInt(final int index) {
         return ARRAY[index];

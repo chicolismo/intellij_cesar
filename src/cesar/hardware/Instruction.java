@@ -6,8 +6,8 @@ import java.util.HashMap;
 
 @SuppressWarnings("ObjectAllocationInLoop")
 public enum Instruction {
-    NOP, CCC, SCC, BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS, JMP, SOB, JSR, RTS, RTI, CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC, MOV, ADD, SUB, CMP, AND, OR, HLT;
-
+    NOP, CCC, SCC, BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS, JMP, SOB, JSR, RTS, RTI,
+    CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC, MOV, ADD, SUB, CMP, AND, OR, HLT;
 
     private static final HashMap<Integer, Instruction> INSTRUCTION_MAP;
     private static final EnumMap<Instruction, String> FORMAT;

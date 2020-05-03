@@ -1,14 +1,14 @@
 package cesar.utils.textual;
 
-import cesar.hardware.Cpu;
-import cesar.utils.Base;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+
+import cesar.hardware.Cpu;
+import cesar.utils.Base;
 
 /**
  * Converte o conteúdo da memória do CPU em um arquivo de texto.
@@ -26,6 +26,18 @@ public final class TextConverter {
     private static final String BYTE_SEPARATOR = "  ";
 
     private TextConverter() {
+    }
+
+    private static String getAddressFormat(final Base base) {
+        return base == Base.DECIMAL ? "%5d" : "%4x";
+    }
+
+    private static String getByteFormat(final Base base) {
+        return base == Base.DECIMAL ? "%3d" : "%2x";
+    }
+
+    private static String getEmptyString(final Base base) {
+        return base == Base.DECIMAL ? "   " : "  ";
     }
 
     public static void writeToFile(final Cpu cpu, final Base base, final File file, final int[] addresses) {
@@ -66,17 +78,5 @@ public final class TextConverter {
         catch (final IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private static String getAddressFormat(final Base base) {
-        return base == Base.DECIMAL ? "%5d" : "%4x";
-    }
-
-    private static String getByteFormat(final Base base) {
-        return base == Base.DECIMAL ? "%3d" : "%2x";
-    }
-
-    private static String getEmptyString(final Base base) {
-        return base == Base.DECIMAL ? "   " : "  ";
     }
 }

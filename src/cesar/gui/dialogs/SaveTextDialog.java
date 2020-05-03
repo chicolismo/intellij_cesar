@@ -1,21 +1,31 @@
 package cesar.gui.dialogs;
 
-import cesar.hardware.Cpu;
-import cesar.utils.Base;
-import cesar.utils.Defaults;
-import cesar.utils.Integers;
-import cesar.utils.textual.TextConverter;
+import static cesar.Properties.getProperty;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
 
-import static cesar.Properties.getProperty;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import cesar.hardware.Cpu;
+import cesar.utils.Base;
+import cesar.utils.Defaults;
+import cesar.utils.Integers;
+import cesar.utils.textual.TextConverter;
 
 public class SaveTextDialog extends JDialog {
     private static final long serialVersionUID = 476591876321607487L;
@@ -88,11 +98,17 @@ public class SaveTextDialog extends JDialog {
         initEvents();
     }
 
-    private void setDefaultValues() {
-        addresses[0] = START_PROGRAM_ADDRESS;
-        addresses[1] = END_PROGRAM_ADDRESS;
-        addresses[2] = START_DATA_ADDRESS;
-        addresses[3] = END_DATA_ADDRESS;
+    private static JPanel createPanel(final String title, final String startText, final JTextField startField,
+            final String endText, final JTextField endField) {
+        final GridLayout grid = new GridLayout(2, 2, 5, 5);
+        final JPanel panel = new JPanel();
+        panel.setLayout(grid);
+        panel.setBorder(BorderFactory.createTitledBorder(title));
+        panel.add(new JLabel(startText));
+        panel.add(startField);
+        panel.add(new JLabel(endText));
+        panel.add(endField);
+        return panel;
     }
 
     private JPanel createContentPane() {
@@ -111,6 +127,10 @@ public class SaveTextDialog extends JDialog {
         panel.add(buttonPanel);
 
         return panel;
+    }
+
+    private int[] getAddresses() {
+        return addresses;
     }
 
     private void initEvents() {
@@ -138,17 +158,15 @@ public class SaveTextDialog extends JDialog {
         });
     }
 
-    private static JPanel createPanel(final String title, final String startText, final JTextField startField,
-            String endText, final JTextField endField) {
-        final GridLayout grid = new GridLayout(2, 2, 5, 5);
-        JPanel panel = new JPanel();
-        panel.setLayout(grid);
-        panel.setBorder(BorderFactory.createTitledBorder(title));
-        panel.add(new JLabel(startText));
-        panel.add(startField);
-        panel.add(new JLabel(endText));
-        panel.add(endField);
-        return panel;
+    private void setDefaultValues() {
+        addresses[0] = START_PROGRAM_ADDRESS;
+        addresses[1] = END_PROGRAM_ADDRESS;
+        addresses[2] = START_DATA_ADDRESS;
+        addresses[3] = END_DATA_ADDRESS;
+    }
+
+    private void setText(final String message) {
+        statusBar.setText(message);
     }
 
     private void tryWriteToFile() {
@@ -157,6 +175,14 @@ public class SaveTextDialog extends JDialog {
             outputFile = null;
             setVisible(false);
         }
+    }
+
+    private void updateFields() {
+        final int radix = currentBase.toInt();
+        startProgramAddressField.setText(Integer.toString(addresses[0], radix));
+        endProgramAddressField.setText(Integer.toString(addresses[1], radix));
+        startDataAddressField.setText(Integer.toString(addresses[2], radix));
+        endDataAddressField.setText(Integer.toString(addresses[3], radix));
     }
 
     private boolean updateValues() {
@@ -215,14 +241,6 @@ public class SaveTextDialog extends JDialog {
         return result;
     }
 
-    private int[] getAddresses() {
-        return addresses;
-    }
-
-    private void setText(final String message) {
-        statusBar.setText(message);
-    }
-
     public void setBase(final Base newBase) {
         currentBase = newBase;
     }
@@ -234,13 +252,5 @@ public class SaveTextDialog extends JDialog {
             updateFields();
             setVisible(true);
         }
-    }
-
-    private void updateFields() {
-        final int radix = currentBase.toInt();
-        startProgramAddressField.setText(Integer.toString(addresses[0], radix));
-        endProgramAddressField.setText(Integer.toString(addresses[1], radix));
-        startDataAddressField.setText(Integer.toString(addresses[2], radix));
-        endDataAddressField.setText(Integer.toString(addresses[3], radix));
     }
 }

@@ -1,10 +1,11 @@
 package cesar;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+
+import javax.swing.JOptionPane;
 
 public class Properties {
     private static final java.util.Properties PROPERTIES;

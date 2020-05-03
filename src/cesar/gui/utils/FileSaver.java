@@ -1,11 +1,6 @@
 package cesar.gui.utils;
 
-import cesar.Properties;
-import cesar.utils.FileUtils;
-import com.sun.istack.internal.Nullable;
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
+import java.awt.Component;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +8,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.sun.istack.internal.Nullable;
+
+import cesar.Properties;
+import cesar.utils.FileUtils;
 
 public class FileSaver {
 
@@ -29,7 +33,6 @@ public class FileSaver {
         VALID_EXTENSIONS_SET.addAll(Arrays.asList(VALID_EXTENSIONS));
     }
 
-
     private final Component parent;
 
     private final JFileChooser fileChooser;
@@ -40,6 +43,31 @@ public class FileSaver {
         fileChooser = new JFileChooser();
         fileChooser.setMultiSelectionEnabled(false);
         fileChooser.setFileFilter(new FileNameExtensionFilter(FILE_FILTER_DESCRIPTION, FILE_FILTER_EXTENSIONS));
+    }
+
+    @Nullable
+    private static String getFilePath(final File file) {
+        final String result;
+        final String extension = FileUtils.getExtension(file.getName());
+        if (VALID_EXTENSIONS_SET.contains(extension)) {
+            result = file.getAbsolutePath();
+        }
+        else if (extension.isEmpty()) {
+            result = String.format("%s.%s", file.getAbsolutePath(), VALID_EXTENSIONS[0]);
+        }
+        else {
+            result = null;
+        }
+        return result;
+    }
+
+    @Nullable
+    private File getFile() {
+        File result = null;
+        if (fileChooser.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
+            result = fileChooser.getSelectedFile();
+        }
+        return result;
     }
 
     public boolean saveFile(final byte[] bytes) {
@@ -66,31 +94,6 @@ public class FileSaver {
                     e.printStackTrace();
                 }
             }
-        }
-        return result;
-    }
-
-    @Nullable
-    private File getFile() {
-        File result = null;
-        if (fileChooser.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
-            result = fileChooser.getSelectedFile();
-        }
-        return result;
-    }
-
-    @Nullable
-    private static String getFilePath(final File file) {
-        final String result;
-        final String extension = FileUtils.getExtension(file.getName());
-        if (VALID_EXTENSIONS_SET.contains(extension)) {
-            result = file.getAbsolutePath();
-        }
-        else if (extension.isEmpty()) {
-            result = String.format("%s.%s", file.getAbsolutePath(), VALID_EXTENSIONS[0]);
-        }
-        else {
-            result = null;
         }
         return result;
     }

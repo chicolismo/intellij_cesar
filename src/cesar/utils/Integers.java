@@ -6,12 +6,12 @@ public class Integers {
     private Integers() {
     }
 
-    public static short clampToShort(final int value) {
-        return (short) clamp(value);
-    }
-
     public static int clamp(final int value) {
         return CLAMP_VALUE & value;
+    }
+
+    public static short clampToShort(final int value) {
+        return (short) clamp(value);
     }
 
     public static boolean isInInterval(final int value, final int min, final int maxInclusive) {

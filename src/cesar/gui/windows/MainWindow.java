@@ -1,19 +1,38 @@
 package cesar.gui.windows;
 
-import cesar.gui.panels.MenuBar;
-import cesar.gui.panels.*;
-import cesar.hardware.Cpu;
+import static cesar.Properties.getProperty;
 
-import javax.swing.*;
 import java.awt.Dialog.ModalExclusionType;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-import static cesar.Properties.getProperty;
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.WindowConstants;
+
+import cesar.gui.panels.ButtonPanel;
+import cesar.gui.panels.ConditionPanel;
+import cesar.gui.panels.ExecutionPanel;
+import cesar.gui.panels.InstructionPanel;
+import cesar.gui.panels.MainPanel;
+import cesar.gui.panels.MenuBar;
+import cesar.gui.panels.RegisterPanel;
+import cesar.gui.panels.StatusBar;
+import cesar.hardware.Cpu;
 
 public class MainWindow extends JFrame {
+    private final class MainWindowComponentAdapter extends ComponentAdapter {
+        @Override
+        public void componentMoved(final ComponentEvent event) {
+            updateSubWindowsPositions();
+        }
+    }
+
     public static final long serialVersionUID = -4182598865843186332L;
+
     private static final int WINDOW_GAP;
 
     static {
@@ -26,7 +45,6 @@ public class MainWindow extends JFrame {
         }
         WINDOW_GAP = gap;
     }
-
     private final int windowWidth;
     private final int windowHeight;
     private final Cpu cpu;
@@ -38,6 +56,7 @@ public class MainWindow extends JFrame {
     private final ConditionPanel conditionPanel;
     private final InstructionPanel instructionPanel;
     private final ButtonPanel buttonPanel;
+
     private final StatusBar statusBar;
 
     public MainWindow() {
@@ -135,13 +154,5 @@ public class MainWindow extends JFrame {
 
     public TextWindow getTextWindow() {
         return textWindow;
-    }
-
-
-    private final class MainWindowComponentAdapter extends ComponentAdapter {
-        @Override
-        public void componentMoved(final ComponentEvent event) {
-            updateSubWindowsPositions();
-        }
     }
 }

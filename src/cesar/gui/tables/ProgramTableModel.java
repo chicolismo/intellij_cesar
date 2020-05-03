@@ -14,9 +14,17 @@ public class ProgramTableModel extends TableModel {
         setProgramCounterRow(0);
     }
 
+    private String getProgramCounterRowAsString(final int row) {
+        return row == getProgramCounterRow() ? ARROW : "";
+    }
+
     @Override
     public String getAddressAsString(final int row) {
         return (String) getValueAt(row, 1);
+    }
+
+    public int getProgramCounterRow() {
+        return programCounterRow;
     }
 
     @Override
@@ -37,14 +45,6 @@ public class ProgramTableModel extends TableModel {
             default:
                 return getMnemonic(row);
         }
-    }
-
-    private String getProgramCounterRowAsString(final int row) {
-        return row == getProgramCounterRow() ? ARROW : "";
-    }
-
-    public int getProgramCounterRow() {
-        return programCounterRow;
     }
 
     public void setProgramCounterRow(final int programCounter) {
