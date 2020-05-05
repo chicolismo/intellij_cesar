@@ -7,8 +7,9 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import cesar.gui.windows.MainWindow;
+import cesar.controllers.ApplicationController;
 import cesar.utils.Defaults;
+import cesar.views.windows.MainWindow;
 
 public class Main {
     public static void main(final String[] args) {

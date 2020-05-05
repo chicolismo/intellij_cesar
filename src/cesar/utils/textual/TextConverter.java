@@ -7,8 +7,8 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import cesar.hardware.Cpu;
-import cesar.utils.Base;
+import cesar.models.Base;
+import cesar.models.Cpu;
 
 /**
  * Converte o conteúdo da memória do CPU em um arquivo de texto.

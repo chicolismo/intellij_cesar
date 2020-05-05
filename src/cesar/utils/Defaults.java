@@ -8,7 +8,7 @@ import javax.swing.JLabel;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
-import cesar.Properties;
+import cesar.models.Base;
 
 public class Defaults {
     public static final Font PANEL_FONT;

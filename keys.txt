@@ -2,8 +2,8 @@ R0.label
 FileLoader.endAddressMessage
 EditMenu.tooltip
 EditMenu.hexadecimalTooltip
-ExecMenu.enableInterruptionCounterLabel
 ExecMenu.zeroInterruptionCounterTooltip
+ExecMenu.enableInterruptionCounterLabel
 ExecMenu.nextLabel
 FileLoader.startAddressMessage
 DataWindow.title
@@ -22,9 +22,10 @@ SaveText.dataRegionStartAddressText
 ProgramWindow.pcArrowWinColor
 ExecMenu.nextTooltip
 SaveText.dataRegionStartAddressErrorMessage
+BinaryDisplay.miniLed0ImagePath
 FileLoader.fileFilterExtensions
-ViewMenu.displayLabel
 ExecMenu.zeroInterruptionCounterLabel
+ViewMenu.displayLabel
 FileMenu.saveTextTooltip
 ZeroMemory.endMessage
 SaveText.programRegionEndAddressErrorMessage
@@ -32,8 +33,8 @@ ZeroMemory.title
 MainWindow.windowGap
 FileMenu.saveTextLabel
 ProgramWindow.BreakPoint.text
-ProgramWindow.pcArrowMacColor
 ExecMenu.enableCompatibilityModeTooltip
+ProgramWindow.pcArrowMacColor
 R1.newValueTitle
 FileLoader.fileFilterDescription
 Goto.title
@@ -45,18 +46,21 @@ SaveText.cancelButtonText
 ButtonPanel.decimalLabel
 R4.label
 MainWindow.iconPath
+RegisterPanel.alternativeIconPath
 R3.newValueTitle
 ViewMenu.programLabel
-ExecutionPanel.instructionLabel
 FileLoader.partialLoadDialogTitle
+ExecutionPanel.instructionLabel
 R7.newValueTitle
 ExecutionPanel.title
 ViewMenu.dataLabel
 R3.newValueMessage
+LedDisplay.lightOffImagePath
 R3.label
 ExecMenu.changeProgramCounterTooltip
 Memory.invalidPositionErrorFormat
 EditMenu.hexadecimalLabel
+DigitalDisplay.imagePathFormat
 SaveText.programRegionTitle
 FileSaver.fileFilterExtensions
 ExecMenu.label
@@ -89,6 +93,7 @@ SaveText.dataRegionEndAddressText
 ExecMenu.zeroProgramCounterTooltip
 ExecMenu.runLabel
 R2.newValueTitle
+RegisterPanel.computerIconPath
 SaveText.programRegionStartAddressErrorMessage
 FileMenu.exitLabel
 ExecMenu.runTooltip
@@ -96,8 +101,10 @@ EditMenu.zeroMemoryTooltip
 R1.newValueMessage
 ExecMenu.enableInterruptionCounterTooltip
 EditMenu.decimalTooltip
+LedDisplay.lightOnImagePath
 R0.newValueTitle
 R7.newValueMessage
+TextDisplay.characterFormat
 R7.label
 R4.newValueTitle
 SaveText.programRegionStartAddressText
@@ -108,6 +115,7 @@ HelpMenu.aboutLabel
 ExecMenu.updateRegistersTooltip
 R1.label
 SaveText.dataRegionTitle
+BinaryDisplay.miniLed1ImagePath
 R0.newValueMessage
 HelpMenu.label
 ExecMenu.enableCompatibilityModeLabel
@@ -123,4 +131,5 @@ Goto.message
 R6.label
 EditMenu.copyMemoryTooltip
 EditMenu.decimalLabel
+DigitalDisplay.nullImagePath
 ViewMenu.dataTooltip

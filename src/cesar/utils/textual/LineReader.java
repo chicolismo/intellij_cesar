@@ -3,7 +3,7 @@ package cesar.utils.textual;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import cesar.hardware.Cpu;
+import cesar.models.Cpu;
 
 public class LineReader {
 
