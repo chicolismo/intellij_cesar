@@ -3,15 +3,11 @@ package cesar.models;
 import cesar.utils.Shorts;
 
 class ConditionRegister {
-    enum CarryOperation {
-        PLUS, MINUS
-    }
-
     private boolean negative;
+
     private boolean zero;
     private boolean carry;
     private boolean overflow;
-
     private int bits;
 
     public ConditionRegister() {
@@ -100,5 +96,9 @@ class ConditionRegister {
 
     public void testZero(final short value) {
         setZero(value == 0);
+    }
+
+    enum CarryOperation {
+        PLUS, MINUS
     }
 }

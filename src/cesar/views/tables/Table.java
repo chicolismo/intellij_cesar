@@ -21,7 +21,7 @@ public abstract class Table extends JTable {
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setShowGrid(false);
         setShowVerticalLines(true);
-        setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
         getTableHeader().setReorderingAllowed(false);
         rowHeight = getRowHeight();
         initColumnWidths();

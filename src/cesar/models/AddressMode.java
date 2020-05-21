@@ -8,10 +8,9 @@ public enum AddressMode {
 
     private static final AddressMode[] ARRAY = AddressMode.values();
 
-    private static final EnumMap<AddressMode, String> FORMAT;
+    private static final EnumMap<AddressMode, String> FORMAT = new EnumMap<>(AddressMode.class);
 
     static {
-        FORMAT = new EnumMap<>(AddressMode.class);
         FORMAT.put(REGISTER, "R%d");
         FORMAT.put(REGISTER_POST_INCREMENTED, "(R%d)+");
         FORMAT.put(REGISTER_PRE_DECREMENTED, "-(R%d)");

@@ -15,17 +15,19 @@ import cesar.utils.Defaults;
 public class InstructionPanel extends JPanel {
     private static final long serialVersionUID = -7005281883928099202L;
 
+    private static final int ROW_HEIGHT = 24;
+
     final private JLabel riText;
     final private JLabel mnemonicText;
 
     public InstructionPanel() {
-        riText = new JLabel(" ");
-        mnemonicText = new JLabel(" ");
+        riText = new JLabel();
+        mnemonicText = new JLabel();
 
         riText.setMinimumSize(riText.getPreferredSize());
         mnemonicText.setMinimumSize(mnemonicText.getPreferredSize());
 
-        final Border border = new CompoundBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED),
+        final Border border = BorderFactory.createCompoundBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED),
                 BorderFactory.createEmptyBorder(1, 1, 1, 1));
 
         riText.setBorder(border);
@@ -40,8 +42,7 @@ public class InstructionPanel extends JPanel {
         final JLabel mnemonicLabel = Defaults.createLabel("Mnem: ");
 
         final GridBagLayout grid = new GridBagLayout();
-        grid.rowHeights = new int[] { 24, 24 };
-        // grid.columnWidths = new int[] { 0, 0 };
+        grid.rowHeights = new int[] { ROW_HEIGHT, ROW_HEIGHT };
         grid.rowWeights = new double[] { 0.0, 0.0 };
         grid.columnWeights = new double[] { 0.0, 1.0 };
         setLayout(grid);

@@ -23,56 +23,12 @@ import cesar.utils.Defaults;
 import cesar.utils.FileUtils;
 
 public class FileLoader {
-    private static class AddressDialog {
-        private final String message;
-        private final String initialValue;
-
-        public AddressDialog(final String message, final String initialValue) {
-            this.message = message;
-            this.initialValue = initialValue;
-        }
-
-        public String showDialog(final JFrame parent) {
-            return (String) JOptionPane.showInputDialog(parent, message, PARTIAL_LOAD_DIALOG_TITLE,
-                    JOptionPane.PLAIN_MESSAGE, null, null, initialValue);
-        }
-    }
-
-    private static class CesarFileFilter extends FileFilter {
-        @Override
-        public boolean accept(final File file) {
-            boolean result = false;
-            if (file != null) {
-                if (file.isDirectory()) {
-                    result = true;
-                }
-                else {
-                    final String extension = FileUtils.getExtension(file.getName());
-                    // Apenas arquivos com a extensão ".mem" e o tamanho de 64kb são exibidos no
-                    // diálogo.
-                    result = VALID_EXTENSIONS.contains(extension) && CESAR_FILE_SIZE == (int) file.length();
-                }
-            }
-            return result;
-        }
-
-        @Override
-        public String getDescription() {
-            return FILE_LOAD_DESCRIPTION;
-        }
-    }
-
-    public static class FileLoaderException extends Exception {
-        private static final long serialVersionUID = 6949583264037362079L;
-
-        public FileLoaderException(final String message) {
-            super(message);
-        }
-    }
-
     private static final int CESAR_FILE_SIZE = 0x10004; // 65_540
+
     private static final int BUFFER_SIZE = Cpu.MEMORY_SIZE; // 0x10000 ou 65_536
+
     private static final int MIN_ADDRESS = Cpu.FIRST_ADDRESS;
+
     private static final int MAX_ADDRESS = Cpu.LAST_ADDRESS;
     private static final String WRONG_SIZE_MESSAGE = "Tamanho de arquivo incorreto";
     private static final String PARTIAL_LOAD_DIALOG_TITLE = getProperty("FileLoader.partialLoadDialogTitle");
@@ -80,19 +36,16 @@ public class FileLoader {
     private static final String START_ADDRESS_MESSAGE = getProperty("FileLoader.startAddressMessage");
     private static final String END_ADDRESS_MESSAGE = getProperty("FileLoader.endAddressMessage");
     private static final String TARGET_ADDRESS_MESSAGE = getProperty("FileLoader.targetAddressMessage");
-
     private static final String FILE_LOAD_DESCRIPTION = getProperty("FileLoader.fileFilterDescription");
-
     private static final String FILE_LOAD_EXTENSIONS = getProperty("FileLoader.fileFilterExtensions");
     private static final Set<String> VALID_EXTENSIONS = new HashSet<>();
+
     static {
         VALID_EXTENSIONS.addAll(Arrays.asList(FileUtils.splitExtensions(FILE_LOAD_EXTENSIONS)));
     }
 
     private final JFileChooser fileChooser;
-
     private final JFrame parent;
-
     private Base currentBase;
 
     public FileLoader(final JFrame parent) {
@@ -213,5 +166,52 @@ public class FileLoader {
 
     public void setBase(final Base base) {
         currentBase = base;
+    }
+
+    private static class AddressDialog {
+        private final String message;
+        private final String initialValue;
+
+        public AddressDialog(final String message, final String initialValue) {
+            this.message = message;
+            this.initialValue = initialValue;
+        }
+
+        public String showDialog(final JFrame parent) {
+            return (String) JOptionPane.showInputDialog(parent, message, PARTIAL_LOAD_DIALOG_TITLE,
+                    JOptionPane.PLAIN_MESSAGE, null, null, initialValue);
+        }
+    }
+
+    private static class CesarFileFilter extends FileFilter {
+        @Override
+        public boolean accept(final File file) {
+            boolean result = false;
+            if (file != null) {
+                if (file.isDirectory()) {
+                    result = true;
+                }
+                else {
+                    final String extension = FileUtils.getExtension(file.getName());
+                    // Apenas arquivos com a extensão ".mem" e o tamanho de 64kb são exibidos no
+                    // diálogo.
+                    result = VALID_EXTENSIONS.contains(extension) && CESAR_FILE_SIZE == (int) file.length();
+                }
+            }
+            return result;
+        }
+
+        @Override
+        public String getDescription() {
+            return FILE_LOAD_DESCRIPTION;
+        }
+    }
+
+    public static class FileLoaderException extends Exception {
+        private static final long serialVersionUID = 6949583264037362079L;
+
+        public FileLoaderException(final String message) {
+            super(message);
+        }
     }
 }

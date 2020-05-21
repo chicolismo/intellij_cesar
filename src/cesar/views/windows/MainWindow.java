@@ -24,13 +24,6 @@ import cesar.views.panels.RegisterPanel;
 import cesar.views.panels.StatusBar;
 
 public class MainWindow extends JFrame {
-    private final class MainWindowComponentAdapter extends ComponentAdapter {
-        @Override
-        public void componentMoved(final ComponentEvent event) {
-            updateSubWindowsPositions();
-        }
-    }
-
     public static final long serialVersionUID = -4182598865843186332L;
 
     private static final int WINDOW_GAP;
@@ -45,6 +38,7 @@ public class MainWindow extends JFrame {
         }
         WINDOW_GAP = gap;
     }
+
     private final int windowWidth;
     private final int windowHeight;
     private final Cpu cpu;
@@ -56,7 +50,6 @@ public class MainWindow extends JFrame {
     private final ConditionPanel conditionPanel;
     private final InstructionPanel instructionPanel;
     private final ButtonPanel buttonPanel;
-
     private final StatusBar statusBar;
 
     public MainWindow() {
@@ -154,5 +147,12 @@ public class MainWindow extends JFrame {
 
     public TextWindow getTextWindow() {
         return textWindow;
+    }
+
+    private final class MainWindowComponentAdapter extends ComponentAdapter {
+        @Override
+        public void componentMoved(final ComponentEvent event) {
+            updateSubWindowsPositions();
+        }
     }
 }

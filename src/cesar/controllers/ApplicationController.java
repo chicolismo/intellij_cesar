@@ -59,123 +59,14 @@ import cesar.views.windows.SideWindow;
 import cesar.views.windows.TextWindow;
 
 public final class ApplicationController {
-    private static class CheckBoxMenuItemComponentAdapter implements ActionListener {
-        private final JDialog sideWindow;
-        private final JCheckBoxMenuItem checkBox;
-
-        public CheckBoxMenuItemComponentAdapter(final JDialog sideWindow, final JCheckBoxMenuItem checkBox) {
-            this.sideWindow = sideWindow;
-            this.checkBox = checkBox;
-        }
-
-        @Override
-        public void actionPerformed(final ActionEvent actionEvent) {
-            sideWindow.setVisible(checkBox.getState());
-        }
-    }
-
-    private static class SideWindowComponentAdapter extends ComponentAdapter {
-        private final JCheckBoxMenuItem checkBox;
-
-        public SideWindowComponentAdapter(final JCheckBoxMenuItem checkBox) {
-            this.checkBox = checkBox;
-        }
-
-        @Override
-        public void componentHidden(final ComponentEvent event) {
-            super.componentHidden(event);
-            checkBox.setState(false);
-        }
-    }
-
-    private static class TableMouseAdapter extends MouseAdapter {
-        private final Table table;
-        private final SideWindow<?, ?> sideWindow;
-
-        public TableMouseAdapter(final Table table, final SideWindow<?, ?> sideWindow) {
-            this.table = table;
-            this.sideWindow = sideWindow;
-        }
-
-        @Override
-        public void mouseReleased(final MouseEvent event) {
-            if (table.getSelectedRow() >= 0) {
-                sideWindow.clickOnRow(table.getSelectedRow());
-            }
-        }
-    }
-
-    private class ValueFieldActionListener implements ActionListener {
-        private final SideWindow<?, ?> sideWindow;
-        private final Table table;
-        private final TableModel tableModel;
-
-        public ValueFieldActionListener(final SideWindow<?, ?> sideWindow) {
-            this.sideWindow = sideWindow;
-            table = sideWindow.getTable();
-            tableModel = (TableModel) table.getModel();
-        }
-
-        @Override
-        public void actionPerformed(final ActionEvent actionEvent) {
-            final JTextField valueField = (JTextField) actionEvent.getSource();
-            final int radix = currentBase.toInt();
-            final String value = valueField.getText();
-            try {
-                final int newValue = Integer.parseInt(value, radix);
-                if (Bytes.isValidByte(newValue)) {
-                    sideWindow.setCurrentValue(newValue);
-                    int address = sideWindow.getCurrentAddress();
-                    cpu.setByte(address, Bytes.fromInt(newValue));
-                    dataTableModel.fireTableDataChanged();
-                    programTableModel.fireTableDataChanged();
-                    if (Cpu.isIOAddress(address)) {
-                        textWindow.getDisplay().repaint();
-                    }
-                    // Seleciona a próxima linha
-                    address = clamp(address + 1);
-                    table.setRowSelectionInterval(address, address);
-                    valueField.setText(tableModel.getValueAsString(address));
-                    table.scrollToRow(address);
-                    valueField.requestFocus();
-                    valueField.selectAll();
-                    sideWindow.setCurrentAddress(address);
-                }
-            }
-            catch (final NumberFormatException ignored) {
-            }
-        }
-    }
-
-    private static class ValueFieldKeyAdapter extends KeyAdapter {
-        private final SideWindow<?, ?> sideWindow;
-
-        public ValueFieldKeyAdapter(final SideWindow<?, ?> sideWindow) {
-            this.sideWindow = sideWindow;
-        }
-
-        @Override
-        public void keyPressed(final KeyEvent event) {
-            // TODO: Testar se o valor atual é inserido na tabela quando uma seta é
-            // apertada.
-
-            final int keyCode = event.getKeyCode();
-            if (keyCode == KeyEvent.VK_UP) {
-                sideWindow.clickOnRow(Math.max(Cpu.FIRST_ADDRESS, sideWindow.getCurrentAddress() - 1));
-            }
-            else if (keyCode == KeyEvent.VK_DOWN) {
-                sideWindow.clickOnRow(Math.min(Cpu.LAST_ADDRESS, sideWindow.getCurrentAddress() + 1));
-            }
-            else {
-                super.keyReleased(event);
-            }
-        }
-    }
-
     private static final String INVALID_MEMORY_POSITION_ERROR_FORMAT = getProperty("Memory.invalidPositionErrorFormat");
+
     private final MainWindow window;
+
     private final Cpu cpu;
+
     private final FileLoader fileLoader;
+
     private final FileSaver fileSaver;
 
     private final SaveTextDialog saveTextDialog;
@@ -183,33 +74,29 @@ public final class ApplicationController {
     private final ZeroMemoryDialog zeroMemoryDialog;
     private final RegisterPanel registerPanel;
     private final ConditionPanel conditionPanel;
-    private final ExecutionPanel executionPanel;
 
+    private final ExecutionPanel executionPanel;
     private final InstructionPanel instructionPanel;
     private final JToggleButton decimalButton;
     private final JToggleButton hexadecimalButton;
-
     private final JToggleButton runButton;
     private final JButton nextButton;
-    private final MenuBar menuBar;
 
+    private final MenuBar menuBar;
     private final StatusBar statusBar;
     private final ProgramWindow programWindow;
 
     private final ProgramTable programTable;
-
     private final ProgramTableModel programTableModel;
     private final DataWindow dataWindow;
-    private final DataTable dataTable;
 
+    private final DataTable dataTable;
     private final DataTableModel dataTableModel;
 
     private final TextWindow textWindow;
 
     private Base currentBase;
-
     private int instructionCount = 0;
-
     private boolean running;
 
     public ApplicationController(final MainWindow window) {
@@ -269,6 +156,7 @@ public final class ApplicationController {
 
             case HALT:
             case BREAK_POINT:
+            case END_OF_MEMORY:
                 if (isRunning() && runButton.isSelected()) {
                     runButton.doClick();
                 }
@@ -318,7 +206,7 @@ public final class ApplicationController {
         return running;
     }
 
-    private synchronized boolean isUpdateRegistersEnabled() {
+    private boolean isUpdateRegistersEnabled() {
         return menuBar.execUpdateRegisters.getState();
     }
 
@@ -649,7 +537,7 @@ public final class ApplicationController {
         running = false;
     }
 
-    private synchronized void updateAfterInstruction() {
+    private void updateAfterInstruction() {
         updateDisplays();
         if (cpu.hasMemoryChanged()) {
             final int start = cpu.getLastChangedAddress();
@@ -661,7 +549,7 @@ public final class ApplicationController {
         updateProgramCounterRow();
     }
 
-    private synchronized void updateDisplays() {
+    private void updateDisplays() {
         for (int i = 0; i < Cpu.REGISTER_COUNT; ++i) {
             registerPanel.getDisplay(i).setValue(cpu.getRegisterValue(i));
         }
@@ -675,7 +563,7 @@ public final class ApplicationController {
         instructionPanel.setMnemonicText(cpu.getReadMnemonic());
     }
 
-    private synchronized void updateInterface() {
+    private void updateInterface() {
         updateDisplays();
         updateProgramCounterRow();
         window.repaint();
@@ -685,7 +573,7 @@ public final class ApplicationController {
         dataWindow.repaint();
     }
 
-    private synchronized void updateProgramCounterRow() {
+    private void updateProgramCounterRow() {
         final int programCounter = cpu.getProgramCounter();
         programTableModel.setProgramCounterRow(programCounter);
         programTable.setRowSelectionInterval(programCounter, programCounter);
@@ -744,5 +632,117 @@ public final class ApplicationController {
         dataTable.scrollToRow(Cpu.DATA_START_ADDRESS, true);
         textWindow.setVisible(true);
         window.requestFocus();
+    }
+
+    private static class CheckBoxMenuItemComponentAdapter implements ActionListener {
+        private final JDialog sideWindow;
+        private final JCheckBoxMenuItem checkBox;
+
+        public CheckBoxMenuItemComponentAdapter(final JDialog sideWindow, final JCheckBoxMenuItem checkBox) {
+            this.sideWindow = sideWindow;
+            this.checkBox = checkBox;
+        }
+
+        @Override
+        public void actionPerformed(final ActionEvent actionEvent) {
+            sideWindow.setVisible(checkBox.getState());
+        }
+    }
+
+    private static class SideWindowComponentAdapter extends ComponentAdapter {
+        private final JCheckBoxMenuItem checkBox;
+
+        public SideWindowComponentAdapter(final JCheckBoxMenuItem checkBox) {
+            this.checkBox = checkBox;
+        }
+
+        @Override
+        public void componentHidden(final ComponentEvent event) {
+            super.componentHidden(event);
+            checkBox.setState(false);
+        }
+    }
+
+    private static class TableMouseAdapter extends MouseAdapter {
+        private final Table table;
+        private final SideWindow<?, ?> sideWindow;
+
+        public TableMouseAdapter(final Table table, final SideWindow<?, ?> sideWindow) {
+            this.table = table;
+            this.sideWindow = sideWindow;
+        }
+
+        @Override
+        public void mouseReleased(final MouseEvent event) {
+            if (table.getSelectedRow() >= 0) {
+                sideWindow.clickOnRow(table.getSelectedRow());
+            }
+        }
+    }
+
+    private class ValueFieldActionListener implements ActionListener {
+        private final SideWindow<?, ?> sideWindow;
+        private final Table table;
+        private final TableModel tableModel;
+
+        public ValueFieldActionListener(final SideWindow<?, ?> sideWindow) {
+            this.sideWindow = sideWindow;
+            table = sideWindow.getTable();
+            tableModel = (TableModel) table.getModel();
+        }
+
+        @Override
+        public void actionPerformed(final ActionEvent actionEvent) {
+            final JTextField valueField = (JTextField) actionEvent.getSource();
+            final int radix = currentBase.toInt();
+            final String value = valueField.getText();
+            try {
+                final int newValue = Integer.parseInt(value, radix);
+                if (Bytes.isValidByte(newValue)) {
+                    sideWindow.setCurrentValue(newValue);
+                    int address = sideWindow.getCurrentAddress();
+                    cpu.setByte(address, Bytes.fromInt(newValue));
+                    dataTableModel.fireTableDataChanged();
+                    programTableModel.fireTableDataChanged();
+                    if (Cpu.isIOAddress(address)) {
+                        textWindow.getDisplay().repaint();
+                    }
+                    // Seleciona a próxima linha
+                    address = clamp(address + 1);
+                    table.setRowSelectionInterval(address, address);
+                    valueField.setText(tableModel.getValueAsString(address));
+                    table.scrollToRow(address);
+                    valueField.requestFocus();
+                    valueField.selectAll();
+                    sideWindow.setCurrentAddress(address);
+                }
+            }
+            catch (final NumberFormatException ignored) {
+            }
+        }
+    }
+
+    private static class ValueFieldKeyAdapter extends KeyAdapter {
+        private final SideWindow<?, ?> sideWindow;
+
+        public ValueFieldKeyAdapter(final SideWindow<?, ?> sideWindow) {
+            this.sideWindow = sideWindow;
+        }
+
+        @Override
+        public void keyPressed(final KeyEvent event) {
+            // TODO: Testar se o valor atual é inserido na tabela quando uma seta é apertada.
+
+            final int keyCode = event.getKeyCode();
+            if (keyCode == KeyEvent.VK_UP) {
+                sideWindow.clickOnRow(Math.max(Cpu.FIRST_ADDRESS, sideWindow.getCurrentAddress() - 1));
+            }
+            else if (keyCode == KeyEvent.VK_DOWN) {
+                sideWindow.clickOnRow(Math.min(Cpu.LAST_ADDRESS, sideWindow.getCurrentAddress() + 1));
+            }
+            else {
+                super.keyReleased(event);
+            }
+        }
     }
 }

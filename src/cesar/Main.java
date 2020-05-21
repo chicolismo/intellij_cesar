@@ -22,6 +22,7 @@ public class Main {
             else {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             }
+            // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             // for (final LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
             // if ("CDE/Motif".equals(info.getName())) {
             // UIManager.setLookAndFeel(info.getClassName());

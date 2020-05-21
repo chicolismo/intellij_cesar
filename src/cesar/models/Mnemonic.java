@@ -114,6 +114,10 @@ public class Mnemonic {
                         final int ddd = Shorts.toUnsignedInt(Shorts.fromBytes(msb, lsb));
                         mnemonic = String.format(format, register, addressMode.asString(ddd, rrr));
                     }
+                    else if (addressMode.isPostIncremented()) {
+                        mnemonic = String.format(format, register, addressMode.asString(rrr));
+                        rowIncrement += WORD_INCREMENT;
+                    }
                     else {
                         mnemonic = String.format(format, register, addressMode.asString(rrr));
                     }
@@ -153,6 +157,10 @@ public class Mnemonic {
                         rowIncrement += WORD_INCREMENT;
                         final int ddd = Shorts.toUnsignedInt(Shorts.fromBytes(msb, lsb));
                         mnemonic = String.format(format, addressMode.asString(ddd, rrr));
+                    }
+                    else if (addressMode.isPostIncremented()) {
+                        mnemonic = String.format(format, addressMode.asString(rrr));
+                        rowIncrement += WORD_INCREMENT;
                     }
                     else {
                         mnemonic = String.format(format, addressMode.asString(rrr));

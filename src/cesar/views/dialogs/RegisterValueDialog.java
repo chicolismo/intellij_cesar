@@ -7,14 +7,6 @@ import cesar.utils.Shorts;
 import cesar.views.displays.RegisterDisplay;
 
 public class RegisterValueDialog {
-    public static class RegisterValueDialogException extends Exception {
-        private static final long serialVersionUID = -5688453742853723066L;
-
-        public RegisterValueDialogException(final String message) {
-            super(message);
-        }
-    }
-
     private static final String NEW_REGISTER_VALUE_ERROR_FORMAT = Properties.getProperty("RegisterValue.errorFormat");
 
     public static short showDialog(final RegisterDisplay display, final short registerValue)
@@ -35,6 +27,14 @@ public class RegisterValueDialog {
         }
         catch (final NumberFormatException e) {
             throw new RegisterValueDialogException(String.format(NEW_REGISTER_VALUE_ERROR_FORMAT, input));
+        }
+    }
+
+    public static class RegisterValueDialogException extends Exception {
+        private static final long serialVersionUID = -5688453742853723066L;
+
+        public RegisterValueDialogException(final String message) {
+            super(message);
         }
     }
 }
