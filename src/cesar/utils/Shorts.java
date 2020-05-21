@@ -13,7 +13,7 @@ public class Shorts {
     }
 
     public static boolean isValidShort(final int value) {
-        return value >= Short.MIN_VALUE && value <= 0xFFFF;
+        return Integers.isInInterval(value, Short.MIN_VALUE, 0xFFFF);
     }
 
     public static byte[] toBytes(final short value) {

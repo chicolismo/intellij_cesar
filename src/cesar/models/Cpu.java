@@ -466,10 +466,6 @@ public class Cpu {
         writeWord(Shorts.toUnsignedInt(registers[SP]), word);
     }
 
-    private void updateMnemonics() {
-        Mnemonic.updateMnemonics(this, 0, true);
-    }
-
     private void writeByte(final int address, final byte value) {
         ++memoryAccessCount;
         memory[clamp(address)] = value;
@@ -485,6 +481,13 @@ public class Cpu {
             writeByte(address + 1, bytes[1]);
         }
         lastChangedMnemonic = Mnemonic.updateMnemonics(this, address);
+    }
+
+    public void copyMemory(final int startAddress, final int endAddress, final int dstAddress) {
+        for (int i = startAddress, j = dstAddress; i <= endAddress && j <= Cpu.LAST_ADDRESS; ++i, ++j) {
+            setByte(j, getByte(i));
+        }
+        updateMnemonics();
     }
 
     public ExecutionResult executeNextInstruction() {
@@ -728,6 +731,10 @@ public class Cpu {
             memoryChanged = true;
             lastChangedAddress = LAST_CHAR_ADDRESS;
         }
+    }
+
+    public void updateMnemonics() {
+        Mnemonic.updateMnemonics(this, 0, true);
     }
 
     public void zeroMemory(final int startAddress, final int endAddress) {

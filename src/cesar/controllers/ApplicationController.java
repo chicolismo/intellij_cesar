@@ -29,6 +29,7 @@ import cesar.models.Cpu.ExecutionResult;
 import cesar.utils.Bytes;
 import cesar.utils.Defaults;
 import cesar.utils.Shorts;
+import cesar.views.dialogs.CopyMemoryDialog;
 import cesar.views.dialogs.GotoDialog;
 import cesar.views.dialogs.RegisterValueDialog;
 import cesar.views.dialogs.RegisterValueDialog.RegisterValueDialogException;
@@ -72,6 +73,7 @@ public final class ApplicationController {
     private final SaveTextDialog saveTextDialog;
     private final GotoDialog gotoDialog;
     private final ZeroMemoryDialog zeroMemoryDialog;
+    private final CopyMemoryDialog copyMemoryDialog;
     private final RegisterPanel registerPanel;
     private final ConditionPanel conditionPanel;
 
@@ -110,6 +112,7 @@ public final class ApplicationController {
         saveTextDialog = new SaveTextDialog(window, cpu);
         gotoDialog = new GotoDialog(window);
         zeroMemoryDialog = new ZeroMemoryDialog(window, Cpu.FIRST_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
+        copyMemoryDialog = new CopyMemoryDialog(window);
 
         programWindow = window.getProgramWindow();
         programTable = programWindow.getTable();
@@ -138,7 +141,11 @@ public final class ApplicationController {
 
     @SuppressWarnings("EmptyMethod")
     private void copyMemory() {
-        // TODO: Implementar
+        if (copyMemoryDialog.showCopyDialog(currentBase)) {
+            cpu.copyMemory(copyMemoryDialog.getStartAddress(), copyMemoryDialog.getEndAddress(),
+                    copyMemoryDialog.getDstAddress());
+            updateInterface();
+        }
     }
 
     private synchronized void executeNextInstruction() {
@@ -702,6 +709,7 @@ public final class ApplicationController {
                     sideWindow.setCurrentValue(newValue);
                     int address = sideWindow.getCurrentAddress();
                     cpu.setByte(address, Bytes.fromInt(newValue));
+                    cpu.updateMnemonics();
                     dataTableModel.fireTableDataChanged();
                     programTableModel.fireTableDataChanged();
                     if (Cpu.isIOAddress(address)) {
