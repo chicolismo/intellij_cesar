@@ -32,6 +32,7 @@ public class InstructionPanel extends JPanel {
         mnemonicText.setBorder(border);
 
         initLayout();
+        setSize(getPreferredSize());
     }
 
     private void initLayout() {
@@ -39,8 +40,8 @@ public class InstructionPanel extends JPanel {
         final JLabel mnemonicLabel = Defaults.createLabel("Mnem: ");
 
         final GridBagLayout grid = new GridBagLayout();
-        grid.rowHeights = new int[] { 0, 0 };
-        grid.columnWidths = new int[] { 0, 0 };
+        grid.rowHeights = new int[] { 24, 24 };
+        // grid.columnWidths = new int[] { 0, 0 };
         grid.rowWeights = new double[] { 0.0, 0.0 };
         grid.columnWeights = new double[] { 0.0, 1.0 };
         setLayout(grid);

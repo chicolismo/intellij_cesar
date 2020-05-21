@@ -1,9 +1,8 @@
 package cesar.views.windows;
 
-import java.awt.Dialog.ModalExclusionType;
-
 import static cesar.utils.Properties.getProperty;
 
+import java.awt.Dialog.ModalExclusionType;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Toolkit;

@@ -31,9 +31,9 @@ import cesar.utils.Defaults;
 import cesar.utils.Shorts;
 import cesar.views.dialogs.GotoDialog;
 import cesar.views.dialogs.RegisterValueDialog;
+import cesar.views.dialogs.RegisterValueDialog.RegisterValueDialogException;
 import cesar.views.dialogs.SaveTextDialog;
 import cesar.views.dialogs.ZeroMemoryDialog;
-import cesar.views.dialogs.RegisterValueDialog.RegisterValueDialogException;
 import cesar.views.displays.RegisterDisplay;
 import cesar.views.panels.ButtonPanel;
 import cesar.views.panels.ConditionPanel;
@@ -50,8 +50,8 @@ import cesar.views.tables.Table;
 import cesar.views.tables.TableModel;
 import cesar.views.utils.Components;
 import cesar.views.utils.FileLoader;
-import cesar.views.utils.FileSaver;
 import cesar.views.utils.FileLoader.FileLoaderException;
+import cesar.views.utils.FileSaver;
 import cesar.views.windows.DataWindow;
 import cesar.views.windows.MainWindow;
 import cesar.views.windows.ProgramWindow;
@@ -246,6 +246,7 @@ public final class ApplicationController {
         hexadecimalButton = buttonPanel.getHexadecimalButton();
 
         running = false;
+
     }
 
     @SuppressWarnings("EmptyMethod")
@@ -253,7 +254,7 @@ public final class ApplicationController {
         // TODO: Implementar
     }
 
-    private void executeNextInstruction() {
+    private synchronized void executeNextInstruction() {
         final ExecutionResult result = cpu.executeNextInstruction();
         statusBar.setText(result.toString());
 
@@ -589,6 +590,10 @@ public final class ApplicationController {
         }
     }
 
+    private synchronized void setRunning(final boolean value) {
+        running = value;
+    }
+
     @SuppressWarnings("ObjectAllocationInLoop")
     private void setSideWindowEvents() {
         programTable.addMouseListener(new TableMouseAdapter(programTable, programWindow));
@@ -627,7 +632,7 @@ public final class ApplicationController {
     }
 
     private synchronized void startRunning() {
-        running = true;
+        setRunning(true);
         final Thread runningThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -644,7 +649,7 @@ public final class ApplicationController {
         running = false;
     }
 
-    private void updateAfterInstruction() {
+    private synchronized void updateAfterInstruction() {
         updateDisplays();
         if (cpu.hasMemoryChanged()) {
             final int start = cpu.getLastChangedAddress();
@@ -656,7 +661,7 @@ public final class ApplicationController {
         updateProgramCounterRow();
     }
 
-    private void updateDisplays() {
+    private synchronized void updateDisplays() {
         for (int i = 0; i < Cpu.REGISTER_COUNT; ++i) {
             registerPanel.getDisplay(i).setValue(cpu.getRegisterValue(i));
         }
@@ -670,7 +675,7 @@ public final class ApplicationController {
         instructionPanel.setMnemonicText(cpu.getReadMnemonic());
     }
 
-    private void updateInterface() {
+    private synchronized void updateInterface() {
         updateDisplays();
         updateProgramCounterRow();
         window.repaint();
@@ -680,7 +685,7 @@ public final class ApplicationController {
         dataWindow.repaint();
     }
 
-    private void updateProgramCounterRow() {
+    private synchronized void updateProgramCounterRow() {
         final int programCounter = cpu.getProgramCounter();
         programTableModel.setProgramCounterRow(programCounter);
         programTable.setRowSelectionInterval(programCounter, programCounter);

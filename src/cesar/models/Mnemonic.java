@@ -74,8 +74,8 @@ public class Mnemonic {
                 case JMP: {
                     final byte nextByte = cpu.getByte(currentRow + rowIncrement);
                     ++rowIncrement;
-                    final int mmm = (nextByte & 0b00111000) >> 3;
-                    final int rrr = nextByte & 0b00000111;
+                    final int mmm = (nextByte & 0b0011_1000) >> 3;
+                    final int rrr = nextByte & 0b0000_0111;
                     final AddressMode addressMode = AddressMode.fromInt(mmm);
                     if (addressMode.isIndexed()) {
                         final byte msb = cpu.getByte(currentRow + rowIncrement);
@@ -83,6 +83,10 @@ public class Mnemonic {
                         rowIncrement += WORD_INCREMENT;
                         final int ddd = Shorts.toUnsignedInt(Shorts.fromBytes(msb, lsb));
                         mnemonic = String.format(format, addressMode.asString(ddd, rrr));
+                    }
+                    else if (addressMode.isPostIncremented()) {
+                        mnemonic = String.format(format, addressMode.asString(rrr));
+                        rowIncrement += WORD_INCREMENT;
                     }
                     else {
                         mnemonic = String.format(format, addressMode.asString(rrr));

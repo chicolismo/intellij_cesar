@@ -239,7 +239,7 @@ public class Cpu {
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.testOverflow(value, (short) -1, result);
-                conditionRegister.setCarry(!(((0xFFFF & value) - 1 & carryBit) == carryBit));
+                conditionRegister.setCarry(((0xFFFF & value) - 1 & carryBit) != carryBit);
                 break;
 
             case NEG:
@@ -247,7 +247,7 @@ public class Cpu {
                 conditionRegister.testNegative(result);
                 conditionRegister.testZero(result);
                 conditionRegister.setOverflow(MEMORY_SIZE / 2 == (0xFFFF & value));
-                conditionRegister.setCarry(!(((0xFFFF & ~value) + 1 & carryBit) == carryBit));
+                conditionRegister.setCarry(((0xFFFF & ~value) + 1 & carryBit) != carryBit);
                 break;
 
             case TST:
@@ -377,6 +377,7 @@ public class Cpu {
                 conditionRegister.testZero(result);
                 conditionRegister.testOverflow(src, dst, result);
                 conditionRegister.testCarry(src, dst, ConditionRegister.CarryOperation.MINUS);
+                result = dst;
                 break;
 
             case AND:
