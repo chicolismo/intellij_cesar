@@ -1,20 +1,9 @@
 package cesar.controllers;
 
 import static cesar.utils.Integers.clamp;
-import static cesar.utils.Properties.getProperty;
 
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -60,14 +49,10 @@ import cesar.views.windows.SideWindow;
 import cesar.views.windows.TextWindow;
 
 public final class ApplicationController {
-    private static final String INVALID_MEMORY_POSITION_ERROR_FORMAT = getProperty("Memory.invalidPositionErrorFormat");
-
     private final MainWindow window;
-
     private final Cpu cpu;
 
     private final FileLoader fileLoader;
-
     private final FileSaver fileSaver;
 
     private final SaveTextDialog saveTextDialog;
@@ -101,17 +86,18 @@ public final class ApplicationController {
     private int instructionCount = 0;
     private boolean running;
 
-    public ApplicationController(final MainWindow window) {
-        this.window = window;
+    public ApplicationController() {
+        window = new MainWindow();
         cpu = window.getCpu();
         menuBar = (MenuBar) window.getJMenuBar();
         statusBar = window.getStatusBar();
+        currentBase = Defaults.DEFAULT_BASE;
 
         fileLoader = new FileLoader(window);
         fileSaver = new FileSaver(window);
         saveTextDialog = new SaveTextDialog(window, cpu);
         gotoDialog = new GotoDialog(window);
-        zeroMemoryDialog = new ZeroMemoryDialog(window, Cpu.FIRST_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
+        zeroMemoryDialog = new ZeroMemoryDialog(window);
         copyMemoryDialog = new CopyMemoryDialog(window);
 
         programWindow = window.getProgramWindow();
@@ -139,7 +125,6 @@ public final class ApplicationController {
 
     }
 
-    @SuppressWarnings("EmptyMethod")
     private void copyMemory() {
         if (copyMemoryDialog.showCopyDialog(currentBase)) {
             cpu.copyMemory(copyMemoryDialog.getStartAddress(), copyMemoryDialog.getEndAddress(),
@@ -173,7 +158,7 @@ public final class ApplicationController {
 
     private void exitProgram() {
         boolean finished = true;
-        if (cpu.hasMemoryChanged()) {
+        if (cpu.hasOriginalMemoryChanged()) {
             final int choice = JOptionPane.showConfirmDialog(window,
                     "O conteúdo da memória mudou, deseja salvar o arquivo?");
             if (choice == JOptionPane.OK_OPTION) {
@@ -190,22 +175,8 @@ public final class ApplicationController {
     }
 
     private void goTo() {
-        final int radix = currentBase.toInt();
-        final String currentValue = Integer.toString(cpu.getProgramCounter(), radix);
-
-        final String input = gotoDialog.showDialog(currentValue);
-
-        try {
-            final int address = Integer.parseInt(input, radix);
-            if (Cpu.isValidAddress(address)) {
-                programWindow.clickOnRow(address);
-            }
-            else {
-                statusBar.setTempMessage(String.format(INVALID_MEMORY_POSITION_ERROR_FORMAT, input));
-            }
-        }
-        catch (final NumberFormatException event) {
-            statusBar.setTempMessage(String.format(INVALID_MEMORY_POSITION_ERROR_FORMAT, input));
+        if (gotoDialog.showGotoDialog()) {
+            programWindow.clickOnRow(gotoDialog.getAddress());
         }
     }
 
@@ -253,6 +224,7 @@ public final class ApplicationController {
             currentBase = newBase;
             saveTextDialog.setBase(newBase);
             zeroMemoryDialog.setBase(newBase);
+            gotoDialog.setBase(newBase);
             programWindow.setBase(newBase);
             dataWindow.setBase(newBase);
             fileLoader.setBase(newBase);
@@ -277,7 +249,7 @@ public final class ApplicationController {
                     }
                 }
                 else {
-                    stopRunning();
+                    setRunning(false);
                 }
             }
         });
@@ -333,8 +305,8 @@ public final class ApplicationController {
                 menuBar.dispatchEvent(event);
                 cpu.setTypedKey((byte) event.getKeyChar());
                 if (cpu.hasMemoryChanged()) {
-                    programTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
-                    dataTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.LAST_CHAR_ADDRESS);
+                    programTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.KEYBOARD_INPUT_ADDRESS);
+                    dataTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.KEYBOARD_INPUT_ADDRESS);
                 }
                 window.requestFocus();
             }
@@ -348,8 +320,10 @@ public final class ApplicationController {
 
     @SuppressWarnings("ObjectAllocationInLoop")
     private void setMenuEvents() {
-        final Component[][] pairs = new Component[][] { { programWindow, menuBar.viewProgram },
-            { dataWindow, menuBar.viewData }, { textWindow, menuBar.viewDisplay } };
+        final Component[][] pairs = new Component[][] {
+                { programWindow, menuBar.viewProgram }, { dataWindow, menuBar.viewData },
+                { textWindow, menuBar.viewDisplay }
+        };
 
         for (final Component[] pair : pairs) {
             final JDialog sideWindow = (JDialog) pair[0];
@@ -509,6 +483,20 @@ public final class ApplicationController {
                 }
             }
         });
+
+        final ProgramWindow.BreakPointField breakPointField = programWindow.getBreakPointField();
+        breakPointField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent event) {
+                cpu.setBreakPoint(breakPointField.getBreakPoint());
+            }
+        });
+        breakPointField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(final FocusEvent event) {
+                cpu.setBreakPoint(breakPointField.getBreakPoint());
+            }
+        });
     }
 
     private void showNewRegisterValueDialog(final RegisterDisplay registerDisplay) {
@@ -538,10 +526,6 @@ public final class ApplicationController {
             }
         });
         runningThread.start();
-    }
-
-    private synchronized void stopRunning() {
-        running = false;
     }
 
     private void updateAfterInstruction() {
@@ -590,32 +574,9 @@ public final class ApplicationController {
     }
 
     private void zeroMemory() {
-        final int radix = currentBase.toInt();
-        String input = null;
-        try {
-            input = zeroMemoryDialog.showStartAddressDialog();
-            if (input == null) {
-                return;
-            }
-
-            final int startAddress = Integer.parseInt(input, radix);
-            if (!Cpu.isValidAddress(startAddress)) {
-                statusBar.setTempMessage(String.format(INVALID_MEMORY_POSITION_ERROR_FORMAT, input));
-                return;
-            }
-
-            input = zeroMemoryDialog.showEndAddressDialog();
-            final int endAddress = Integer.parseInt(input, radix);
-            if (!Cpu.isValidAddress(endAddress) || endAddress < startAddress) {
-                statusBar.setTempMessage(String.format(INVALID_MEMORY_POSITION_ERROR_FORMAT, input));
-                return;
-            }
-
-            cpu.zeroMemory(startAddress, endAddress);
+        if (zeroMemoryDialog.showZeroMemoryDialog()) {
+            cpu.zeroMemory(zeroMemoryDialog.getStartAddress(), zeroMemoryDialog.getEndAddress());
             updateInterface();
-        }
-        catch (final NumberFormatException event) {
-            statusBar.setTempMessage(String.format(INVALID_MEMORY_POSITION_ERROR_FORMAT, input));
         }
     }
 
@@ -656,6 +617,7 @@ public final class ApplicationController {
         }
     }
 
+
     private static class SideWindowComponentAdapter extends ComponentAdapter {
         private final JCheckBoxMenuItem checkBox;
 
@@ -669,6 +631,7 @@ public final class ApplicationController {
             checkBox.setState(false);
         }
     }
+
 
     private static class TableMouseAdapter extends MouseAdapter {
         private final Table table;
@@ -686,6 +649,7 @@ public final class ApplicationController {
             }
         }
     }
+
 
     private class ValueFieldActionListener implements ActionListener {
         private final SideWindow<?, ?> sideWindow;
@@ -730,6 +694,7 @@ public final class ApplicationController {
         }
     }
 
+
     private static class ValueFieldKeyAdapter extends KeyAdapter {
         private final SideWindow<?, ?> sideWindow;
 
@@ -739,7 +704,7 @@ public final class ApplicationController {
 
         @Override
         public void keyPressed(final KeyEvent event) {
-            // TODO: Testar se o valor atual é inserido na tabela quando uma seta é apertada.
+            // TODO: Verificar se o valor atual é inserido na tabela quando uma seta é apertada.
 
             final int keyCode = event.getKeyCode();
             if (keyCode == KeyEvent.VK_UP) {

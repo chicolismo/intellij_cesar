@@ -5,16 +5,16 @@ import java.util.EnumSet;
 import java.util.HashMap;
 
 @SuppressWarnings("ObjectAllocationInLoop")
-public enum Instruction {
+public enum InstructionString {
     NOP, CCC, SCC, BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS, JMP, SOB, JSR, RTS, RTI,
     CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC, MOV, ADD, SUB, CMP, AND, OR, HLT;
 
-    private static final HashMap<Integer, Instruction> INSTRUCTION_MAP;
-    private static final EnumMap<Instruction, String> FORMAT;
+    private static final HashMap<Integer, InstructionString> INSTRUCTION_MAP;
+    private static final EnumMap<InstructionString, String> FORMAT;
 
-    private static final EnumSet<Instruction> CONDITIONAL_BRANCH_INSTRUCTIONS;
-    private static final EnumSet<Instruction> ONE_OP_INSTRUCTIONS;
-    private static final EnumSet<Instruction> TWO_OP_INSTRUCTIONS;
+    private static final EnumSet<InstructionString> CONDITIONAL_BRANCH_INSTRUCTIONS;
+    private static final EnumSet<InstructionString> ONE_OP_INSTRUCTIONS;
+    private static final EnumSet<InstructionString> TWO_OP_INSTRUCTIONS;
 
     static {
         INSTRUCTION_MAP = new HashMap<>();
@@ -75,12 +75,12 @@ public enum Instruction {
         ONE_OP_INSTRUCTIONS = EnumSet.of(CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC);
         TWO_OP_INSTRUCTIONS = EnumSet.of(MOV, ADD, SUB, CMP, AND, OR);
 
-        FORMAT = new EnumMap<>(Instruction.class);
+        FORMAT = new EnumMap<>(InstructionString.class);
         FORMAT.put(NOP, "NOP");
         FORMAT.put(HLT, "HLT");
         FORMAT.put(CCC, "CCC %s");
         FORMAT.put(SCC, "SCC %s");
-        for (final Instruction instruction : Instruction.CONDITIONAL_BRANCH_INSTRUCTIONS) {
+        for (final InstructionString instruction : InstructionString.CONDITIONAL_BRANCH_INSTRUCTIONS) {
             FORMAT.put(instruction, instruction.toString() + " %d");
         }
         FORMAT.put(JMP, "JMP %s"); // modo
@@ -88,15 +88,15 @@ public enum Instruction {
         FORMAT.put(JSR, "JSR R%d, %s"); // registrador, modo
         FORMAT.put(RTS, "RTS R%d"); // registrador
         FORMAT.put(RTI, "RTI"); //
-        for (final Instruction instruction : Instruction.ONE_OP_INSTRUCTIONS) {
+        for (final InstructionString instruction : InstructionString.ONE_OP_INSTRUCTIONS) {
             FORMAT.put(instruction, instruction.toString() + " %s"); // modo
         }
-        for (final Instruction instruction : Instruction.TWO_OP_INSTRUCTIONS) {
+        for (final InstructionString instruction : InstructionString.TWO_OP_INSTRUCTIONS) {
             FORMAT.put(instruction, instruction.toString() + " %s, %s"); // modo, modo
         }
     }
 
-    public static Instruction getInstruction(final byte opCode) {
+    public static InstructionString getInstruction(final byte opCode) {
         int key = 0xFF & opCode;
         if (INSTRUCTION_MAP.containsKey(key)) {
             return INSTRUCTION_MAP.get(key);

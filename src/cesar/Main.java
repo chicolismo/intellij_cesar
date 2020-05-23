@@ -9,7 +9,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import cesar.controllers.ApplicationController;
 import cesar.utils.Defaults;
-import cesar.views.windows.MainWindow;
 
 public class Main {
     public static void main(final String[] args) {
@@ -30,20 +29,15 @@ public class Main {
             // }
             // }
         }
-        catch (UnsupportedLookAndFeelException | IllegalAccessException | InstantiationException
-                | ClassNotFoundException e) {
+        catch (UnsupportedLookAndFeelException | IllegalAccessException | InstantiationException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                final ToolTipManager ttm = ToolTipManager.sharedInstance();
-                ttm.setInitialDelay(300);
-
-                final MainWindow mainWindow = new MainWindow();
-                final ApplicationController applicationController = new ApplicationController(mainWindow);
-                applicationController.run();
+                ToolTipManager.sharedInstance().setInitialDelay(300);
+                new ApplicationController().run();
             }
         });
     }

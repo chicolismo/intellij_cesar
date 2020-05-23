@@ -3,24 +3,31 @@ package cesar.views.windows;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 
+
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 
+import cesar.models.Base;
 import cesar.models.Cpu;
 import cesar.utils.Properties;
+import cesar.utils.Shorts;
 import cesar.views.tables.ProgramTable;
 import cesar.views.tables.ProgramTableModel;
 
 public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
     public static final long serialVersionUID = 8452878222228144644L;
 
-    private final JTextField bpField;
+    private final BreakPointField bpField;
 
     public ProgramWindow(final MainWindow parent, final Cpu cpu) {
         super(parent, Properties.getProperty("ProgramWindow.title"), cpu);
-        bpField = new JTextField(4);
+        bpField = new BreakPointField(cpu, getCurrentBase());
         bpField.setMinimumSize(bpField.getPreferredSize());
         initLayout();
     }
@@ -87,7 +94,49 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
         table = new ProgramTable(model);
     }
 
-    public JTextField getBreakPointField() {
+    @Override
+    public void setBase(final Base base) {
+        super.setBase(base);
+        bpField.setBase(base);
+    }
+
+    public BreakPointField getBreakPointField() {
         return bpField;
+    }
+
+    public static class BreakPointField extends JTextField {
+        private final Cpu cpu;
+        private Base currentBase;
+
+        public BreakPointField(final Cpu cpu, final Base base) {
+            super(4);
+            this.cpu = cpu;
+            setBase(base);
+            setCurrentBreakPoint();
+            ((AbstractDocument) getDocument()).setDocumentFilter(new UpperCaseFilter());
+        }
+
+        public void setBase(final Base base) {
+            currentBase = base;
+            setCurrentBreakPoint();
+        }
+
+        public short getBreakPoint() {
+            final int radix = currentBase.toInt();
+            try {
+                final String string = getText();
+                final int value = Integer.parseInt(string, radix);
+                return Shorts.fromInt(value);
+            }
+            catch (NumberFormatException ignore) {
+                setCurrentBreakPoint();
+                return cpu.getBreakPoint();
+            }
+        }
+
+        private void setCurrentBreakPoint() {
+            final short breakPoint = cpu.getBreakPoint();
+            setText(Integer.toString(Shorts.toUnsignedInt(breakPoint), currentBase.toInt()));
+        }
     }
 }

@@ -11,6 +11,10 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 
 import cesar.models.Base;
 import cesar.models.Cpu;
@@ -43,6 +47,8 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         addressLabel = new JLabel(String.format(LABEL_FORMAT, "0"));
         valueField = new JTextField(6);
         valueField.setMinimumSize(valueField.getPreferredSize());
+
+        ((AbstractDocument) valueField.getDocument()).setDocumentFilter(new UpperCaseFilter());
         currentBase = Defaults.DEFAULT_BASE;
     }
 
@@ -104,11 +110,29 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         valueField.setText(Integer.toString(currentValue, radix));
     }
 
+    public Base getCurrentBase() {
+        return currentBase;
+    }
+
     public void setCurrentAddress(final int address) {
         currentAddress = address;
     }
 
     public void setCurrentValue(final int value) {
         currentValue = value;
+    }
+
+    protected static class UpperCaseFilter extends DocumentFilter {
+        @Override
+        public void insertString(DocumentFilter.FilterBypass fb, int offset, String text,
+                AttributeSet attr) throws BadLocationException {
+            fb.insertString(offset, text.toUpperCase(), attr);
+        }
+
+        @Override
+        public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text,
+                AttributeSet attrs) throws BadLocationException {
+            fb.replace(offset, length, text.toUpperCase(), attrs);
+        }
     }
 }

@@ -34,7 +34,7 @@ public class Mnemonic {
             final byte opCode = cpu.getByte(currentRow);
             final String mnemonic;
             int rowIncrement = 1;
-            final Instruction instruction = Instruction.getInstruction(opCode);
+            final InstructionString instruction = InstructionString.getInstruction(opCode);
             final String format = instruction.getFormatString();
 
             switch (instruction) {
@@ -227,7 +227,7 @@ public class Mnemonic {
                 }
 
                 default:
-                    mnemonic = Instruction.NOP.getFormatString();
+                    mnemonic = InstructionString.NOP.getFormatString();
             }
 
             if (forceAllRows) {
