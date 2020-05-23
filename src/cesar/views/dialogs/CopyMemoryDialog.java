@@ -38,7 +38,7 @@ public class CopyMemoryDialog {
         return startAddress;
     }
 
-    public boolean showCopyDialog(final Base base) {
+    public boolean showDialog(final Base base) {
         final int radix = base.toInt();
 
         String input = null;

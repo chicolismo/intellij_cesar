@@ -27,6 +27,7 @@ public class Cpu {
     private final short[] registers;
     private final byte[] memory;
     private final byte[] originalMemory;
+    private boolean originalMemoryChanged;
     private final String[] mnemonics;
     private short breakPoint;
     private boolean memoryChanged;
@@ -40,6 +41,7 @@ public class Cpu {
         registers = new short[REGISTER_COUNT];
         memory = new byte[MEMORY_SIZE];
         originalMemory = new byte[MEMORY_SIZE];
+        originalMemoryChanged = false;
         mnemonics = new String[MEMORY_SIZE];
         breakPoint = (short) 0xFFFF;
         conditionRegister = new ConditionRegister();
@@ -662,7 +664,7 @@ public class Cpu {
     }
 
     public boolean hasOriginalMemoryChanged() {
-        return !Arrays.equals(memory, originalMemory);
+        return originalMemoryChanged && !Arrays.equals(memory, originalMemory);
     }
 
     public boolean isCarry() {
@@ -702,15 +704,26 @@ public class Cpu {
     public void setMemory(final byte[] bytes) {
         assert bytes.length == MEMORY_SIZE;
         System.arraycopy(bytes, 0, memory, 0, MEMORY_SIZE);
-        System.arraycopy(bytes, 0, originalMemory, 0, MEMORY_SIZE);
+        if (!originalMemoryChanged) {
+            System.arraycopy(bytes, 0, originalMemory, 0, MEMORY_SIZE);
+            originalMemoryChanged = true;
+        }
         Mnemonic.updateMnemonics(this, 0, true);
     }
 
     public void setMemory(final byte[] bytes, final int start, final int end, final int target) {
         assert end <= MEMORY_SIZE;
-        for (int i = target, j = start; i < MEMORY_SIZE && j <= end; ++i, ++j) {
-            memory[i] = bytes[j];
-            originalMemory[i] = bytes[j];
+        if (originalMemoryChanged) {
+            for (int i = target, j = start; i < MEMORY_SIZE && j <= end; ++i, ++j) {
+                memory[i] = bytes[j];
+            }
+        }
+        else {
+            for (int i = target, j = start; i < MEMORY_SIZE && j <= end; ++i, ++j) {
+                memory[i] = bytes[j];
+                originalMemory[i] = bytes[j];
+            }
+            originalMemoryChanged = true;
         }
         Mnemonic.updateMnemonics(this, 0, true);
     }

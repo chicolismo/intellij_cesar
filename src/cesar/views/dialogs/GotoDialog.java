@@ -44,7 +44,7 @@ public class GotoDialog {
         currentBase = newBase;
     }
 
-    public boolean showGotoDialog() {
+    public boolean showDialog() {
         int radix = currentBase.toInt();
         boolean result = false;
         String currentValue = Integer.toString(cpu.getProgramCounter(), radix);

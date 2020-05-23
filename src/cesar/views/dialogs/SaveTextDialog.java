@@ -26,6 +26,7 @@ import cesar.models.Cpu;
 import cesar.utils.Defaults;
 import cesar.utils.Integers;
 import cesar.utils.textual.TextConverter;
+import cesar.views.windows.MainWindow;
 
 public class SaveTextDialog extends JDialog {
     private static final long serialVersionUID = 476591876321607487L;
@@ -56,6 +57,7 @@ public class SaveTextDialog extends JDialog {
     private static final int START_DATA_ADDRESS = 65_000;
     private static final int END_DATA_ADDRESS = Cpu.LAST_ADDRESS;
 
+    private final MainWindow parent;
     private final JTextField startProgramAddressField;
     private final JTextField endProgramAddressField;
     private final JTextField startDataAddressField;
@@ -70,9 +72,10 @@ public class SaveTextDialog extends JDialog {
     private Base currentBase;
     private File outputFile;
 
-    public SaveTextDialog(final JFrame parent, final Cpu cpu) {
+    public SaveTextDialog(final MainWindow parent) {
         super(parent, TITLE, true);
-        this.cpu = cpu;
+        this.parent = parent;
+        cpu = parent.getCpu();
         fileChooser = new JFileChooser();
         fileChooser.setFileFilter(new FileNameExtensionFilter(FILTER_DESCRIPTION, FILTER_EXTENSIONS));
         currentBase = Defaults.DEFAULT_BASE;
@@ -246,7 +249,7 @@ public class SaveTextDialog extends JDialog {
     }
 
     public void showDialog() {
-        if (fileChooser.showSaveDialog(getParent()) == JFileChooser.APPROVE_OPTION) {
+        if (fileChooser.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
             outputFile = fileChooser.getSelectedFile();
             setDefaultValues();
             updateFields();

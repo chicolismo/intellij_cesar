@@ -1,7 +1,6 @@
 package cesar.views.panels;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -21,8 +20,13 @@ public class InstructionPanel extends JPanel {
     final private JLabel mnemonicText;
 
     public InstructionPanel() {
+        final Font monoFont = new Font(Font.MONOSPACED, Font.PLAIN, 12);
+
         riText = new JLabel();
+        riText.setFont(monoFont);
+
         mnemonicText = new JLabel();
+        mnemonicText.setFont(monoFont);
 
         riText.setMinimumSize(riText.getPreferredSize());
         mnemonicText.setMinimumSize(mnemonicText.getPreferredSize());

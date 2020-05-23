@@ -2,6 +2,7 @@ package cesar.views.utils;
 
 import static cesar.utils.Properties.getProperty;
 
+import java.awt.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,6 +16,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
+import cesar.views.panels.StatusBar;
+import cesar.views.windows.MainWindow;
 import com.sun.istack.internal.Nullable;
 
 import cesar.models.Base;
@@ -39,18 +42,24 @@ public class FileLoader {
     private static final String FILE_LOAD_DESCRIPTION = getProperty("FileLoader.fileFilterDescription");
     private static final String FILE_LOAD_EXTENSIONS = getProperty("FileLoader.fileFilterExtensions");
     private static final Set<String> VALID_EXTENSIONS = new HashSet<>();
+    private final StatusBar statusBar;
+    private int startAddress, endAddress, targetAddress;
+    private final Cpu cpu;
 
     static {
         VALID_EXTENSIONS.addAll(Arrays.asList(FileUtils.splitExtensions(FILE_LOAD_EXTENSIONS)));
     }
 
     private final JFileChooser fileChooser;
-    private final JFrame parent;
-    private Base currentBase;
+    private final MainWindow parent;
+    private Base base;
+    private File currentFile;
 
-    public FileLoader(final JFrame parent) {
+    public FileLoader(final MainWindow parent) {
         this.parent = parent;
-        currentBase = Defaults.DEFAULT_BASE;
+        statusBar = parent.getStatusBar();
+        base = Defaults.DEFAULT_BASE;
+        cpu = parent.getCpu();
 
         fileChooser = new JFileChooser();
         fileChooser.setMultiSelectionEnabled(false);
@@ -61,112 +70,111 @@ public class FileLoader {
         return CESAR_FILE_SIZE == (int) file.length();
     }
 
-    private static boolean isValidAddress(final int address) {
-        return Cpu.isValidAddress(address);
+    private static boolean isInvalidAddress(final int address) {
+        return !Cpu.isValidAddress(address);
     }
 
-    private static byte[] readBytes(final File file) throws FileLoaderException {
-        final byte[] result;
-        if (!hasCorrectFileSize(file)) {
-            throw new FileLoaderException(WRONG_SIZE_MESSAGE);
-        }
-        try (BufferedInputStream stream = new BufferedInputStream(new FileInputStream(file))) {
-            final byte[] fileBytes = new byte[BUFFER_SIZE];
-            final int headerSize = 4; // Os quatro primeiros bytes são o cabeçalho do arquivo.
-            if (stream.skip(headerSize) != headerSize) {
-                throw new FileLoaderException(
-                        String.format("Não foi possível avançar o cabeçalho do arquivo \"%s\"", file.getName()));
+    @Nullable
+    private byte[] readBytes(final File file) {
+        byte[] result = null;
+        if (hasCorrectFileSize(file)) {
+            try (BufferedInputStream stream = new BufferedInputStream(new FileInputStream(file))) {
+                final byte[] fileBytes = new byte[BUFFER_SIZE];
+                final int headerSize = 4; // Os quatro primeiros bytes são o cabeçalho do arquivo.
+                if (stream.skip(headerSize) != headerSize) {
+                    statusBar.setTempMessage(
+                            String.format("Não foi possível avançar o cabeçalho do arquivo \"%s\"", file.getName()));
+                }
+                final int bytesRead = stream.read(fileBytes, 0, BUFFER_SIZE);
+                if (bytesRead != BUFFER_SIZE) {
+                    statusBar.setTempMessage("Não foi possível ler todos os bytes do arquivo");
+                }
+                result = fileBytes;
             }
-            final int bytesRead = stream.read(fileBytes, 0, BUFFER_SIZE);
-            if (bytesRead != BUFFER_SIZE) {
-                throw new FileLoaderException("Não foi possível ler todos os bytes do arquivo");
+            catch (final IOException e) {
+                statusBar.setTempMessage("Ocorreu um erro ao ler o arquivo.");
             }
-            result = fileBytes;
         }
-        catch (final IOException e) {
-            throw new FileLoaderException("Ocorreu um erro ao ler o arquivo.");
+        else {
+            statusBar.setTempMessage(WRONG_SIZE_MESSAGE);
         }
         return result;
     }
 
-    @Nullable
-    private int[] getAddresses() throws FileLoaderException {
-        int[] result = null;
-        final int[] addresses = new int[3];
-        final int radix = currentBase.toInt();
-        final AddressDialog[] dialogs = new AddressDialog[] {
-            new AddressDialog(START_ADDRESS_MESSAGE, Integer.toString(MIN_ADDRESS, radix)),
-            new AddressDialog(END_ADDRESS_MESSAGE, Integer.toString(MAX_ADDRESS, radix)),
-            new AddressDialog(TARGET_ADDRESS_MESSAGE, Integer.toString(MIN_ADDRESS, radix)) };
-        String input = "";
+
+    private boolean getAddresses() {
+        final AddressDialog startAddressDialog, endAddressDialog, targetAddressDialog;
+
+        final int radix = base.toInt();
+        startAddressDialog = new AddressDialog(START_ADDRESS_MESSAGE, Integer.toString(MIN_ADDRESS, radix));
+        endAddressDialog = new AddressDialog(END_ADDRESS_MESSAGE, Integer.toString(MAX_ADDRESS, radix));
+        targetAddressDialog = new AddressDialog(TARGET_ADDRESS_MESSAGE, Integer.toString(MIN_ADDRESS, radix));
+
+        boolean result = true;
         try {
-            input = dialogs[0].showDialog(parent);
+            String input = startAddressDialog.showDialog(parent);
             if (input != null) {
-                final int startAddress = Integer.parseInt(input, radix);
-                if (isValidAddress(startAddress)) {
-                    addresses[0] = startAddress;
+                startAddress = Integer.parseInt(input, radix);
+                if (isInvalidAddress(startAddress)) {
+                    statusBar.setTempMessage(String.format(ERROR_MESSAGE_FORMAT, input));
+                    result = false;
                 }
                 else {
-                    throw new FileLoaderException(String.format(ERROR_MESSAGE_FORMAT, input));
+                    input = endAddressDialog.showDialog(parent);
+                    endAddress = Integer.parseInt(input, radix);
+                    if (isInvalidAddress(endAddress) || endAddress <= startAddress) {
+                        statusBar.setTempMessage(String.format(ERROR_MESSAGE_FORMAT, input));
+                        result = false;
+                    }
+                    else {
+                        input = targetAddressDialog.showDialog(parent);
+                        targetAddress = Integer.parseInt(input, radix);
+                        if (isInvalidAddress(targetAddress)) {
+                            statusBar.setTempMessage(String.format(ERROR_MESSAGE_FORMAT, input));
+                            result = false;
+                        }
+                    }
                 }
-                input = dialogs[1].showDialog(parent);
-                final int endAddress = Integer.parseInt(input, radix);
-                if (isValidAddress(endAddress) && endAddress > startAddress) {
-                    addresses[1] = endAddress;
-                }
-                else {
-                    throw new FileLoaderException(String.format(ERROR_MESSAGE_FORMAT, input));
-                }
-                input = dialogs[2].showDialog(parent);
-                final int targetAddress = Integer.parseInt(input, radix);
-                if (isValidAddress(targetAddress)) {
-                    addresses[2] = targetAddress;
-                }
-                else {
-                    throw new FileLoaderException(String.format(ERROR_MESSAGE_FORMAT, input));
-                }
-                result = addresses;
             }
         }
-        catch (final NumberFormatException e) {
-            throw new FileLoaderException(String.format(ERROR_MESSAGE_FORMAT, input));
+        catch (final NumberFormatException ignore) {
+            result = false;
         }
         return result;
     }
 
-    @Nullable
-    private File showDialog() {
-        File result = null;
-        if (fileChooser.showDialog(parent, null) == JFileChooser.APPROVE_OPTION) {
-            result = fileChooser.getSelectedFile();
+    private boolean showDialog() {
+        boolean result = false;
+        final int choice = fileChooser.showDialog(parent, null);
+        if (choice == JFileChooser.APPROVE_OPTION) {
+            currentFile = fileChooser.getSelectedFile();
+            result = true;
         }
         return result;
     }
 
-    public boolean loadFile(final Cpu cpu) throws FileLoaderException {
-        final File file = showDialog();
-        if (file != null) {
-            cpu.setMemory(readBytes(file));
-            return true;
+    public boolean loadFile() {
+        boolean result = false;
+        if (showDialog()) {
+            cpu.setMemory(readBytes(currentFile));
+            result = true;
         }
-        return false;
+        return result;
     }
 
-    public boolean loadFilePartially(final Cpu cpu) throws FileLoaderException {
-        final File file = showDialog();
-        if (file != null) {
-            final int[] addresses = getAddresses();
-            if (addresses != null) {
-                cpu.setMemory(readBytes(file), addresses[0], addresses[1], addresses[2]);
-                return true;
-            }
+    public boolean loadFilePartially() {
+        boolean result = false;
+        if (showDialog() && getAddresses()) {
+            cpu.setMemory(readBytes(currentFile), startAddress, endAddress, targetAddress);
+            result = true;
         }
-        return false;
+        return result;
     }
 
-    public void setBase(final Base base) {
-        currentBase = base;
+    public void setBase(final Base newBase) {
+        base = newBase;
     }
+
 
     private static class AddressDialog {
         private final String message;
@@ -177,11 +185,12 @@ public class FileLoader {
             this.initialValue = initialValue;
         }
 
-        public String showDialog(final JFrame parent) {
+        public String showDialog(final Component parent) {
             return (String) JOptionPane.showInputDialog(parent, message, PARTIAL_LOAD_DIALOG_TITLE,
                     JOptionPane.PLAIN_MESSAGE, null, null, initialValue);
         }
     }
+
 
     private static class CesarFileFilter extends FileFilter {
         @Override
@@ -204,14 +213,6 @@ public class FileLoader {
         @Override
         public String getDescription() {
             return FILE_LOAD_DESCRIPTION;
-        }
-    }
-
-    public static class FileLoaderException extends Exception {
-        private static final long serialVersionUID = 6949583264037362079L;
-
-        public FileLoaderException(final String message) {
-            super(message);
         }
     }
 }

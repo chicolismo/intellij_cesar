@@ -20,8 +20,6 @@ import cesar.utils.Defaults;
 import cesar.utils.Shorts;
 import cesar.views.dialogs.CopyMemoryDialog;
 import cesar.views.dialogs.GotoDialog;
-import cesar.views.dialogs.RegisterValueDialog;
-import cesar.views.dialogs.RegisterValueDialog.RegisterValueDialogException;
 import cesar.views.dialogs.SaveTextDialog;
 import cesar.views.dialogs.ZeroMemoryDialog;
 import cesar.views.displays.RegisterDisplay;
@@ -40,7 +38,6 @@ import cesar.views.tables.Table;
 import cesar.views.tables.TableModel;
 import cesar.views.utils.Components;
 import cesar.views.utils.FileLoader;
-import cesar.views.utils.FileLoader.FileLoaderException;
 import cesar.views.utils.FileSaver;
 import cesar.views.windows.DataWindow;
 import cesar.views.windows.MainWindow;
@@ -82,7 +79,7 @@ public final class ApplicationController {
 
     private final TextWindow textWindow;
 
-    private Base currentBase;
+    private Base base;
     private int instructionCount = 0;
     private boolean running;
 
@@ -91,11 +88,11 @@ public final class ApplicationController {
         cpu = window.getCpu();
         menuBar = (MenuBar) window.getJMenuBar();
         statusBar = window.getStatusBar();
-        currentBase = Defaults.DEFAULT_BASE;
+        base = Defaults.DEFAULT_BASE;
 
         fileLoader = new FileLoader(window);
         fileSaver = new FileSaver(window);
-        saveTextDialog = new SaveTextDialog(window, cpu);
+        saveTextDialog = new SaveTextDialog(window);
         gotoDialog = new GotoDialog(window);
         zeroMemoryDialog = new ZeroMemoryDialog(window);
         copyMemoryDialog = new CopyMemoryDialog(window);
@@ -123,10 +120,11 @@ public final class ApplicationController {
 
         running = false;
 
+        setBase(Defaults.DEFAULT_BASE);
     }
 
     private void copyMemory() {
-        if (copyMemoryDialog.showCopyDialog(currentBase)) {
+        if (copyMemoryDialog.showDialog(base)) {
             cpu.copyMemory(copyMemoryDialog.getStartAddress(), copyMemoryDialog.getEndAddress(),
                     copyMemoryDialog.getDstAddress());
             updateInterface();
@@ -141,9 +139,7 @@ public final class ApplicationController {
             case NOOP:
             case OK:
                 ++instructionCount;
-                if (isUpdateRegistersEnabled()) {
-                    updateAfterInstruction();
-                }
+                updateAfterInstruction();
                 break;
 
             case HALT:
@@ -156,17 +152,23 @@ public final class ApplicationController {
         }
     }
 
+    private boolean askToSave() {
+        boolean result = true;
+        final int choice =
+                JOptionPane.showConfirmDialog(window, "O conteúdo da memória mudou, deseja salvar o arquivo?");
+        if (choice == JOptionPane.OK_OPTION) {
+            result = fileSaver.saveFile(cpu.getMemory());
+        }
+        else if (choice == JOptionPane.CANCEL_OPTION) {
+            result = false;
+        }
+        return result;
+    }
+
     private void exitProgram() {
         boolean finished = true;
         if (cpu.hasOriginalMemoryChanged()) {
-            final int choice = JOptionPane.showConfirmDialog(window,
-                    "O conteúdo da memória mudou, deseja salvar o arquivo?");
-            if (choice == JOptionPane.OK_OPTION) {
-                finished = fileSaver.saveFile(cpu.getMemory());
-            }
-            else if (choice == JOptionPane.CANCEL_OPTION) {
-                finished = false;
-            }
+            finished = askToSave();
         }
         if (finished) {
             window.dispose();
@@ -175,7 +177,7 @@ public final class ApplicationController {
     }
 
     private void goTo() {
-        if (gotoDialog.showGotoDialog()) {
+        if (gotoDialog.showDialog()) {
             programWindow.clickOnRow(gotoDialog.getAddress());
         }
     }
@@ -184,30 +186,24 @@ public final class ApplicationController {
         return running;
     }
 
-    private boolean isUpdateRegistersEnabled() {
-        return menuBar.execUpdateRegisters.getState();
-    }
-
     private void loadFile() {
-        try {
-            if (fileLoader.loadFile(cpu)) {
-                updateInterface();
-                dataTable.scrollToRow(Cpu.DATA_START_ADDRESS, true);
-            }
+        boolean readyToLoad = true;
+        if (cpu.hasOriginalMemoryChanged()) {
+            readyToLoad = askToSave();
         }
-        catch (final FileLoaderException event) {
-            statusBar.setTempMessage(event.getMessage());
+        if (readyToLoad && fileLoader.loadFile()) {
+            updateInterface();
+            dataTable.scrollToRow(Cpu.DATA_START_ADDRESS, true);
         }
     }
 
     private void loadFilePartially() {
-        try {
-            if (fileLoader.loadFilePartially(cpu)) {
-                updateInterface();
-            }
+        boolean readyToLoad = true;
+        if (cpu.hasOriginalMemoryChanged()) {
+            readyToLoad = askToSave();
         }
-        catch (final FileLoaderException event) {
-            statusBar.setTempMessage(event.getMessage());
+        if (readyToLoad && fileLoader.loadFilePartially()) {
+            updateInterface();
         }
     }
 
@@ -220,8 +216,8 @@ public final class ApplicationController {
     }
 
     private void setBase(final Base newBase) {
-        if (currentBase != newBase) {
-            currentBase = newBase;
+        if (base != newBase) {
+            base = newBase;
             saveTextDialog.setBase(newBase);
             zeroMemoryDialog.setBase(newBase);
             gotoDialog.setBase(newBase);
@@ -232,7 +228,20 @@ public final class ApplicationController {
         }
     }
 
-    private void setButtonEvents() {
+    private void setEventListeners() {
+        //====================================================================
+        // MainWindow Events
+        //====================================================================
+        window.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(final WindowEvent e) {
+                exitProgram();
+            }
+        });
+
+        //====================================================================
+        // Button Events
+        //====================================================================
         nextButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent event) {
@@ -269,24 +278,10 @@ public final class ApplicationController {
                 menuBar.editHexadecimal.setSelected(true);
             }
         });
-    }
 
-    private void setEventListeners() {
-        window.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(final WindowEvent e) {
-                exitProgram();
-            }
-        });
-
-        setButtonEvents();
-        setKeyListenerEvents();
-        setSideWindowEvents();
-        setRegisterDisplayEvents();
-        setMenuEvents();
-    }
-
-    private void setKeyListenerEvents() {
+        //====================================================================
+        // Key Events
+        //====================================================================
         final KeyListener keyListener = new KeyListener() {
             @Override
             public void keyPressed(final KeyEvent event) {
@@ -311,15 +306,64 @@ public final class ApplicationController {
                 window.requestFocus();
             }
         };
-
         window.addKeyListener(keyListener);
         programWindow.addKeyListener(keyListener);
         dataWindow.addKeyListener(keyListener);
         textWindow.addKeyListener(keyListener);
-    }
 
-    @SuppressWarnings("ObjectAllocationInLoop")
-    private void setMenuEvents() {
+        //====================================================================
+        // Side Window Events
+        //====================================================================
+        programTable.addMouseListener(new TableMouseAdapter(programTable, programWindow));
+        programTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(final MouseEvent event) {
+                final int selectedRow;
+                if (event.getClickCount() == 2 && (selectedRow = programTable.getSelectedRow()) != -1) {
+                    cpu.setRegisterValue(7, Shorts.fromInt(selectedRow));
+                    updateInterface();
+                }
+            }
+        });
+        programWindow.getValueField().addActionListener(new ValueFieldActionListener(programWindow));
+        programWindow.getValueField().addKeyListener(new ValueFieldKeyAdapter(programWindow));
+        final ProgramWindow.BreakPointField breakPointField = programWindow.getBreakPointField();
+        breakPointField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent event) {
+                cpu.setBreakPoint(breakPointField.getBreakPoint());
+            }
+        });
+        breakPointField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(final FocusEvent event) {
+                cpu.setBreakPoint(breakPointField.getBreakPoint());
+            }
+        });
+
+        dataTable.addMouseListener(new TableMouseAdapter(dataTable, dataWindow));
+        dataWindow.getValueField().addActionListener(new ValueFieldActionListener(dataWindow));
+        dataWindow.getValueField().addKeyListener(new ValueFieldKeyAdapter(dataWindow));
+
+        //====================================================================
+        // Register Display Events
+        //====================================================================
+        final MouseAdapter registerDisplayMouseAdapter = new MouseAdapter() {
+            @Override
+            public void mouseClicked(final MouseEvent event) {
+                if (event.getClickCount() == 2) {
+                    showRegisterDisplayDialog((RegisterDisplay) event.getSource());
+                }
+            }
+        };
+
+        for (final RegisterDisplay display : registerPanel.getDisplays()) {
+            display.addMouseListener(registerDisplayMouseAdapter);
+        }
+
+        //====================================================================
+        // Menu Events
+        //====================================================================
         final Component[][] pairs = new Component[][] {
                 { programWindow, menuBar.viewProgram }, { dataWindow, menuBar.viewData },
                 { textWindow, menuBar.viewDisplay }
@@ -328,9 +372,7 @@ public final class ApplicationController {
         for (final Component[] pair : pairs) {
             final JDialog sideWindow = (JDialog) pair[0];
             final JCheckBoxMenuItem checkBox = (JCheckBoxMenuItem) pair[1];
-
             sideWindow.addComponentListener(new SideWindowComponentAdapter(checkBox));
-
             checkBox.addActionListener(new CheckBoxMenuItemComponentAdapter(sideWindow, checkBox));
         }
 
@@ -430,7 +472,7 @@ public final class ApplicationController {
         menuBar.execChangeProgramCounter.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent event) {
-                showNewRegisterValueDialog(registerPanel.getDisplay(Cpu.PC));
+                showRegisterDisplayDialog(registerPanel.getDisplay(Cpu.PC));
             }
         });
 
@@ -444,73 +486,20 @@ public final class ApplicationController {
         });
     }
 
-    private void setRegisterDisplayEvents() {
-        final MouseAdapter mouseAdapter = new MouseAdapter() {
-            @Override
-            public void mouseClicked(final MouseEvent event) {
-                if (event.getClickCount() == 2) {
-                    showNewRegisterValueDialog((RegisterDisplay) event.getSource());
-                }
-            }
-        };
-
-        for (final RegisterDisplay display : registerPanel.getDisplays()) {
-            display.addMouseListener(mouseAdapter);
-        }
-    }
-
     private synchronized void setRunning(final boolean value) {
         running = value;
     }
 
-    @SuppressWarnings("ObjectAllocationInLoop")
-    private void setSideWindowEvents() {
-        programTable.addMouseListener(new TableMouseAdapter(programTable, programWindow));
-        programWindow.getValueField().addActionListener(new ValueFieldActionListener(programWindow));
-        programWindow.getValueField().addKeyListener(new ValueFieldKeyAdapter(programWindow));
-
-        dataTable.addMouseListener(new TableMouseAdapter(dataTable, dataWindow));
-        dataWindow.getValueField().addActionListener(new ValueFieldActionListener(dataWindow));
-        dataWindow.getValueField().addKeyListener(new ValueFieldKeyAdapter(dataWindow));
-
-        programTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(final MouseEvent event) {
-                final int selectedRow;
-                if (event.getClickCount() == 2 && (selectedRow = programTable.getSelectedRow()) != -1) {
-                    cpu.setRegisterValue(7, Shorts.fromInt(selectedRow));
-                    updateInterface();
-                }
-            }
-        });
-
-        final ProgramWindow.BreakPointField breakPointField = programWindow.getBreakPointField();
-        breakPointField.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                cpu.setBreakPoint(breakPointField.getBreakPoint());
-            }
-        });
-        breakPointField.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(final FocusEvent event) {
-                cpu.setBreakPoint(breakPointField.getBreakPoint());
-            }
-        });
-    }
-
-    private void showNewRegisterValueDialog(final RegisterDisplay registerDisplay) {
-        try {
-            final int registerNumber = registerDisplay.getNumber();
-            final short currentValue = cpu.getRegisterValue(registerNumber);
-            final short newValue = RegisterValueDialog.showDialog(registerDisplay, currentValue);
+    private void showRegisterDisplayDialog(final RegisterDisplay registerDisplay) {
+        final short currentValue = registerDisplay.getValueAsShort();
+        if (registerDisplay.showDialog()) {
+            short newValue = registerDisplay.getValueAsShort();
             if (newValue != currentValue) {
-                cpu.setRegisterValue(registerNumber, newValue);
-                updateInterface();
+                cpu.setRegisterValue(registerDisplay.getNumber(), newValue);
             }
         }
-        catch (final RegisterValueDialogException e) {
-            statusBar.setTempMessage(e.getMessage());
+        else if (registerDisplay.hasError()) {
+            statusBar.setTempMessage(registerDisplay.getErrorMessage());
         }
     }
 
@@ -529,7 +518,9 @@ public final class ApplicationController {
     }
 
     private void updateAfterInstruction() {
-        updateDisplays();
+        if (menuBar.execUpdateRegisters.getState()) {
+            updateDisplays();
+        }
         if (cpu.hasMemoryChanged()) {
             final int start = cpu.getLastChangedAddress();
             final int end = cpu.getLastChangedMnemonic();
@@ -567,8 +558,8 @@ public final class ApplicationController {
     private void updateProgramCounterRow() {
         final int programCounter = cpu.getProgramCounter();
         programTableModel.setProgramCounterRow(programCounter);
-        programTable.setRowSelectionInterval(programCounter, programCounter);
         if (!isRunning()) {
+            programTable.setRowSelectionInterval(programCounter, programCounter);
             programTable.scrollToRow(programCounter);
         }
     }
@@ -581,14 +572,12 @@ public final class ApplicationController {
     }
 
     public void run() {
-        setBase(Defaults.DEFAULT_BASE);
-
         menuBar.viewProgram.setState(true);
         menuBar.viewData.setState(true);
         menuBar.viewDisplay.setState(true);
         menuBar.execUpdateRegisters.setState(true);
-
         setEventListeners();
+
         decimalButton.doClick();
         updateInterface();
 
@@ -601,6 +590,7 @@ public final class ApplicationController {
         textWindow.setVisible(true);
         window.requestFocus();
     }
+
 
     private static class CheckBoxMenuItemComponentAdapter implements ActionListener {
         private final JDialog sideWindow;
@@ -665,7 +655,7 @@ public final class ApplicationController {
         @Override
         public void actionPerformed(final ActionEvent actionEvent) {
             final JTextField valueField = (JTextField) actionEvent.getSource();
-            final int radix = currentBase.toInt();
+            final int radix = base.toInt();
             final String value = valueField.getText();
             try {
                 final int newValue = Integer.parseInt(value, radix);

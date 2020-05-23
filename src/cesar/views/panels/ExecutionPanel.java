@@ -1,7 +1,6 @@
 package cesar.views.panels;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.*;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
