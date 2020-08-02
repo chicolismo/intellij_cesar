@@ -64,7 +64,6 @@ public final class ApplicationController {
 
     public ApplicationController() {
         window = new MainWindow();
-        window.updateWindows();
 
         cpu = window.getCpu();
         menuBar = (MenuBar) window.getJMenuBar();
@@ -211,7 +210,7 @@ public final class ApplicationController {
         fileSaver.saveFile(cpu.getMemory());
     }
 
-    private void setEventListeners() {
+    private void addEventListeners() {
         //====================================================================
         // MainWindow Events
         //====================================================================
@@ -468,13 +467,14 @@ public final class ApplicationController {
         menuBar.viewData.setState(true);
         menuBar.viewDisplay.setState(true);
         menuBar.execUpdateRegisters.setState(true);
-        setEventListeners();
+        addEventListeners();
 
         decimalButton.doClick();
         updateInterface();
 
         window.setLocationRelativeTo(null);
         Components.centerComponent(window);
+        window.updateWindows();
         window.setVisible(true);
         programWindow.setVisible(true);
         dataWindow.setVisible(true);

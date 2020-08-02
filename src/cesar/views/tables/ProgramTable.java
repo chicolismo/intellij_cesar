@@ -19,11 +19,15 @@ public class ProgramTable extends Table {
 
     @Override
     void initColumnWidths() {
-        for (int i = 0; i < COLUMN_WIDTHS.length; ++i) {
-            final TableColumn column = getColumnModel().getColumn(i);
-            column.setMaxWidth(COLUMN_WIDTHS[i]);
+        TableColumn column = getColumnModel().getColumn(0);
+        column.setMaxWidth(COLUMN_WIDTHS[0]);
+        column.setMinWidth(COLUMN_WIDTHS[0]);
+        for (int i = 1; i < COLUMN_WIDTHS.length; ++i) {
+            column = getColumnModel().getColumn(i);
+            column.setWidth(COLUMN_WIDTHS[i]);
             column.setMinWidth(COLUMN_WIDTHS[i]);
-            column.setResizable(false);
+//            column.setResizable(false);
+            column.setResizable(true);
         }
     }
 

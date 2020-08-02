@@ -8,7 +8,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 
 public class Defaults {
-    public static final Font PANEL_FONT = new Font(Font.SANS_SERIF, Font.BOLD, 12);
+    public static final Font PANEL_FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
     public static final Color ARROW_COLOR;
     public static final Base DEFAULT_BASE = Base.DECIMAL;
     public static final boolean IS_APPLE = System.getProperty("os.name").equals("Mac OS X");

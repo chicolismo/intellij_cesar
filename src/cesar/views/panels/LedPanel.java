@@ -18,6 +18,8 @@ public class LedPanel extends JPanel {
         display.setAlignmentY(Component.CENTER_ALIGNMENT);
         initLayout();
         setBorder(Defaults.createTitledBorder(label, TitledBorder.CENTER));
+        setSize(getPreferredSize());
+        setPreferredSize(getSize());
     }
 
     private void initLayout() {

@@ -34,18 +34,15 @@ public class StatusBar extends JPanel {
         final long milliseconds = 3000;
         final String currentText = getText();
 
-        final Thread tempThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                setText(message);
-                try {
-                    Thread.sleep(milliseconds);
-                }
-                catch (final InterruptedException e) {
-                    e.printStackTrace();
-                }
-                setText(currentText);
+        final Thread tempThread = new Thread(() -> {
+            setText(message);
+            try {
+                Thread.sleep(milliseconds);
             }
+            catch (final InterruptedException e) {
+                e.printStackTrace();
+            }
+            setText(currentText);
         });
         tempThread.start();
     }

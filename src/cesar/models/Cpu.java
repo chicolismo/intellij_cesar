@@ -698,6 +698,7 @@ public class Cpu {
         return breakPoint;
     }
 
+    // TODO: Habilitar a alteração do breakpoint na janela de programma
     public void setBreakPoint(final int bp) {
         breakPoint = clampToShort(bp);
     }
