@@ -1,28 +1,23 @@
 package cesar.views.dialogs;
 
-import java.awt.Component;
-
-import javax.swing.JOptionPane;
-
 import cesar.models.Base;
 import cesar.models.Cpu;
-import cesar.utils.Properties;
 import cesar.views.panels.StatusBar;
 import cesar.views.windows.MainWindow;
 
+import javax.swing.*;
+
 public class ZeroMemoryDialog {
-    private static final String INVALID_MEMORY_POSITION_ERROR_FORMAT = Properties.getProperty(
-            "Memory.invalidPositionErrorFormat");
-    private static final String ZERO_MEMORY_TITLE = Properties.getProperty("ZeroMemory.title");
-    private static final String ZERO_MEMORY_START_MESSAGE = Properties.getProperty("ZeroMemory.startMessage");
-    private static final String ZERO_MEMORY_END_MESSAGE = Properties.getProperty("ZeroMemory.endMessage");
+    private static final String ERROR_FORMAT = "ERRO: Posição da memória inválida (%s)";
+    private static final String TITLE = "Zerar memória";
+    private static final String INITIAL_ADDRESS_MESSAGE = "Digite o endereço inicial";
+    private static final String FINAL_ADDRESS_MESSAGE = "Digite o endereço final";
 
     private final MainWindow parent;
-
     private final int minimumAddress;
     private final int maximumAddress;
-    private Base currentBase;
     private final StatusBar statusBar;
+    private Base currentBase;
     private int startAddress, endAddress;
 
     public ZeroMemoryDialog(final MainWindow parent) {
@@ -45,48 +40,45 @@ public class ZeroMemoryDialog {
         return endAddress;
     }
 
-    private String getUserInput(final String message, final String initialValue) {
-        return (String) JOptionPane.showInputDialog(parent, message, ZeroMemoryDialog.ZERO_MEMORY_TITLE,
-                JOptionPane.PLAIN_MESSAGE, null, null, initialValue);
-    }
-
     public void setBase(final Base base) {
         currentBase = base;
     }
 
     public boolean showZeroMemoryDialog() {
-        boolean result = true;
         final int radix = currentBase.toInt();
-        String input = null;
+        String userInput = null;
         try {
-            input = getUserInput(ZERO_MEMORY_START_MESSAGE, Integer.toString(minimumAddress, radix));
-            if (input == null) {
-                result = false;
+            userInput = getUserInput(INITIAL_ADDRESS_MESSAGE, Integer.toString(minimumAddress, radix));
+            if (userInput == null) {
+                return false;
             }
-            else {
-                startAddress = Integer.parseInt(input, radix);
-                if (!Cpu.isValidAddress(startAddress)) {
-                    statusBar.setTempMessage(String.format(INVALID_MEMORY_POSITION_ERROR_FORMAT, input));
-                    result = false;
-                }
-                else {
-                    input = getUserInput(ZERO_MEMORY_END_MESSAGE, Integer.toString(maximumAddress, radix));
-                    if (input == null) {
-                        result = false;
-                    }
-                    else {
-                        endAddress = Integer.parseInt(input, radix);
-                        if (!Cpu.isValidAddress(endAddress) || endAddress < startAddress) {
-                            statusBar.setTempMessage(String.format(INVALID_MEMORY_POSITION_ERROR_FORMAT, input));
-                            result = false;
-                        }
-                    }
-                }
+
+            startAddress = Integer.parseInt(userInput, radix);
+            if (!Cpu.isValidAddress(startAddress)) {
+                statusBar.setTempMessage(String.format(ERROR_FORMAT, userInput));
+                return false;
+            }
+
+            userInput = getUserInput(FINAL_ADDRESS_MESSAGE, Integer.toString(maximumAddress, radix));
+            if (userInput == null) {
+                return false;
+            }
+
+            endAddress = Integer.parseInt(userInput, radix);
+            if (!Cpu.isValidAddress(endAddress) || endAddress < startAddress) {
+                statusBar.setTempMessage(String.format(ERROR_FORMAT, userInput));
+                return false;
             }
         }
         catch (final NumberFormatException event) {
-            statusBar.setTempMessage(String.format(INVALID_MEMORY_POSITION_ERROR_FORMAT, input));
+            statusBar.setTempMessage(String.format(ERROR_FORMAT, userInput));
         }
-        return result;
+        return true;
+    }
+
+    private String getUserInput(final String message, final String initialValue) {
+        return (String) JOptionPane
+                .showInputDialog(parent, message, ZeroMemoryDialog.TITLE, JOptionPane.PLAIN_MESSAGE, null, null,
+                        initialValue);
     }
 }

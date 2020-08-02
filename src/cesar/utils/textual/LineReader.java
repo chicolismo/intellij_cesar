@@ -1,9 +1,9 @@
 package cesar.utils.textual;
 
+import cesar.models.Cpu;
+
 import java.util.ArrayList;
 import java.util.Objects;
-
-import cesar.models.Cpu;
 
 public class LineReader {
 

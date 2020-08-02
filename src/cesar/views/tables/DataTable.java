@@ -4,7 +4,7 @@ import javax.swing.table.TableColumn;
 
 public class DataTable extends Table {
     private static final long serialVersionUID = -5256889056472626825L;
-    private static final int[] COLUMN_WIDTHS = new int[] { 62, 52 };
+    private static final int[] COLUMN_WIDTHS = new int[]{62, 52};
 
     public DataTable(final DataTableModel model) {
         super(model);

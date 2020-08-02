@@ -1,11 +1,11 @@
 package cesar.views.tables;
 
-import javax.swing.table.AbstractTableModel;
-
 import cesar.models.Base;
 import cesar.models.Cpu;
 import cesar.utils.Bytes;
 import cesar.utils.Defaults;
+
+import javax.swing.table.AbstractTableModel;
 
 public abstract class TableModel extends AbstractTableModel {
     private static final long serialVersionUID = -124231497089309828L;
@@ -23,6 +23,11 @@ public abstract class TableModel extends AbstractTableModel {
         this.columnNames = columnNames;
         this.classNames = classNames;
         setBase(Defaults.DEFAULT_BASE);
+    }
+
+    public void setBase(final Base base) {
+        formatString = base == Base.DECIMAL ? DECIMAL_FORMAT : HEXADECIMAL_FORMAT;
+        fireTableDataChanged();
     }
 
     protected String formatNumber(final byte number) {
@@ -44,18 +49,13 @@ public abstract class TableModel extends AbstractTableModel {
     abstract public String getAddressAsString(final int row);
 
     @Override
-    public Class<?> getColumnClass(final int column) {
-        return classNames[column];
-    }
-
-    @Override
-    public int getColumnCount() {
-        return columnNames.length;
-    }
-
-    @Override
     public String getColumnName(final int col) {
         return columnNames[col];
+    }
+
+    @Override
+    public Class<?> getColumnClass(final int column) {
+        return classNames[column];
     }
 
     @Override
@@ -63,10 +63,10 @@ public abstract class TableModel extends AbstractTableModel {
         return Cpu.MEMORY_SIZE;
     }
 
-    abstract public String getValueAsString(final int row);
-
-    public void setBase(final Base base) {
-        formatString = base == Base.DECIMAL ? DECIMAL_FORMAT : HEXADECIMAL_FORMAT;
-        fireTableDataChanged();
+    @Override
+    public int getColumnCount() {
+        return columnNames.length;
     }
+
+    abstract public String getValueAsString(final int row);
 }

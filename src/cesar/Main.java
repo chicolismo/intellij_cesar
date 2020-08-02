@@ -1,14 +1,10 @@
 package cesar;
 
-import java.util.Locale;
-
-import javax.swing.SwingUtilities;
-import javax.swing.ToolTipManager;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-
 import cesar.controllers.ApplicationController;
 import cesar.utils.Defaults;
+
+import javax.swing.*;
+import java.util.Locale;
 
 public class Main {
     public static void main(final String[] args) {

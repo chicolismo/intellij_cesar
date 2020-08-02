@@ -1,15 +1,12 @@
 package cesar.views.panels;
 
-import java.awt.*;
+import cesar.utils.Defaults;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
-
-import cesar.utils.Defaults;
+import java.awt.*;
 
 public class InstructionPanel extends JPanel {
     private static final long serialVersionUID = -7005281883928099202L;
@@ -46,9 +43,9 @@ public class InstructionPanel extends JPanel {
         final JLabel mnemonicLabel = Defaults.createLabel("Mnem: ");
 
         final GridBagLayout grid = new GridBagLayout();
-        grid.rowHeights = new int[] { ROW_HEIGHT, ROW_HEIGHT };
-        grid.rowWeights = new double[] { 0.0, 0.0 };
-        grid.columnWeights = new double[] { 0.0, 1.0 };
+        grid.rowHeights = new int[]{ROW_HEIGHT, ROW_HEIGHT};
+        grid.rowWeights = new double[]{0.0, 0.0};
+        grid.columnWeights = new double[]{0.0, 1.0};
         setLayout(grid);
 
         final GridBagConstraints c_0 = new GridBagConstraints();

@@ -1,46 +1,22 @@
 package cesar.views.windows;
 
-import static cesar.utils.Properties.getProperty;
-
-import java.awt.Dialog.ModalExclusionType;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-
-import javax.swing.BoxLayout;
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
-
 import cesar.models.Cpu;
-import cesar.views.panels.ButtonPanel;
-import cesar.views.panels.ConditionPanel;
-import cesar.views.panels.ExecutionPanel;
-import cesar.views.panels.InstructionPanel;
-import cesar.views.panels.MainPanel;
 import cesar.views.panels.MenuBar;
-import cesar.views.panels.RegisterPanel;
-import cesar.views.panels.StatusBar;
+import cesar.views.panels.*;
+
+import javax.swing.*;
+import java.awt.Dialog.ModalExclusionType;
+import java.awt.*;
+import java.net.URL;
 
 public class MainWindow extends JFrame {
     public static final long serialVersionUID = -4182598865843186332L;
 
-    private static final int WINDOW_GAP;
+    private static final String TITLE = "Cesar";
+    private static final int WINDOW_GAP = 3;
+    private static final URL ICON = MainWindow.class.getResource("/cesar/resources/images/computer.png");
 
-    static {
-        int gap;
-        try {
-            gap = Integer.parseInt(getProperty("MainWindow.windowGap"), 10);
-        }
-        catch (final NumberFormatException e) {
-            gap = 6;
-        }
-        WINDOW_GAP = gap;
-    }
 
-    private final int windowWidth;
-    private final int windowHeight;
     private final Cpu cpu;
     private final ProgramWindow programWindow;
     private final DataWindow dataWindow;
@@ -53,9 +29,8 @@ public class MainWindow extends JFrame {
     private final StatusBar statusBar;
 
     public MainWindow() {
-        super(getProperty("MainWindow.title"));
-        setIconImage(
-                Toolkit.getDefaultToolkit().getImage(MainWindow.class.getResource(getProperty("MainWindow.iconPath"))));
+        super(TITLE);
+        setIconImage(Toolkit.getDefaultToolkit().getImage(ICON));
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         setAutoRequestFocus(true);
         setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
@@ -85,27 +60,21 @@ public class MainWindow extends JFrame {
         add(statusBar);
         setJMenuBar(new MenuBar());
         pack();
-
-        windowWidth = getWidth();
-        windowHeight = getHeight();
         setResizable(false);
-
         programWindow.setSize(programWindow.getPreferredSize());
         dataWindow.setSize(dataWindow.getPreferredSize());
-        addComponentListener(new MainWindowComponentAdapter());
-        updateSubWindowsPositions();
     }
 
-    private void updateSubWindowsPositions() {
-        final Point pos = getLocation();
-        final Dimension programWindowSize = programWindow.getSize();
-        final Dimension programWindowPreferredSize = programWindow.getPreferredSize();
-        final Dimension dataWindowPreferredSize = dataWindow.getPreferredSize();
-        programWindow.setLocation(pos.x - programWindowSize.width - WINDOW_GAP, pos.y);
-        dataWindow.setLocation(pos.x + windowWidth + WINDOW_GAP, pos.y);
-        programWindow.setSize(programWindowPreferredSize.width, windowHeight);
-        dataWindow.setSize(dataWindowPreferredSize.width, windowHeight);
-        textWindow.setLocation(pos.x - programWindowSize.width - WINDOW_GAP, pos.y + windowHeight + WINDOW_GAP);
+    public void updateWindows() {
+        final int x = getX();
+        final int y = getY();
+        final int height = getHeight();
+        final int width = getWidth();
+        programWindow.setLocation(x - programWindow.getWidth() - WINDOW_GAP, y);
+        dataWindow.setLocation(x + width + WINDOW_GAP, y);
+        programWindow.setSize(programWindow.getPreferredSize().width, height);
+        dataWindow.setSize(dataWindow.getPreferredSize().width, height);
+        textWindow.setLocation(x - programWindow.getWidth() - WINDOW_GAP, y + height + WINDOW_GAP);
         requestFocus();
     }
 
@@ -147,12 +116,5 @@ public class MainWindow extends JFrame {
 
     public TextWindow getTextWindow() {
         return textWindow;
-    }
-
-    private final class MainWindowComponentAdapter extends ComponentAdapter {
-        @Override
-        public void componentMoved(final ComponentEvent event) {
-            updateSubWindowsPositions();
-        }
     }
 }

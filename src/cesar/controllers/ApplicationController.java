@@ -1,49 +1,28 @@
 package cesar.controllers;
 
-import static cesar.utils.Integers.clamp;
-
-import java.awt.Component;
-import java.awt.event.*;
-
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import javax.swing.JToggleButton;
-
 import cesar.models.Base;
 import cesar.models.Cpu;
 import cesar.models.Cpu.ExecutionResult;
 import cesar.utils.Bytes;
 import cesar.utils.Defaults;
+import cesar.utils.Integers;
 import cesar.utils.Shorts;
 import cesar.views.dialogs.CopyMemoryDialog;
 import cesar.views.dialogs.GotoDialog;
 import cesar.views.dialogs.SaveTextDialog;
 import cesar.views.dialogs.ZeroMemoryDialog;
 import cesar.views.displays.RegisterDisplay;
-import cesar.views.panels.ButtonPanel;
-import cesar.views.panels.ConditionPanel;
-import cesar.views.panels.ExecutionPanel;
-import cesar.views.panels.InstructionPanel;
 import cesar.views.panels.MenuBar;
-import cesar.views.panels.RegisterPanel;
-import cesar.views.panels.StatusBar;
-import cesar.views.tables.DataTable;
-import cesar.views.tables.DataTableModel;
-import cesar.views.tables.ProgramTable;
-import cesar.views.tables.ProgramTableModel;
-import cesar.views.tables.Table;
-import cesar.views.tables.TableModel;
+import cesar.views.panels.*;
+import cesar.views.tables.*;
 import cesar.views.utils.Components;
 import cesar.views.utils.FileLoader;
 import cesar.views.utils.FileSaver;
-import cesar.views.windows.DataWindow;
-import cesar.views.windows.MainWindow;
-import cesar.views.windows.ProgramWindow;
-import cesar.views.windows.SideWindow;
-import cesar.views.windows.TextWindow;
+import cesar.views.windows.*;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 public final class ApplicationController {
     private final MainWindow window;
@@ -85,6 +64,8 @@ public final class ApplicationController {
 
     public ApplicationController() {
         window = new MainWindow();
+        window.updateWindows();
+
         cpu = window.getCpu();
         menuBar = (MenuBar) window.getJMenuBar();
         statusBar = window.getStatusBar();
@@ -123,6 +104,19 @@ public final class ApplicationController {
         setBase(Defaults.DEFAULT_BASE);
     }
 
+    private void setBase(final Base newBase) {
+        if (base != newBase) {
+            base = newBase;
+            saveTextDialog.setBase(newBase);
+            zeroMemoryDialog.setBase(newBase);
+            gotoDialog.setBase(newBase);
+            programWindow.setBase(newBase);
+            dataWindow.setBase(newBase);
+            fileLoader.setBase(newBase);
+            registerPanel.setBase(newBase);
+        }
+    }
+
     private void copyMemory() {
         if (copyMemoryDialog.showDialog(base)) {
             cpu.copyMemory(copyMemoryDialog.getStartAddress(), copyMemoryDialog.getEndAddress(),
@@ -152,25 +146,23 @@ public final class ApplicationController {
         }
     }
 
-    private boolean askToSave() {
-        boolean result = true;
+    private boolean showSaveDialog() {
         final int choice =
                 JOptionPane.showConfirmDialog(window, "O conteúdo da memória mudou, deseja salvar o arquivo?");
         if (choice == JOptionPane.OK_OPTION) {
-            result = fileSaver.saveFile(cpu.getMemory());
+            return fileSaver.saveFile(cpu.getMemory());
         }
-        else if (choice == JOptionPane.CANCEL_OPTION) {
-            result = false;
+        else {
+            return choice != JOptionPane.CANCEL_OPTION;
         }
-        return result;
     }
 
     private void exitProgram() {
-        boolean finished = true;
+        boolean readyToExit = true;
         if (cpu.hasOriginalMemoryChanged()) {
-            finished = askToSave();
+            readyToExit = showSaveDialog();
         }
-        if (finished) {
+        if (readyToExit) {
             window.dispose();
             System.exit(0);
         }
@@ -186,10 +178,14 @@ public final class ApplicationController {
         return running;
     }
 
+    private synchronized void setRunning(final boolean value) {
+        running = value;
+    }
+
     private void loadFile() {
         boolean readyToLoad = true;
         if (cpu.hasOriginalMemoryChanged()) {
-            readyToLoad = askToSave();
+            readyToLoad = showSaveDialog();
         }
         if (readyToLoad && fileLoader.loadFile()) {
             updateInterface();
@@ -200,7 +196,7 @@ public final class ApplicationController {
     private void loadFilePartially() {
         boolean readyToLoad = true;
         if (cpu.hasOriginalMemoryChanged()) {
-            readyToLoad = askToSave();
+            readyToLoad = showSaveDialog();
         }
         if (readyToLoad && fileLoader.loadFilePartially()) {
             updateInterface();
@@ -215,23 +211,16 @@ public final class ApplicationController {
         fileSaver.saveFile(cpu.getMemory());
     }
 
-    private void setBase(final Base newBase) {
-        if (base != newBase) {
-            base = newBase;
-            saveTextDialog.setBase(newBase);
-            zeroMemoryDialog.setBase(newBase);
-            gotoDialog.setBase(newBase);
-            programWindow.setBase(newBase);
-            dataWindow.setBase(newBase);
-            fileLoader.setBase(newBase);
-            registerPanel.setBase(newBase);
-        }
-    }
-
     private void setEventListeners() {
         //====================================================================
         // MainWindow Events
         //====================================================================
+        window.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentMoved(final ComponentEvent e) {
+                window.updateWindows();
+            }
+        });
         window.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(final WindowEvent e) {
@@ -242,47 +231,44 @@ public final class ApplicationController {
         //====================================================================
         // Button Events
         //====================================================================
-        nextButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                executeNextInstruction();
-            }
-        });
+        nextButton.addActionListener(e -> executeNextInstruction());
 
-        runButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                if (runButton.isSelected()) {
-                    if (!isRunning()) {
-                        startRunning();
-                    }
-                }
-                else {
-                    setRunning(false);
+        runButton.addActionListener(e -> {
+            if (runButton.isSelected()) {
+                if (!isRunning()) {
+                    startRunning();
                 }
             }
-        });
-
-        decimalButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                setBase(Base.DECIMAL);
-                menuBar.editDecimal.setSelected(true);
+            else {
+                setRunning(false);
             }
         });
 
-        hexadecimalButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                setBase(Base.HEXADECIMAL);
-                menuBar.editHexadecimal.setSelected(true);
-            }
+        decimalButton.addActionListener(e -> {
+            setBase(Base.DECIMAL);
+            menuBar.editDecimal.setSelected(true);
+        });
+
+        hexadecimalButton.addActionListener(e -> {
+            setBase(Base.HEXADECIMAL);
+            menuBar.editHexadecimal.setSelected(true);
         });
 
         //====================================================================
         // Key Events
         //====================================================================
         final KeyListener keyListener = new KeyListener() {
+            @Override
+            public void keyTyped(final KeyEvent event) {
+                menuBar.dispatchEvent(event);
+                cpu.setTypedKey((byte) event.getKeyChar());
+                if (cpu.hasMemoryChanged()) {
+                    programTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.KEYBOARD_INPUT_ADDRESS);
+                    dataTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.KEYBOARD_INPUT_ADDRESS);
+                }
+                window.requestFocus();
+            }
+
             @Override
             public void keyPressed(final KeyEvent event) {
                 menuBar.dispatchEvent(event);
@@ -292,17 +278,6 @@ public final class ApplicationController {
             @Override
             public void keyReleased(final KeyEvent event) {
                 menuBar.dispatchEvent(event);
-                window.requestFocus();
-            }
-
-            @Override
-            public void keyTyped(final KeyEvent event) {
-                menuBar.dispatchEvent(event);
-                cpu.setTypedKey((byte) event.getKeyChar());
-                if (cpu.hasMemoryChanged()) {
-                    programTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.KEYBOARD_INPUT_ADDRESS);
-                    dataTableModel.fireTableRowsUpdated(Cpu.KEYBOARD_STATE_ADDRESS, Cpu.KEYBOARD_INPUT_ADDRESS);
-                }
                 window.requestFocus();
             }
         };
@@ -328,12 +303,7 @@ public final class ApplicationController {
         programWindow.getValueField().addActionListener(new ValueFieldActionListener(programWindow));
         programWindow.getValueField().addKeyListener(new ValueFieldKeyAdapter(programWindow));
         final ProgramWindow.BreakPointField breakPointField = programWindow.getBreakPointField();
-        breakPointField.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                cpu.setBreakPoint(breakPointField.getBreakPoint());
-            }
-        });
+        breakPointField.addActionListener(e -> cpu.setBreakPoint(breakPointField.getBreakPoint()));
         breakPointField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(final FocusEvent event) {
@@ -364,10 +334,9 @@ public final class ApplicationController {
         //====================================================================
         // Menu Events
         //====================================================================
-        final Component[][] pairs = new Component[][] {
-                { programWindow, menuBar.viewProgram }, { dataWindow, menuBar.viewData },
-                { textWindow, menuBar.viewDisplay }
-        };
+        final Component[][] pairs =
+                new Component[][]{{programWindow, menuBar.viewProgram}, {dataWindow, menuBar.viewData},
+                        {textWindow, menuBar.viewDisplay}};
 
         for (final Component[] pair : pairs) {
             final JDialog sideWindow = (JDialog) pair[0];
@@ -376,118 +345,44 @@ public final class ApplicationController {
             checkBox.addActionListener(new CheckBoxMenuItemComponentAdapter(sideWindow, checkBox));
         }
 
-        menuBar.fileLoad.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                loadFile();
+        menuBar.fileLoad.addActionListener(e -> loadFile());
+
+        menuBar.fileLoadPartially.addActionListener(e -> loadFilePartially());
+
+        menuBar.fileSave.addActionListener(e -> saveFile());
+
+        menuBar.fileSaveText.addActionListener(e -> saveAsText());
+
+        menuBar.fileExit.addActionListener(e -> exitProgram());
+
+        menuBar.editGoto.addActionListener(e -> goTo());
+
+        menuBar.editZeroMemory.addActionListener(e -> zeroMemory());
+
+        menuBar.editCopyMemory.addActionListener(e -> copyMemory());
+
+        menuBar.editDecimal.addActionListener(e -> decimalButton.doClick());
+
+        menuBar.editHexadecimal.addActionListener(e -> hexadecimalButton.doClick());
+
+        menuBar.execRun.addActionListener(e -> runButton.doClick());
+
+        menuBar.execNext.addActionListener(e -> nextButton.doClick());
+
+        menuBar.execUpdateRegisters.addActionListener(e -> {
+            if (menuBar.execUpdateRegisters.getState()) {
+                updateAfterInstruction();
             }
         });
 
-        menuBar.fileLoadPartially.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                loadFilePartially();
-            }
-        });
+        menuBar.execChangeProgramCounter
+                .addActionListener(e -> showRegisterDisplayDialog(registerPanel.getDisplay(Cpu.PC)));
 
-        menuBar.fileSave.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                saveFile();
-            }
+        // TODO: Também tem que zerar o IE.
+        menuBar.execZeroProgramCounter.addActionListener(e -> {
+            cpu.setRegisterValue(Cpu.PC, Cpu.ZERO_BYTE);
+            updateInterface();
         });
-
-        menuBar.fileSaveText.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                saveAsText();
-            }
-        });
-
-        menuBar.fileExit.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent actionEvent) {
-                exitProgram();
-            }
-        });
-
-        menuBar.editGoto.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                goTo();
-            }
-        });
-
-        menuBar.editZeroMemory.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                zeroMemory();
-            }
-        });
-
-        menuBar.editCopyMemory.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                copyMemory();
-            }
-        });
-
-        menuBar.editDecimal.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                decimalButton.doClick();
-            }
-        });
-
-        menuBar.editHexadecimal.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                hexadecimalButton.doClick();
-            }
-        });
-
-        menuBar.execRun.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                runButton.doClick();
-            }
-        });
-
-        menuBar.execNext.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                nextButton.doClick();
-            }
-        });
-
-        menuBar.execUpdateRegisters.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                if (menuBar.execUpdateRegisters.getState()) {
-                    updateAfterInstruction();
-                }
-            }
-        });
-
-        menuBar.execChangeProgramCounter.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                showRegisterDisplayDialog(registerPanel.getDisplay(Cpu.PC));
-            }
-        });
-
-        menuBar.execZeroProgramCounter.addActionListener(new ActionListener() {
-            // TODO: Também tem que zerar o IE.
-            @Override
-            public void actionPerformed(final ActionEvent event) {
-                cpu.setRegisterValue(Cpu.PC, Cpu.ZERO_BYTE);
-                updateInterface();
-            }
-        });
-    }
-
-    private synchronized void setRunning(final boolean value) {
-        running = value;
     }
 
     private void showRegisterDisplayDialog(final RegisterDisplay registerDisplay) {
@@ -505,14 +400,11 @@ public final class ApplicationController {
 
     private synchronized void startRunning() {
         setRunning(true);
-        final Thread runningThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (isRunning()) {
-                    executeNextInstruction();
-                }
-                updateInterface();
+        final Thread runningThread = new Thread(() -> {
+            while (isRunning()) {
+                executeNextInstruction();
             }
+            updateInterface();
         });
         runningThread.start();
     }
@@ -640,6 +532,29 @@ public final class ApplicationController {
         }
     }
 
+    private static class ValueFieldKeyAdapter extends KeyAdapter {
+        private final SideWindow<?, ?> sideWindow;
+
+        public ValueFieldKeyAdapter(final SideWindow<?, ?> sideWindow) {
+            this.sideWindow = sideWindow;
+        }
+
+        @Override
+        public void keyPressed(final KeyEvent event) {
+            // TODO: Verificar se o valor atual é inserido na tabela quando uma seta é apertada.
+
+            final int keyCode = event.getKeyCode();
+            if (keyCode == KeyEvent.VK_UP) {
+                sideWindow.clickOnRow(Math.max(Cpu.FIRST_ADDRESS, sideWindow.getCurrentAddress() - 1));
+            }
+            else if (keyCode == KeyEvent.VK_DOWN) {
+                sideWindow.clickOnRow(Math.min(Cpu.LAST_ADDRESS, sideWindow.getCurrentAddress() + 1));
+            }
+            else {
+                super.keyReleased(event);
+            }
+        }
+    }
 
     private class ValueFieldActionListener implements ActionListener {
         private final SideWindow<?, ?> sideWindow;
@@ -670,7 +585,7 @@ public final class ApplicationController {
                         textWindow.getDisplay().repaint();
                     }
                     // Seleciona a próxima linha
-                    address = clamp(address + 1);
+                    address = Integers.clamp(address + 1);
                     table.setRowSelectionInterval(address, address);
                     valueField.setText(tableModel.getValueAsString(address));
                     table.scrollToRow(address);
@@ -680,31 +595,6 @@ public final class ApplicationController {
                 }
             }
             catch (final NumberFormatException ignored) {
-            }
-        }
-    }
-
-
-    private static class ValueFieldKeyAdapter extends KeyAdapter {
-        private final SideWindow<?, ?> sideWindow;
-
-        public ValueFieldKeyAdapter(final SideWindow<?, ?> sideWindow) {
-            this.sideWindow = sideWindow;
-        }
-
-        @Override
-        public void keyPressed(final KeyEvent event) {
-            // TODO: Verificar se o valor atual é inserido na tabela quando uma seta é apertada.
-
-            final int keyCode = event.getKeyCode();
-            if (keyCode == KeyEvent.VK_UP) {
-                sideWindow.clickOnRow(Math.max(Cpu.FIRST_ADDRESS, sideWindow.getCurrentAddress() - 1));
-            }
-            else if (keyCode == KeyEvent.VK_DOWN) {
-                sideWindow.clickOnRow(Math.min(Cpu.LAST_ADDRESS, sideWindow.getCurrentAddress() + 1));
-            }
-            else {
-                super.keyReleased(event);
             }
         }
     }

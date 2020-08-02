@@ -1,57 +1,54 @@
 package cesar.views.displays;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.swing.JPanel;
-
-import cesar.utils.Properties;
 
 public class LedDisplay extends JPanel {
     private static final long serialVersionUID = 7159709799229150768L;
 
     private static final int WIDTH = 15;
     private static final int HEIGHT = 15;
-    private static final BufferedImage[] images;
+    private static final String LIGHT_ON_PATH = "/cesar/resources/images/light_on.png";
+    private static final String LIGHT_OFF_PATH = "/cesar/resources/images/light_off.png";
+    private static final BufferedImage[] IMAGES;
 
     static {
-        images = new BufferedImage[2];
+        IMAGES = new BufferedImage[2];
         try {
-            images[0] = ImageIO
-                    .read(LedDisplay.class.getResourceAsStream(Properties.getProperty("LedDisplay.lightOffImagePath")));
-            images[1] = ImageIO
-                    .read(LedDisplay.class.getResourceAsStream(Properties.getProperty("LedDisplay.lightOnImagePath")));
+            IMAGES[0] = ImageIO.read(LedDisplay.class.getResourceAsStream(LIGHT_OFF_PATH));
+            IMAGES[1] = ImageIO.read(LedDisplay.class.getResourceAsStream(LIGHT_ON_PATH));
         }
-        catch (final IOException e) {
+        catch (final IOException exception) {
             System.err.println("Erro ao ler as imagens do LED.");
-            e.printStackTrace();
+            exception.printStackTrace(System.err);
+            System.exit(1);
         }
     }
 
-    private boolean isTurnedOn;
+    private boolean isLightOn;
 
     public LedDisplay() {
         super(true);
-        final Dimension dim = new Dimension(WIDTH, HEIGHT);
-        setSize(dim);
-        setPreferredSize(dim);
-        setMinimumSize(dim);
-        setMaximumSize(dim);
-        isTurnedOn = false;
+        final Dimension size = new Dimension(WIDTH, HEIGHT);
+        setSize(size);
+        setPreferredSize(size);
+        setMinimumSize(size);
+        setMaximumSize(size);
+        isLightOn = false;
     }
 
     @Override
     public void paintComponent(final Graphics g) {
         super.paintComponent(g);
-        g.drawImage(isTurnedOn ? images[1] : images[0], 0, 0, WIDTH, HEIGHT, null);
+        g.drawImage(isLightOn ? IMAGES[1] : IMAGES[0], 0, 0, WIDTH, HEIGHT, null);
     }
 
-    public void setTurnedOn(final boolean value) {
-        if (isTurnedOn != value) {
-            isTurnedOn = value;
+    public void setLightOn(final boolean value) {
+        if (isLightOn != value) {
+            isLightOn = value;
             repaint();
         }
     }

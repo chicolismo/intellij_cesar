@@ -1,19 +1,16 @@
 package cesar.views.tables;
 
-import java.awt.Component;
+import cesar.utils.Defaults;
 
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
-
-import cesar.utils.Defaults;
+import java.awt.*;
 
 public class ProgramTable extends Table {
     private static final long serialVersionUID = -8843361396327035069L;
 
-    private static final int[] COLUMN_WIDTHS = new int[] { 35, 62, 40, 160 };
+    private static final int[] COLUMN_WIDTHS = new int[]{35, 62, 40, 160};
 
     public ProgramTable(final ProgramTableModel model) {
         super(model);
@@ -35,7 +32,7 @@ public class ProgramTable extends Table {
 
         @Override
         public Component getTableCellRendererComponent(final JTable table, final Object value, final boolean isSelected,
-                final boolean hasFocus, final int row, final int col) {
+                                                       final boolean hasFocus, final int row, final int col) {
             final JLabel c = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
             c.setForeground(Defaults.ARROW_COLOR);
             c.setHorizontalAlignment(SwingConstants.CENTER);

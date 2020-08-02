@@ -6,7 +6,7 @@ public class DataTableModel extends TableModel {
     private static final long serialVersionUID = -6517003845553744906L;
 
     public DataTableModel(final Cpu cpu) {
-        super(cpu, new String[] { "Endereço", "Dado" }, new Class<?>[] { Integer.class, Byte.class });
+        super(cpu, new String[]{"Endereço", "Dado"}, new Class<?>[]{Integer.class, Byte.class});
     }
 
     @Override

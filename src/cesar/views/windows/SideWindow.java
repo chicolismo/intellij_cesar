@@ -1,31 +1,21 @@
 package cesar.views.windows;
 
-import java.awt.Dimension;
-import java.awt.GridBagLayout;
+import cesar.models.Base;
+import cesar.models.Cpu;
+import cesar.utils.Defaults;
+import cesar.views.tables.Table;
+import cesar.views.tables.TableModel;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
-
-import cesar.models.Base;
-import cesar.models.Cpu;
-import cesar.utils.Defaults;
-import cesar.utils.Properties;
-import cesar.views.tables.Table;
-import cesar.views.tables.TableModel;
+import java.awt.*;
 
 public abstract class SideWindow<TableType extends Table, TableModelType extends TableModel> extends JDialog {
     public static final long serialVersionUID = 3602114587032491724L;
-    public static final String LABEL_FORMAT = Properties.getProperty("SideWindow.labelFormat");
+    public static final String LABEL_FORMAT = "[%s]";
 
     protected final JLabel addressLabel;
 
@@ -52,11 +42,10 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         currentBase = Defaults.DEFAULT_BASE;
     }
 
-    protected static GridBagLayout getGridLayout(final double[] rowWeights, final double[] colWeights) {
-        final GridBagLayout grid = new GridBagLayout();
-        grid.rowWeights = rowWeights;
-        grid.columnWeights = colWeights;
-        return grid;
+    abstract protected void initTable(final Cpu cpu);
+
+    public void setCurrentValue(final int value) {
+        currentValue = value;
     }
 
     protected void initLayout() {
@@ -71,8 +60,6 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         scrollPane.setPreferredSize(scrollPaneSize);
         contentPane.add(scrollPane);
     }
-
-    abstract protected void initTable(final Cpu cpu);
 
     public void clickOnRow(final int row) {
         table.setRowSelectionInterval(row, row);
@@ -92,6 +79,10 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
 
     public int getCurrentAddress() {
         return currentAddress;
+    }
+
+    public void setCurrentAddress(final int address) {
+        currentAddress = address;
     }
 
     public TableType getTable() {
@@ -114,24 +105,23 @@ public abstract class SideWindow<TableType extends Table, TableModelType extends
         return currentBase;
     }
 
-    public void setCurrentAddress(final int address) {
-        currentAddress = address;
-    }
-
-    public void setCurrentValue(final int value) {
-        currentValue = value;
+    protected static GridBagLayout getGridLayout(final double[] rowWeights, final double[] colWeights) {
+        final GridBagLayout grid = new GridBagLayout();
+        grid.rowWeights = rowWeights;
+        grid.columnWeights = colWeights;
+        return grid;
     }
 
     protected static class UpperCaseFilter extends DocumentFilter {
         @Override
-        public void insertString(DocumentFilter.FilterBypass fb, int offset, String text,
-                AttributeSet attr) throws BadLocationException {
+        public void insertString(DocumentFilter.FilterBypass fb, int offset, String text, AttributeSet attr)
+                throws BadLocationException {
             fb.insertString(offset, text.toUpperCase(), attr);
         }
 
         @Override
-        public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text,
-                AttributeSet attrs) throws BadLocationException {
+        public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
+                throws BadLocationException {
             fb.replace(offset, length, text.toUpperCase(), attrs);
         }
     }

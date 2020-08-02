@@ -16,7 +16,7 @@ public final class Line {
     }
 
     public String asString(final int maxByteCount, final String addressFormat, final String byteFormat,
-            final String emptyString, final String byteSeparator, final String endLine) {
+                           final String emptyString, final String byteSeparator, final String endLine) {
 
         final StringBuilder builder = new StringBuilder();
         builder.append(String.format(addressFormat, address).toUpperCase()).append("   ");
@@ -39,12 +39,12 @@ public final class Line {
         return address;
     }
 
-    public int getBytesSize() {
-        return bytes.size();
-    }
-
     public void setAddress(final int address) {
         this.address = address;
+    }
+
+    public int getBytesSize() {
+        return bytes.size();
     }
 
     public void setString(final String mnemonic) {

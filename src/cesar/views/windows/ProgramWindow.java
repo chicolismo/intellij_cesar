@@ -1,52 +1,45 @@
 package cesar.views.windows;
 
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-
-
-import javax.swing.Box;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DocumentFilter;
-
 import cesar.models.Base;
 import cesar.models.Cpu;
-import cesar.utils.Properties;
 import cesar.utils.Shorts;
 import cesar.views.tables.ProgramTable;
 import cesar.views.tables.ProgramTableModel;
 
+import javax.swing.*;
+import javax.swing.text.AbstractDocument;
+import java.awt.*;
+
 public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
     public static final long serialVersionUID = 8452878222228144644L;
+
+    private static final String TITLE = "Programa";
+    private static final String BREAK_POINT_LABEL = "BP";
+    private static final Color BREAK_POINT_COLOR = new Color(0xAA, 0x00, 0x00);
 
     private final BreakPointField bpField;
 
     public ProgramWindow(final MainWindow parent, final Cpu cpu) {
-        super(parent, Properties.getProperty("ProgramWindow.title"), cpu);
+        super(parent, TITLE, cpu);
         bpField = new BreakPointField(cpu, getCurrentBase());
         bpField.setMinimumSize(bpField.getPreferredSize());
         initLayout();
     }
 
     @Override
+    protected void initTable(final Cpu cpu) {
+        model = new ProgramTableModel(cpu);
+        table = new ProgramTable(model);
+    }
+
+    @Override
     protected void initLayout() {
         super.initLayout();
 
-        final JLabel bpLabel = new JLabel(Properties.getProperty("ProgramWindow.BreakPoint.text"));
-        try {
-            final int rgb = Integer.parseInt(Properties.getProperty("ProgramWindow.breakPointColor"), 16);
-            bpLabel.setForeground(new Color(rgb));
-        }
-        catch (final NumberFormatException e) {
-            bpLabel.setForeground(Color.RED);
-        }
+        final JLabel bpLabel = new JLabel(BREAK_POINT_LABEL);
+        bpLabel.setForeground(BREAK_POINT_COLOR);
 
-        final JPanel lowerPanel = new JPanel(
-                getGridLayout(new double[] { 1.0 }, new double[] { 0.0, 0.0, 1.0, 0.0, 0.0 }));
+        final JPanel lowerPanel = new JPanel(getGridLayout(new double[]{1.0}, new double[]{0.0, 0.0, 1.0, 0.0, 0.0}));
 
         final GridBagConstraints c_0 = new GridBagConstraints();
         c_0.ipadx = 4;
@@ -89,12 +82,6 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
     }
 
     @Override
-    protected void initTable(final Cpu cpu) {
-        model = new ProgramTableModel(cpu);
-        table = new ProgramTable(model);
-    }
-
-    @Override
     public void setBase(final Base base) {
         super.setBase(base);
         bpField.setBase(base);
@@ -121,6 +108,11 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
             setCurrentBreakPoint();
         }
 
+        private void setCurrentBreakPoint() {
+            final short breakPoint = cpu.getBreakPoint();
+            setText(Integer.toString(Shorts.toUnsignedInt(breakPoint), currentBase.toInt()));
+        }
+
         public short getBreakPoint() {
             final int radix = currentBase.toInt();
             try {
@@ -132,11 +124,6 @@ public class ProgramWindow extends SideWindow<ProgramTable, ProgramTableModel> {
                 setCurrentBreakPoint();
                 return cpu.getBreakPoint();
             }
-        }
-
-        private void setCurrentBreakPoint() {
-            final short breakPoint = cpu.getBreakPoint();
-            setText(Integer.toString(Shorts.toUnsignedInt(breakPoint), currentBase.toInt()));
         }
     }
 }

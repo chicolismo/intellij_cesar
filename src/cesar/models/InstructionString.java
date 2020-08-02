@@ -6,8 +6,7 @@ import java.util.HashMap;
 
 @SuppressWarnings("ObjectAllocationInLoop")
 public enum InstructionString {
-    NOP, CCC, SCC, BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS, JMP, SOB, JSR, RTS, RTI,
-    CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC, MOV, ADD, SUB, CMP, AND, OR, HLT;
+    NOP, CCC, SCC, BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS, JMP, SOB, JSR, RTS, RTI, CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC, MOV, ADD, SUB, CMP, AND, OR, HLT;
 
     private static final HashMap<Integer, InstructionString> INSTRUCTION_MAP;
     private static final EnumMap<InstructionString, String> FORMAT;
@@ -70,8 +69,8 @@ public enum InstructionString {
         // Instrução de parada
         INSTRUCTION_MAP.put(0b1111, HLT);
 
-        CONDITIONAL_BRANCH_INSTRUCTIONS = EnumSet.of(BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE,
-                BHI, BLS);
+        CONDITIONAL_BRANCH_INSTRUCTIONS =
+                EnumSet.of(BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS);
         ONE_OP_INSTRUCTIONS = EnumSet.of(CLR, NOT, INC, DEC, NEG, TST, ROR, ROL, ASR, ASL, ADC, SBC);
         TWO_OP_INSTRUCTIONS = EnumSet.of(MOV, ADD, SUB, CMP, AND, OR);
 
@@ -96,6 +95,10 @@ public enum InstructionString {
         }
     }
 
+    public String getFormatString() {
+        return FORMAT.get(this);
+    }
+
     public static InstructionString getInstruction(final byte opCode) {
         int key = 0xFF & opCode;
         if (INSTRUCTION_MAP.containsKey(key)) {
@@ -108,9 +111,5 @@ public enum InstructionString {
         }
 
         return NOP;
-    }
-
-    public String getFormatString() {
-        return FORMAT.get(this);
     }
 }

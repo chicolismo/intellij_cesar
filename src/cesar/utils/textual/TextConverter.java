@@ -1,14 +1,14 @@
 package cesar.utils.textual;
 
+import cesar.models.Base;
+import cesar.models.Cpu;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-
-import cesar.models.Base;
-import cesar.models.Cpu;
 
 /**
  * Converte o conteúdo da memória do CPU em um arquivo de texto.
@@ -28,18 +28,6 @@ public final class TextConverter {
     private TextConverter() {
     }
 
-    private static String getAddressFormat(final Base base) {
-        return base == Base.DECIMAL ? "%5d" : "%4x";
-    }
-
-    private static String getByteFormat(final Base base) {
-        return base == Base.DECIMAL ? "%3d" : "%2x";
-    }
-
-    private static String getEmptyString(final Base base) {
-        return base == Base.DECIMAL ? "   " : "  ";
-    }
-
     public static void writeToFile(final Cpu cpu, final Base base, final File file, final int[] addresses) {
 
         final int startProgramAddress = addresses[0];
@@ -48,8 +36,8 @@ public final class TextConverter {
         final int endDataAddress = addresses[3];
 
         try {
-            final OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file),
-                    StandardCharsets.US_ASCII);
+            final OutputStreamWriter writer =
+                    new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.US_ASCII);
 
             final LineReaderResult result = LineReader.readLines(cpu);
 
@@ -62,8 +50,8 @@ public final class TextConverter {
             for (int i = startProgramAddress; i <= endProgramAddress; ++i) {
                 final Line line = lines.get(i);
                 if (line.getAddress() <= endProgramAddress) {
-                    final String lineString = line.asString(maxByteCount, addressFormat, emptyString, byteFormat,
-                            BYTE_SEPARATOR, ENDL);
+                    final String lineString =
+                            line.asString(maxByteCount, addressFormat, emptyString, byteFormat, BYTE_SEPARATOR, ENDL);
                     writer.write(lineString);
                 }
             }
@@ -78,5 +66,17 @@ public final class TextConverter {
         catch (final IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static String getAddressFormat(final Base base) {
+        return base == Base.DECIMAL ? "%5d" : "%4x";
+    }
+
+    private static String getByteFormat(final Base base) {
+        return base == Base.DECIMAL ? "%3d" : "%2x";
+    }
+
+    private static String getEmptyString(final Base base) {
+        return base == Base.DECIMAL ? "   " : "  ";
     }
 }

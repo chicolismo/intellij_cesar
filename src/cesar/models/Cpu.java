@@ -1,14 +1,14 @@
 package cesar.models;
 
-import static cesar.utils.Integers.clamp;
-import static cesar.utils.Integers.clampToShort;
+import cesar.utils.Bytes;
+import cesar.utils.Integers;
+import cesar.utils.Shorts;
 
 import java.util.Arrays;
 import java.util.EnumMap;
 
-import cesar.utils.Bytes;
-import cesar.utils.Integers;
-import cesar.utils.Shorts;
+import static cesar.utils.Integers.clamp;
+import static cesar.utils.Integers.clampToShort;
 
 public class Cpu {
     public static final int REGISTER_COUNT = 8;
@@ -27,8 +27,8 @@ public class Cpu {
     private final short[] registers;
     private final byte[] memory;
     private final byte[] originalMemory;
-    private boolean originalMemoryChanged;
     private final String[] mnemonics;
+    private boolean originalMemoryChanged;
     private short breakPoint;
     private boolean memoryChanged;
     private int lastChangedAddress;
@@ -53,12 +53,8 @@ public class Cpu {
         updateMnemonics();
     }
 
-    public static boolean isIOAddress(final int address) {
-        return Integers.isInInterval(address, KEYBOARD_STATE_ADDRESS, END_DISPLAY_ADDRESS);
-    }
-
-    public static boolean isValidAddress(final int address) {
-        return Integers.isInInterval(address, FIRST_ADDRESS, LAST_ADDRESS);
+    public void updateMnemonics() {
+        Mnemonic.updateMnemonics(this, 0, true);
     }
 
     public ConditionRegister getConditionRegister() {
@@ -445,11 +441,6 @@ public class Cpu {
         return operand;
     }
 
-    private byte readByte(final int address) {
-        ++memoryAccessCount;
-        return memory[clamp(address)];
-    }
-
     private short readWord(final int address) {
         final short word;
         if (isIOAddress(address)) {
@@ -494,6 +485,16 @@ public class Cpu {
             setByte(j, getByte(i));
         }
         updateMnemonics();
+    }
+
+    public void setByte(final int address, final byte value) {
+        memory[clamp(address)] = value;
+        memoryChanged = true;
+        lastChangedMnemonic = Mnemonic.updateMnemonics(this, address);
+    }
+
+    public byte getByte(final int address) {
+        return memory[clamp(address)];
     }
 
     public ExecutionResult executeNextInstruction() {
@@ -615,8 +616,8 @@ public class Cpu {
         return ExecutionResult.NOOP;
     }
 
-    public byte getByte(final int address) {
-        return memory[clamp(address)];
+    public byte getDisplayByte(final int position) {
+        return getByte(Cpu.BEGIN_DISPLAY_ADDRESS + position);
     }
 
     public int getLastChangedAddress() {
@@ -629,6 +630,16 @@ public class Cpu {
 
     public byte[] getMemory() {
         return memory;
+    }
+
+    public void setMemory(final byte[] bytes) {
+        assert bytes.length == MEMORY_SIZE;
+        System.arraycopy(bytes, 0, memory, 0, MEMORY_SIZE);
+        if (!originalMemoryChanged) {
+            System.arraycopy(bytes, 0, originalMemory, 0, MEMORY_SIZE);
+            originalMemoryChanged = true;
+        }
+        Mnemonic.updateMnemonics(this, 0, true);
     }
 
     public int getMemoryAccessCount() {
@@ -695,22 +706,6 @@ public class Cpu {
         breakPoint = bp;
     }
 
-    public void setByte(final int address, final byte value) {
-        memory[clamp(address)] = value;
-        memoryChanged = true;
-        lastChangedMnemonic = Mnemonic.updateMnemonics(this, address);
-    }
-
-    public void setMemory(final byte[] bytes) {
-        assert bytes.length == MEMORY_SIZE;
-        System.arraycopy(bytes, 0, memory, 0, MEMORY_SIZE);
-        if (!originalMemoryChanged) {
-            System.arraycopy(bytes, 0, originalMemory, 0, MEMORY_SIZE);
-            originalMemoryChanged = true;
-        }
-        Mnemonic.updateMnemonics(this, 0, true);
-    }
-
     public void setMemory(final byte[] bytes, final int start, final int end, final int target) {
         assert end <= MEMORY_SIZE;
         if (originalMemoryChanged) {
@@ -748,8 +743,9 @@ public class Cpu {
         }
     }
 
-    public void updateMnemonics() {
-        Mnemonic.updateMnemonics(this, 0, true);
+    private byte readByte(final int address) {
+        ++memoryAccessCount;
+        return memory[clamp(address)];
     }
 
     public void zeroMemory(final int startAddress, final int endAddress) {
@@ -757,18 +753,13 @@ public class Cpu {
         updateMnemonics();
     }
 
-    private static class Operand {
-        public final short value;
-        public final int address;
-        public final AddressMode addressMode;
-
-        public Operand(final short value, final int address, final AddressMode addressMode) {
-            this.value = value;
-            this.address = address;
-            this.addressMode = addressMode;
-        }
+    public static boolean isIOAddress(final int address) {
+        return Integers.isInInterval(address, KEYBOARD_STATE_ADDRESS, END_DISPLAY_ADDRESS);
     }
 
+    public static boolean isValidAddress(final int address) {
+        return Integers.isInInterval(address, FIRST_ADDRESS, LAST_ADDRESS);
+    }
 
     enum BranchInstruction {
         BR, BNE, BEQ, BPL, BMI, BVC, BVS, BCC, BCS, BGE, BLT, BGT, BLE, BHI, BLS;
@@ -802,10 +793,6 @@ public class Cpu {
         }
     }
 
-    // enum CpuReturnInstruction {
-    // RTS, RTI
-    // }
-
 
     public enum ExecutionResult {
         HALT, NOOP, OK, BREAK_POINT, END_OF_MEMORY;
@@ -823,6 +810,22 @@ public class Cpu {
         @Override
         public String toString() {
             return TO_STRING.get(this);
+        }
+    }
+
+    // enum CpuReturnInstruction {
+    // RTS, RTI
+    // }
+
+    private static class Operand {
+        public final short value;
+        public final int address;
+        public final AddressMode addressMode;
+
+        public Operand(final short value, final int address, final AddressMode addressMode) {
+            this.value = value;
+            this.address = address;
+            this.addressMode = addressMode;
         }
     }
 

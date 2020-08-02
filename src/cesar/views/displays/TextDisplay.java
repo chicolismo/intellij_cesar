@@ -1,39 +1,35 @@
 package cesar.views.displays;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import cesar.models.Cpu;
+import cesar.utils.Bytes;
+import cesar.utils.Integers;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
-import javax.swing.JPanel;
-
-import cesar.models.Cpu;
-import cesar.utils.Properties;
-
 public class TextDisplay extends JPanel {
     private static final long serialVersionUID = 1744904008121167731L;
-
-    private static final int SIZE = 36;
+    private static final int DISPLAY_SIZE = 36;
     private static final int CHAR_WIDTH = 20;
     private static final int CHAR_HEIGHT = 28;
     private static final int START_Y = 4;
     private static final int START_X = 1;
     private static final int CHAR_OFFSET = CHAR_WIDTH + 1;
-    private static final int WIDTH = CHAR_OFFSET * SIZE + 2;
+    private static final int WIDTH = CHAR_OFFSET * DISPLAY_SIZE + 2;
     private static final int HEIGHT = CHAR_HEIGHT + 8;
-    private static final int NUMBER_OF_CHARACTERS = 95;
-    private static final int START_ADDRESS = Cpu.BEGIN_DISPLAY_ADDRESS;
-
-    private static final BufferedImage[] charImages;
+    private static final int N_CHARS = 95;
+    private static final int ASCII_DIFFERENCE = 32;
+    private static final String CHAR_FORMAT = "/cesar/resources/images/character_%02d.png";
+    private static final BufferedImage[] CHAR_IMAGES;
 
     static {
-        charImages = new BufferedImage[NUMBER_OF_CHARACTERS];
-        final String format = Properties.getProperty("TextDisplay.characterFormat");
+        CHAR_IMAGES = new BufferedImage[N_CHARS];
         try {
-            for (int i = 0; i < NUMBER_OF_CHARACTERS; ++i) {
-                charImages[i] = ImageIO.read(TextDisplay.class.getResourceAsStream(String.format(format, i)));
+            for (int i = 0; i < N_CHARS; ++i) {
+                CHAR_IMAGES[i] = ImageIO.read(TextDisplay.class.getResourceAsStream(String.format(CHAR_FORMAT, i)));
             }
         }
         catch (final IOException e) {
@@ -61,16 +57,19 @@ public class TextDisplay extends JPanel {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, WIDTH, HEIGHT);
         int x = START_X;
-        for (int i = 0; i < SIZE; ++i) {
-            // int index = (memory[START_ADDRESS + i] - 32);
-            final int index = cpu.getByte(START_ADDRESS + i) - 32;
-            if (index >= 0 && index < NUMBER_OF_CHARACTERS) {
-                g.drawImage(charImages[index], x, START_Y, CHAR_WIDTH, CHAR_HEIGHT, null);
-            }
-            else {
-                g.drawImage(charImages[0], x, START_Y, CHAR_WIDTH, CHAR_HEIGHT, null);
-            }
+        for (int i = 0; i < DISPLAY_SIZE; ++i) {
+            g.drawImage(getCharImage(cpu.getDisplayByte(i)), x, START_Y, CHAR_WIDTH, CHAR_HEIGHT, null);
             x += CHAR_OFFSET;
+        }
+    }
+
+    private static BufferedImage getCharImage(final byte byteValue) {
+        final int index = Bytes.toUnsignedInt(byteValue) - ASCII_DIFFERENCE;
+        if (Integers.isInInterval(index, 0, N_CHARS, false)) {
+            return CHAR_IMAGES[index];
+        }
+        else {
+            return CHAR_IMAGES[0];
         }
     }
 }

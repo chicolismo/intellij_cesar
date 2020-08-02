@@ -1,21 +1,18 @@
 package cesar.views.panels;
 
-import java.awt.*;
+import cesar.utils.Defaults;
+import cesar.views.displays.DigitalDisplay;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
-
-import cesar.utils.Defaults;
-import cesar.utils.Properties;
-import cesar.views.displays.DigitalDisplay;
+import java.awt.*;
 
 public class ExecutionPanel extends JPanel {
     private static final long serialVersionUID = 8981667379501321204L;
-    private static final String TITLE = Properties.getProperty("ExecutionPanel.title");
-    private static final String ACCESS_LABEL = Properties.getProperty("ExecutionPanel.accessLabel");
-    private static final String INSTRUCTION_LABEL = Properties.getProperty("ExecutionPanel.instructionLabel");
+    private static final String TITLE = "Execução";
+    private static final String ACCESS_LABEL = "Acessos:";
+    private static final String INSTRUCTION_LABEL = "Instruções:";
 
     private final DigitalDisplay memoryAccessCountDisplay;
     private final DigitalDisplay instructionCountDisplay;
@@ -28,10 +25,10 @@ public class ExecutionPanel extends JPanel {
         final JLabel instructionLabel = Defaults.createLabel(INSTRUCTION_LABEL);
 
         final GridBagLayout grid = new GridBagLayout();
-        grid.columnWidths = new int[] { 0, 0 };
-        grid.rowHeights = new int[] { 0, 0 };
-        grid.columnWeights = new double[] { 0.0, 0.0 };
-        grid.rowWeights = new double[] { 0.0, 0.0 };
+        grid.columnWidths = new int[]{0, 0};
+        grid.rowHeights = new int[]{0, 0};
+        grid.columnWeights = new double[]{0.0, 0.0};
+        grid.rowWeights = new double[]{0.0, 0.0};
         setLayout(grid);
 
         final GridBagConstraints c_0 = new GridBagConstraints();

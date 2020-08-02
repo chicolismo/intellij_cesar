@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 public class FileUtils {
     private static final Pattern SPLIT_EXTENSIONS_PATTERN = Pattern.compile("\\s*,\\s*");
 
-    public static String getExtension(final String fileName) {
+    public static String getFileExtension(final String fileName) {
         final int index = fileName.lastIndexOf('.');
         String extension = "";
         if (index + 1 < fileName.length()) {

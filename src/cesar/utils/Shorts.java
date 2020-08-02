@@ -19,7 +19,7 @@ public class Shorts {
     public static byte[] toBytes(final short value) {
         final byte msb = (byte) ((value & 0xFF00) >> 4);
         final byte lsb = (byte) (value & 0xFF);
-        return new byte[] { msb, lsb };
+        return new byte[]{msb, lsb};
     }
 
     public static int toUnsignedInt(final short value) {

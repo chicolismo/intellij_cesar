@@ -1,17 +1,12 @@
 package cesar.views.panels;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-
 import cesar.utils.Defaults;
-import cesar.utils.Properties;
+
+import javax.swing.*;
 
 public class StatusBar extends JPanel {
     private static final long serialVersionUID = 1408669317780545642L;
-    private static final String INITIAL_VALUE = Properties.getProperty("StatusBar.initialValue");
+    private static final String INITIAL_VALUE = "Pronto";
 
     private final JLabel label;
 
@@ -28,10 +23,6 @@ public class StatusBar extends JPanel {
 
     public void clear() {
         label.setText(" ");
-    }
-
-    public String getText() {
-        return label.getText();
     }
 
     /**
@@ -57,6 +48,10 @@ public class StatusBar extends JPanel {
             }
         });
         tempThread.start();
+    }
+
+    public String getText() {
+        return label.getText();
     }
 
     public void setText(final String text) {

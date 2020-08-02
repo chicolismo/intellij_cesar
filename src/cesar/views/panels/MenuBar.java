@@ -1,39 +1,15 @@
 package cesar.views.panels;
 
-import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.KeyStroke;
-
 import cesar.utils.Defaults;
-import cesar.utils.Properties;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyEvent;
 
 public class MenuBar extends JMenuBar {
     private static final long serialVersionUID = -7618206299229330211L;
 
-    private final static int CTRL_KEY;
-
-    static {
-        int ctrlKey;
-        try {
-            // noinspection JavaReflectionMemberAccess
-            final Method m = Toolkit.class.getMethod("getMenuShortcutKeyMaskEx");
-
-            ctrlKey = (int) m.invoke(Toolkit.getDefaultToolkit());
-        }
-        catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            ctrlKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-        }
-        CTRL_KEY = ctrlKey;
-    }
+    private final static int CTRL_KEY = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 
     public final JMenu fileMenu;
     public final JMenu editMenu;
@@ -72,29 +48,29 @@ public class MenuBar extends JMenuBar {
     public MenuBar() {
         final boolean isApple = Defaults.IS_APPLE;
 
-        // ==============================================================================================================
+        // =============================================================================================================
         // Arquivo
-        // ==============================================================================================================
-        fileMenu = new JMenu(getString("FileMenu.label"));
-        fileMenu.setToolTipText(getString("FileMenu.tooltip"));
+        // =============================================================================================================
+        fileMenu = new JMenu("Arquivo");
+        fileMenu.setToolTipText("Operações com arquivo");
 
-        fileLoad = new JMenuItem(getString("FileMenu.loadLabel"), KeyEvent.VK_C);
-        fileLoad.setToolTipText(getString("FileMenu.loadTooltip"));
+        fileLoad = new JMenuItem("Carregar...");
+        fileLoad.setToolTipText("Carrega um arquivo da memória");
         fileLoad.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, CTRL_KEY));
 
-        fileLoadPartially = new JMenuItem(getString("FileMenu.loadPartiallyLabel"), KeyEvent.VK_P);
-        fileLoadPartially.setToolTipText(getString("FileMenu.loadPartiallyTooltip"));
+        fileLoadPartially = new JMenuItem("Carga parcial...");
+        fileLoadPartially.setToolTipText("Carrega parcialmente um arquivo");
         fileLoadPartially.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, CTRL_KEY));
 
-        fileSave = new JMenuItem(getString("FileMenu.saveLabel"), KeyEvent.VK_S);
-        fileSave.setToolTipText(getString("FileMenu.saveTooltip"));
+        fileSave = new JMenuItem("Salvar...");
+        fileSave.setToolTipText("Salva a memória em um arquivo .MEM");
         fileSave.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, CTRL_KEY));
 
-        fileSaveText = new JMenuItem(getString("FileMenu.saveTextLabel"), KeyEvent.VK_T);
-        fileSaveText.setToolTipText(getString("FileMenu.saveTextTooltip"));
+        fileSaveText = new JMenuItem("Salvar texto...");
+        fileSaveText.setToolTipText("Salva a memória em um arquivo texto");
         fileSaveText.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, CTRL_KEY));
 
-        fileExit = new JMenuItem(getString("FileMenu.exitLabel"), KeyEvent.VK_R);
+        fileExit = new JMenuItem("Sair");
 
         fileMenu.add(fileLoad);
         fileMenu.add(fileLoadPartially);
@@ -103,29 +79,29 @@ public class MenuBar extends JMenuBar {
         fileMenu.addSeparator();
         fileMenu.add(fileExit);
 
-        // ==============================================================================================================
+        // =============================================================================================================
         // Editar
-        // ==============================================================================================================
-        editMenu = new JMenu(getString("EditMenu.label"));
-        editMenu.setToolTipText(getString("EditMenu.tooltip"));
+        // =============================================================================================================
+        editMenu = new JMenu("Editar");
+        editMenu.setToolTipText("Modo de edição, Ir Para..., Zerar memória, etc");
 
-        editGoto = new JMenuItem(getString("EditMenu.gotoLabel"));
-        editGoto.setToolTipText(getString("EditMenu.gotoTooltip"));
+        editGoto = new JMenuItem("Ir Para...");
+        editGoto.setToolTipText("Vai para uma posição na memória");
         editGoto.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, CTRL_KEY));
 
-        editZeroMemory = new JMenuItem(getString("EditMenu.zeroMemoryLabel"));
-        editZeroMemory.setToolTipText(getString("EditMenu.zeroMemoryTooltip"));
+        editZeroMemory = new JMenuItem("Zerar memória");
+        editZeroMemory.setToolTipText("Zera uma região da memória");
         editZeroMemory.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, CTRL_KEY));
 
-        editCopyMemory = new JMenuItem(getString("EditMenu.copyMemoryLabel"));
-        editCopyMemory.setToolTipText(getString("EditMenu.copyMemoryTooltip"));
+        editCopyMemory = new JMenuItem("Copiar memória...");
+        editCopyMemory.setToolTipText("Copia uma região da memória");
 
-        editDecimal = new JRadioButtonMenuItem(getString("EditMenu.decimalLabel"));
-        editDecimal.setToolTipText(getString("EditMenu.decimalTooltip"));
+        editDecimal = new JRadioButtonMenuItem("Decimal");
+        editDecimal.setToolTipText("Trocar para o modo de edição Decimal");
         editDecimal.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, CTRL_KEY));
 
-        editHexadecimal = new JRadioButtonMenuItem(getString("EditMenu.hexadecimalLabel"));
-        editHexadecimal.setToolTipText(getString("EditMenu.hexadecimalTooltip"));
+        editHexadecimal = new JRadioButtonMenuItem("Hexadecimal");
+        editHexadecimal.setToolTipText("Trocar para o modo de edição Hexadecimal");
         editHexadecimal.setAccelerator(KeyStroke.getKeyStroke(isApple ? KeyEvent.VK_X : KeyEvent.VK_H, CTRL_KEY));
 
         final ButtonGroup group = new ButtonGroup();
@@ -140,58 +116,59 @@ public class MenuBar extends JMenuBar {
         editMenu.add(editDecimal);
         editMenu.add(editHexadecimal);
 
-        // ==============================================================================================================
+        // =============================================================================================================
         // Visualizar
-        // ==============================================================================================================
-        viewMenu = new JMenu(getString("ViewMenu.label"));
-        viewMenu.setToolTipText(getString("ViewMenu.tooltip"));
+        // =============================================================================================================
+        viewMenu = new JMenu("Visualizar");
+        viewMenu.setToolTipText("Exibe / oculta janelas");
 
-        viewProgram = new JCheckBoxMenuItem(getString("ViewMenu.programLabel"));
+        viewProgram = new JCheckBoxMenuItem("Memória - Programa");
+        viewProgram.setToolTipText("Exibe / oculta janela de memória do programa");
         viewProgram.setAccelerator(KeyStroke.getKeyStroke(isApple ? KeyEvent.VK_F9 : KeyEvent.VK_F11, 0));
-        viewProgram.setToolTipText(getString("ViewMenu.programTooltip"));
 
-        viewData = new JCheckBoxMenuItem(getString("ViewMenu.dataLabel"));
+        viewData = new JCheckBoxMenuItem("Memória - Dados");
+        viewData.setToolTipText("Exibe / oculta janela de memória dos dados");
         viewData.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
-        viewData.setToolTipText(getString("ViewMenu.dataTooltip"));
 
-        viewDisplay = new JCheckBoxMenuItem(getString("ViewMenu.displayLabel"));
+        viewDisplay = new JCheckBoxMenuItem("Saída");
 
         viewMenu.add(viewProgram);
         viewMenu.add(viewData);
         viewMenu.add(viewDisplay);
 
-        // ==============================================================================================================
+        // =============================================================================================================
         // Executar
-        // ==============================================================================================================
-        execMenu = new JMenu(getString("ExecMenu.label"));
-        execMenu.setToolTipText(getString("ExecMenu.tooltip"));
+        // =============================================================================================================
+        execMenu = new JMenu("Executar");
+        execMenu.setToolTipText("Opções de execução");
 
-        execRun = new JMenuItem(getString("ExecMenu.runLabel"));
-        execRun.setToolTipText(getString("ExecMenu.runTooltip"));
+        execRun = new JMenuItem("Rodar");
+        execRun.setToolTipText("Roda o programa");
         execRun.setAccelerator(KeyStroke.getKeyStroke(isApple ? KeyEvent.VK_F8 : KeyEvent.VK_F9, 0));
 
-        execNext = new JMenuItem(getString("ExecMenu.nextLabel"));
-        execNext.setToolTipText(getString("ExecMenu.nextTooltip"));
+        execNext = new JMenuItem("Passo");
+        execNext.setToolTipText("Executa o programa passo a passo");
         execNext.setAccelerator(KeyStroke.getKeyStroke(isApple ? KeyEvent.VK_F7 : KeyEvent.VK_F8, 0));
 
-        execChangeProgramCounter = new JMenuItem(getString("ExecMenu.changeProgramCounterLabel"));
-        execChangeProgramCounter.setToolTipText(getString("ExecMenu.changeProgramCounterTooltip"));
+        execChangeProgramCounter = new JMenuItem("Alterar PC...");
+        execChangeProgramCounter.setToolTipText("Altera o conteúdo do PC");
         execChangeProgramCounter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L, CTRL_KEY));
 
-        execZeroProgramCounter = new JMenuItem(getString("ExecMenu.zeroProgramCounterLabel"));
-        execZeroProgramCounter.setToolTipText(getString("ExecMenu.zeroProgramCounterTooltip"));
+        execZeroProgramCounter = new JMenuItem("Reset: Zerar PC e IE");
+        execZeroProgramCounter.setToolTipText("Zerar PC");
         execZeroProgramCounter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0));
 
-        execUpdateRegisters = new JCheckBoxMenuItem(getString("ExecMenu.updateRegistersLabel"));
-        execUpdateRegisters.setToolTipText(getString("ExecMenu.updateRegistersTooltip"));
+        execUpdateRegisters = new JCheckBoxMenuItem("Atualizar Registradores");
+        execUpdateRegisters.setToolTipText("Exibe o valor dos registradores enquanto roda o programa");
 
-        execEnableInterruptionCounter = new JCheckBoxMenuItem(getString("ExecMenu.enableInterruptionCounterLabel"));
-        execEnableInterruptionCounter.setToolTipText(getString("ExecMenu.enableInterruptionCounterTooltip"));
+        execEnableInterruptionCounter = new JCheckBoxMenuItem("Habilitar contadores de interrupção");
+        execEnableInterruptionCounter.setToolTipText("Conta pedidos de interrupção enquanto roda o programa");
 
-        execZeroInterruptionCounter = new JMenuItem(getString("ExecMenu.zeroInterruptionCounterLabel"));
+        execZeroInterruptionCounter = new JMenuItem("Zerar contadores de interrupção");
+        execZeroInterruptionCounter.setToolTipText("Zerar contadores de pedidos de interrupção");
 
-        execEnableCompatibilityMode = new JCheckBoxMenuItem(getString("ExecMenu.enableCompatibilityModeLabel"));
-        execEnableCompatibilityMode.setToolTipText(getString("ExecMenu.enableCompatibilityModeTooltip"));
+        execEnableCompatibilityMode = new JCheckBoxMenuItem("Habilitar modo de compatibilidade (Cesar16)");
+        execEnableCompatibilityMode.setToolTipText("Desabilita o sistema de interrupção");
 
         execMenu.add(execRun);
         execMenu.add(execNext);
@@ -205,16 +182,16 @@ public class MenuBar extends JMenuBar {
         execMenu.addSeparator();
         execMenu.add(execEnableCompatibilityMode);
 
-        // ==============================================================================================================
+        // =============================================================================================================
         // Ajuda
-        // ==============================================================================================================
-        helpMenu = new JMenu(getString("HelpMenu.label"));
+        // =============================================================================================================
+        helpMenu = new JMenu("?");
 
-        helpAbout = new JMenuItem(getString("HelpMenu.aboutLabel"), KeyEvent.VK_S);
+        helpAbout = new JMenuItem("Sobre...");
 
         helpMenu.add(helpAbout);
 
-        // ==============================================================================================================
+        // =============================================================================================================
 
         fileMenu.setMnemonic(KeyEvent.VK_A);
         editMenu.setMnemonic(KeyEvent.VK_E);
@@ -227,9 +204,5 @@ public class MenuBar extends JMenuBar {
         add(viewMenu);
         add(execMenu);
         add(helpMenu);
-    }
-
-    private static String getString(final String key) {
-        return Properties.getProperty(key);
     }
 }
