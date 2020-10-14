@@ -14,10 +14,10 @@ public class DataTable extends Table {
     void initColumnWidths() {
         for (int i = 0; i < COLUMN_WIDTHS.length; ++i) {
             final TableColumn column = getColumnModel().getColumn(i);
-//            column.setMaxWidth(COLUMN_WIDTHS[i]);
+            //column.setMaxWidth(COLUMN_WIDTHS[i]);
             column.setMinWidth(COLUMN_WIDTHS[i]);
             column.setWidth(COLUMN_WIDTHS[i]);
-//            column.setResizable(false);
+            //column.setResizable(false);
         }
     }
 }

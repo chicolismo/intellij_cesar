@@ -1,4 +1,4 @@
-package cesar.utils.textual;
+package cesar.utils.text;
 
 import cesar.models.Cpu;
 

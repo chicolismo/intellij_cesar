@@ -4,7 +4,7 @@ import cesar.models.Base;
 import cesar.models.Cpu;
 import cesar.utils.Defaults;
 import cesar.utils.Integers;
-import cesar.utils.textual.TextConverter;
+import cesar.utils.text.TextConverter;
 import cesar.views.windows.MainWindow;
 
 import javax.swing.*;

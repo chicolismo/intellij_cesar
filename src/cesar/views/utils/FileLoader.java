@@ -66,7 +66,11 @@ public class FileLoader {
         final int choice = fileChooser.showDialog(parent, null);
         if (choice == JFileChooser.APPROVE_OPTION) {
             currentFile = fileChooser.getSelectedFile();
-            result = true;
+            result = currentFile.isFile();
+            if (!result) {
+                final String message = "O arquivo selecionado não é válido: " + currentFile.getAbsolutePath();
+                JOptionPane.showMessageDialog(parent, message, "Erro ao ler o arquivo", JOptionPane.ERROR_MESSAGE);
+            }
         }
         return result;
     }
@@ -118,21 +122,21 @@ public class FileLoader {
             String userInput = startAddressDialog.showDialog(parent);
             if (userInput != null) {
                 startAddress = Integer.parseInt(userInput, radix);
-                if (!isValidAddress(startAddress)) {
+                if (isInvalidAddress(startAddress)) {
                     statusBar.setTempMessage(String.format(ERROR_MESSAGE_FORMAT, userInput));
                     return false;
                 }
 
                 userInput = endAddressDialog.showDialog(parent);
                 endAddress = Integer.parseInt(userInput, radix);
-                if (!isValidAddress(endAddress) || endAddress <= startAddress) {
+                if (isInvalidAddress(endAddress) || endAddress <= startAddress) {
                     statusBar.setTempMessage(String.format(ERROR_MESSAGE_FORMAT, userInput));
                     return false;
                 }
 
                 userInput = targetAddressDialog.showDialog(parent);
                 targetAddress = Integer.parseInt(userInput, radix);
-                if (!isValidAddress(targetAddress)) {
+                if (isInvalidAddress(targetAddress)) {
                     statusBar.setTempMessage(String.format(ERROR_MESSAGE_FORMAT, userInput));
                     return false;
                 }
@@ -144,8 +148,8 @@ public class FileLoader {
         return true;
     }
 
-    private static boolean isValidAddress(final int address) {
-        return Cpu.isValidAddress(address);
+    private static boolean isInvalidAddress(final int address) {
+        return !Cpu.isValidAddress(address);
     }
 
     public void setBase(final Base newBase) {
