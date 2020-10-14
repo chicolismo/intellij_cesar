@@ -21,7 +21,7 @@ import java.util.ArrayList;
  * @author chico
  */
 public final class TextConverter {
-    private static final String ENDL = System.lineSeparator();
+    private static final String LINE_SEPARATOR = System.lineSeparator();
 
     private static final String BYTE_SEPARATOR = "  ";
 
@@ -51,15 +51,16 @@ public final class TextConverter {
                 final Line line = lines.get(i);
                 if (line.getAddress() <= endProgramAddress) {
                     final String lineString =
-                            line.asString(maxByteCount, addressFormat, emptyString, byteFormat, BYTE_SEPARATOR, ENDL);
+                            line.asString(maxByteCount, addressFormat, emptyString, byteFormat, BYTE_SEPARATOR,
+                                    LINE_SEPARATOR);
                     writer.write(lineString);
                 }
             }
-            writer.write(ENDL);
+            writer.write(LINE_SEPARATOR);
             for (int i = startDataAddress; i <= endDataAddress; ++i) {
                 final String addressString = String.format(addressFormat, i);
                 final String byteString = String.format(byteFormat, 0xFF & cpu.getByte(i));
-                writer.write(String.format("%s   %s%s", addressString, byteString, ENDL));
+                writer.write(String.format("%s   %s%s", addressString, byteString, LINE_SEPARATOR));
             }
             writer.close();
         }

@@ -52,10 +52,6 @@ public class RegisterDisplay extends JPanel {
         setMinimumSize(getPreferredSize());
     }
 
-    public Base getBase() {
-        return currentBase;
-    }
-
     public void setBase(final Base newBase) {
         if (currentBase != newBase) {
             currentBase = newBase;

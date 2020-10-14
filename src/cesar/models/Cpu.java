@@ -626,10 +626,6 @@ public class Cpu {
         return memory[clamp(address)];
     }
 
-    public ConditionRegister getConditionRegister() {
-        return conditionRegister;
-    }
-
     public byte getDisplayByte(final int position) {
         return getByte(Cpu.BEGIN_DISPLAY_ADDRESS + position);
     }

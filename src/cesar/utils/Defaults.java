@@ -34,7 +34,7 @@ public class Defaults {
     }
 
     public static JLabel createLabel(final String title) {
-        final JLabel label = new JLabel(title);
+        final var label = new JLabel(title);
         label.setFont(PANEL_FONT);
         return label;
     }
@@ -44,9 +44,9 @@ public class Defaults {
     }
 
     public static Border createTitledBorder(final String title, final int align) {
-        final TitledBorder border =
+        final var titledBorder =
                 BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), title, align, TitledBorder.CENTER);
-        border.setTitleFont(PANEL_FONT);
-        return border;
+        titledBorder.setTitleFont(PANEL_FONT);
+        return titledBorder;
     }
 }
